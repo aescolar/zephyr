@@ -1327,8 +1327,11 @@ class TestCase:
         self.min_flash = tc_dict["min_flash"]
         self.extra_sections = tc_dict["extra_sections"]
 
-        self.path = os.path.normpath(os.path.join(os.path.abspath(
-            testcase_root).replace(ZEPHYR_BASE + "/", ''), workdir, name))
+        print("R: " +os.path.abspath(testcase_root));
+        print("Z: "+ os.path.realpath(ZEPHYR_BASE))
+        self.path = os.path.normpath(os.path.join(os.path.realpath( #HERE
+            testcase_root).replace(os.path.realpath(ZEPHYR_BASE) + "/", ''), workdir, name))
+        print ("333: " + self.path)
         self.name = os.path.join(self.path)
         self.defconfig = {}
         self.yamlfile = yamlfile
@@ -1420,7 +1423,7 @@ class TestSuite:
         self.coverage = coverage
 
         for testcase_root in testcase_roots:
-            testcase_root = os.path.abspath(testcase_root)
+            testcase_root = os.path.abspath(testcase_root) #HERE
 
             debug("Reading test case configuration files under %s..." %
                   testcase_root)
