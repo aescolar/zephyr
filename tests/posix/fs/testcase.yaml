@@ -1,0 +1,5 @@
+tests:
+  portability.posix:
+    min_ram: 16
+    tags: posix
+
