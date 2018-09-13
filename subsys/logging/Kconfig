@@ -283,5 +283,10 @@ config LOG_BACKEND_UART_FORMAT_TIMESTAMP
 	default y
 	help
 	  When enabled timestamp is formatted to hh:mm:ss:ms,us.
+
+config LOG_BACKEND_NATIVE
+	bool "Enable native backend"
+	default n
+
 endif
 endmenu

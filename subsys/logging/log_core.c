@@ -10,6 +10,7 @@
 #include <logging/log_ctrl.h>
 #include <logging/log_output.h>
 #include <logging/log_backend_uart.h>
+#include <logging/log_backend_native.h>
 #include <misc/printk.h>
 #include <assert.h>
 #include <atomic.h>
@@ -23,6 +24,13 @@ LOG_BACKEND_UART_DEFINE(log_backend_uart);
 const struct log_backend *uart_backend = &log_backend_uart;
 #else
 const struct log_backend *uart_backend;
+#endif
+
+#ifdef CONFIG_LOG_BACKEND_NATIVE
+LOG_BACKEND_DEFINE(log_backend_native, log_backend_native_api);
+const struct log_backend *native_backend = &log_backend_native;
+#else
+const struct log_backend *native_backend;
 #endif
 
 static struct log_list_t list;
@@ -264,6 +272,11 @@ void log_init(void)
 		backend_filter_init(uart_backend);
 		log_backend_uart_init();
 		log_backend_activate(uart_backend, NULL);
+	}
+
+	if (IS_ENABLED(CONFIG_LOG_BACKEND_NATIVE)) {
+		backend_filter_init(native_backend);
+		log_backend_activate(native_backend, NULL);
 	}
 }
 
