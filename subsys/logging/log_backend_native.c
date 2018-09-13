@@ -30,7 +30,7 @@ int char_out(u8_t *data, size_t length, void *ctx)
 static struct log_output_ctx ctx = {
 	.func = char_out,
 	.data = buf,
-	.length = 1024,
+	.length = 1,
 	.offset = 0
 };
 
