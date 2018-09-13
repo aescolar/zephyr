@@ -66,7 +66,7 @@ static int print(struct log_output_ctx *ctx, const char *fmt, ...)
 	int length = 0;
 
 	va_start(args, fmt);
-#ifndef CONFIG_NEWLIB_LIBC
+#if !defined(CONFIG_NEWLIB_LIBC) && !defined(CONFIG_ARCH_POSIX)
 	length = _prf(out_func, ctx, (char *)fmt, args);
 #else
 	_vprintk(out_func, ctx, fmt, args);

@@ -38,4 +38,17 @@ endchoice
 
 endif # BT_HCI
 
+if LOG
+
+config LOG_BACKEND_NATIVE
+	def_bool y
+
+config LOG_INPLACE_PROCESS
+	def_bool y
+
+config LOG_PROCESS_THREAD
+	def_bool n
+
+endif # LOG
+
 endif # BOARD_NATIVE_POSIX

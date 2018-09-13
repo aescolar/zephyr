@@ -6,18 +6,20 @@
  */
 
 #include <stdio.h>
-
-#include <logging/log_backend_native.h>
+#include <stddef.h>
+#include <logging/log_backend.h>
 #include <logging/log_core.h>
 #include <logging/log_msg.h>
 #include <logging/log_output.h>
 #include <device.h>
 #include <uart.h>
 
-static u8_t buf;
+static u8_t buf[1024];
 
 int char_out(u8_t *data, size_t length, void *ctx)
 {
+	ARG_UNUSED(ctx);
+
 	for (size_t i = 0; i < length; i++) {
 		putchar(data[i]);
 	}
@@ -27,8 +29,8 @@ int char_out(u8_t *data, size_t length, void *ctx)
 
 static struct log_output_ctx ctx = {
 	.func = char_out,
-	.data = &buf,
-	.length = 1,
+	.data = buf,
+	.length = 1024,
 	.offset = 0
 };
 
@@ -55,6 +57,7 @@ static void put(const struct log_backend *const backend,
 
 static void panic(struct log_backend const *const backend)
 {
+	/* Nothing to be done, we always process in place in this backend */
 }
 
 const struct log_backend_api log_backend_native_api = {

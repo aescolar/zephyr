@@ -286,6 +286,7 @@ config LOG_BACKEND_UART_FORMAT_TIMESTAMP
 
 config LOG_BACKEND_NATIVE
 	bool "Enable native backend"
+	depends on ARCH_POSIX
 	default n
 
 endif

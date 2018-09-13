@@ -27,10 +27,11 @@ const struct log_backend *uart_backend;
 #endif
 
 #ifdef CONFIG_LOG_BACKEND_NATIVE
+extern const struct log_backend_api log_backend_native_api;
 LOG_BACKEND_DEFINE(log_backend_native, log_backend_native_api);
 const struct log_backend *native_backend = &log_backend_native;
 #else
-const struct log_backend *native_backend;
+#define log_backend NULL
 #endif
 
 static struct log_list_t list;
@@ -504,6 +505,7 @@ static void log_process_thread_func(void *dummy1, void *dummy2, void *dummy3)
 	log_init();
 	thread_set(k_current_get());
 
+//TODO: this thread should exit if there is no registered backend instead of spining forever
 	while (1) {
 		if (log_process(false) == false) {
 			k_sleep(CONFIG_LOG_PROCESS_THREAD_SLEEP_MS);
@@ -514,4 +516,14 @@ static void log_process_thread_func(void *dummy1, void *dummy2, void *dummy3)
 K_THREAD_DEFINE(log_process_thread, CONFIG_LOG_PROCESS_THREAD_STACK_SIZE,
 		log_process_thread_func, NULL, NULL, NULL,
 		CONFIG_LOG_PROCESS_THREAD_PRIO, 0, K_NO_WAIT);
+#else
+#include <init.h>
+static int enable_logger(struct device *arg)
+{
+	ARG_UNUSED(arg);
+	log_init();
+	return 0;
+}
+
+SYS_INIT(enable_logger, POST_KERNEL, 10);
 #endif /* CONFIG_LOG_PROCESS_THREAD */
