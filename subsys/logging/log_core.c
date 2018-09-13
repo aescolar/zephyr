@@ -25,6 +25,14 @@ const struct log_backend *uart_backend = &log_backend_uart;
 const struct log_backend *uart_backend;
 #endif
 
+#ifdef CONFIG_LOG_BACKEND_NATIVE_POSIX
+extern const struct log_backend_api log_backend_native_api;
+LOG_BACKEND_DEFINE(log_backend_native, log_backend_native_api);
+const struct log_backend *native_backend = &log_backend_native;
+#else
+#define native_backend NULL
+#endif
+
 static struct log_list_t list;
 static atomic_t initialized;
 static bool panic_mode;
@@ -264,6 +272,11 @@ void log_init(void)
 		backend_filter_init(uart_backend);
 		log_backend_uart_init();
 		log_backend_activate(uart_backend, NULL);
+	}
+
+	if (IS_ENABLED(CONFIG_LOG_BACKEND_NATIVE_POSIX)) {
+		backend_filter_init(native_backend);
+		log_backend_activate(native_backend, NULL);
 	}
 }
 

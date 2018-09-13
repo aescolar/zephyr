@@ -283,5 +283,13 @@ config LOG_BACKEND_UART_FORMAT_TIMESTAMP
 	default y
 	help
 	  When enabled timestamp is formatted to hh:mm:ss:ms,us.
+
+config LOG_BACKEND_NATIVE_POSIX
+	bool "Enable native posix backend"
+	depends on ARCH_POSIX
+	default n
+	help
+	  Enable backend in native_posix
+
 endif
 endmenu
