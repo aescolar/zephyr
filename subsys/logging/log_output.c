@@ -45,9 +45,6 @@ typedef int (*out_func_t)(int c, void *ctx);
 extern int _prf(int (*func)(), void *dest, char *format, va_list vargs);
 extern void _vprintk(out_func_t out, void *ctx, const char *fmt, va_list ap);
 
-#ifdef CONFIG_ARCH_POSIX
-#include <stdio.h>
-#else
 static int out_func(int c, void *ctx)
 {
 	struct log_output_ctx *out_ctx = (struct log_output_ctx *)ctx;
@@ -62,7 +59,6 @@ static int out_func(int c, void *ctx)
 
 	return 0;
 }
-#endif
 
 static int print(struct log_output_ctx *ctx, const char *fmt, ...)
 {
@@ -70,14 +66,10 @@ static int print(struct log_output_ctx *ctx, const char *fmt, ...)
 	int length = 0;
 
 	va_start(args, fmt);
-#ifdef CONFIG_ARCH_POSIX
-	vfprintf(stdout, fmt, args);
-#else
 #ifndef CONFIG_NEWLIB_LIBC
 	length = _prf(out_func, ctx, (char *)fmt, args);
 #else
 	_vprintk(out_func, ctx, fmt, args);
-#endif
 #endif
 	va_end(args);
 
