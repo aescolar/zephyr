@@ -488,6 +488,7 @@ u32_t log_filter_get(struct log_backend const *const backend,
 #ifdef CONFIG_LOG_PROCESS_THREAD
 static void log_process_thread_func(void *dummy1, void *dummy2, void *dummy3)
 {
+	assert(log_backend_count_get() > 0);
 	log_init();
 	thread_set(k_current_get());
 
@@ -501,4 +502,13 @@ static void log_process_thread_func(void *dummy1, void *dummy2, void *dummy3)
 K_THREAD_DEFINE(log_process_thread, CONFIG_LOG_PROCESS_THREAD_STACK_SIZE,
 		log_process_thread_func, NULL, NULL, NULL,
 		CONFIG_LOG_PROCESS_THREAD_PRIO, 0, K_NO_WAIT);
+#else
+#include <init.h>
+static int enable_logger(struct device *arg)
+{
+	ARG_UNUSED(arg);
+	log_init();
+	return 0;
+}
+SYS_INIT(enable_logger, POST_KERNEL, 0);
 #endif /* CONFIG_LOG_PROCESS_THREAD */
