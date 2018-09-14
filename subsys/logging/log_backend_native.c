@@ -6,23 +6,51 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#include <stdio.h>
 #include <stddef.h>
 #include <logging/log_backend.h>
 #include <logging/log_core.h>
 #include <logging/log_msg.h>
 #include <logging/log_output.h>
-#include <device.h>
-#include <uart.h>
+#include "posix_trace.h"
 
-static u8_t buf[1024];
+#define _STDOUT_BUF_SIZE 256
+static char stdout_buff[_STDOUT_BUF_SIZE];
+static int n_pend; /* Number of pending characters in buffer */
+
+static void preprint_char(int c)
+{
+	int printnow = 0;
+
+	if (c == '\r') {
+		/* Discard carriage returns */
+		return;
+	}
+	if (c != '\n') {
+		stdout_buff[n_pend++] = c;
+		stdout_buff[n_pend] = 0;
+	} else {
+		printnow = 1;
+	}
+
+	if (n_pend >= _STDOUT_BUF_SIZE - 1) {
+		printnow = 1;
+	}
+
+	if (printnow) {
+		posix_print_trace("%s\n", stdout_buff);
+		n_pend = 0;
+		stdout_buff[0] = 0;
+	}
+}
+
+static u8_t buf[_STDOUT_BUF_SIZE];
 
 int char_out(u8_t *data, size_t length, void *ctx)
 {
 	ARG_UNUSED(ctx);
 
 	for (size_t i = 0; i < length; i++) {
-		putchar(data[i]);
+		preprint_char(data[i]);
 	}
 
 	return length;
@@ -46,7 +74,7 @@ static void put(const struct log_backend *const backend,
 
 	u32_t flags = 0;
 
-	flags |= LOG_OUTPUT_FLAG_COLORS;
+	flags |= posix_trace_over_tty(0);
 	flags |= LOG_OUTPUT_FLAG_FORMAT_TIMESTAMP;
 
 	log_output_msg_process(msg, &ctx, flags);
