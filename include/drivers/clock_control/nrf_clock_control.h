@@ -61,4 +61,27 @@
 void nrf5_power_usb_power_int_enable(bool enable);
 #endif
 
+/**
+ * @brief Initialize LFCLK RC calibration.
+ *
+ * @param hfclk_dev HFCLK device.
+ */
+void nrf_clock_control_calibration_init(struct device *hfclk_dev);
+
+/**
+ * @brief Calibration interrupts handler
+ *
+ * Must be called from clock interrupt context.
+ */
+void nrf_clock_control_calibration_isr(void);
+
+/**
+ * @brief Stop calibration.
+ *
+ * Function called when LFCLK RC clock is being stopped.
+ *
+ * @param dev LFCLK device.
+ */
+void nrf_clock_control_calibration_stop(struct device *dev);
+
 #endif /* ZEPHYR_INCLUDE_DRIVERS_CLOCK_CONTROL_NRF_CLOCK_CONTROL_H_ */

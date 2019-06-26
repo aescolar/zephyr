@@ -47,14 +47,45 @@ config CLOCK_CONTROL_NRF_K32SRC_EXT_FULL_SWING
 
 endchoice
 
-config CLOCK_CONTROL_NRF_K32SRC_BLOCKING
-	bool "Blocking 32KHz crystal oscillator startup"
-	depends on CLOCK_CONTROL_NRF_K32SRC_XTAL
+config CLOCK_CONTROL_NRF_K32SRC_RC_CALIBRATION
+	bool
+	depends on !SOC_SERIES_NRF91X
+	default y if CLOCK_CONTROL_NRF_K32SRC_RC
+
+if CLOCK_CONTROL_NRF_K32SRC_RC_CALIBRATION
+
+config CLOCK_CONTROL_NRF_CALIBRATION_PERIOD
+	int "Calibration opportunity period (in 250ms units)"
+	default 1
 	help
-	  Clock control driver will spin wait in CPU sleep until 32KHz
-	  crystal oscillator starts up. If not enabled, RC oscillator will
-	  initially start running and automatically switch to crystal when
-	  ready.
+	  Periodically, temperature is measured. If temperature change exceeded
+	  CLOCK_CONTROL_NRF_CALIBRATION_TEMP_DIFF then calibration is started
+	  else it is skipped.
+
+config CLOCK_CONTROL_NRF_CALIBRATION_MAX_SKIP
+	int "Maximum number of calibration skips"
+	default 4
+	help
+	  Calibration is skipped when temperature change did not exceeded
+	  configured threshold. If number of consecutive skips reaches
+	  configured value then calibration is performed unconditionally. Set to
+	  0 to perform unconditional calibration periodically.
+
+config CLOCK_CONTROL_NRF_CALIBRATION_TEMP_DIFF
+	int "Temperature change triggering calibration"
+	default 1
+	help
+	  if temperature change between two consecutive measurements equals or
+	  exceeds  configurated value then calibration is triggered.
+
+config CLOCK_CONTROL_NRF_USES_TEMP_SENSOR
+	bool
+	default y if CLOCK_CONTROL_NRF_CALIBRATION_MAX_SKIP > 0 && \
+		CLOCK_CONTROL_NRF_CALIBRATION_TEMP_DIFF > 0
+	select TEMP_NRF5
+	select SENSOR
+
+endif # CLOCK_CONTROL_NRF_K32SRC_RC_CALIBRATION
 
 choice CLOCK_CONTROL_NRF_ACCURACY
 	prompt "32KHz clock accuracy"
