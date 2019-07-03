@@ -68,6 +68,8 @@ struct k_sem sem[3];
 void isr0(void)
 {
 	printk("%s ran!\n", __func__);
+	/* Test current interrupt priority */
+	zassert_equal(z_arch_irq_current_prio(), 0 + _IRQ_PRIO_OFFSET, "");
 	k_sem_give(&sem[0]);
 	_IntExit();
 }
@@ -82,6 +84,8 @@ void isr0(void)
 void isr1(void)
 {
 	printk("%s ran!\n", __func__);
+	/* Test current interrupt priority */
+	zassert_equal(z_arch_irq_current_prio(), 1 + _IRQ_PRIO_OFFSET, "");
 	k_sem_give(&sem[1]);
 	_IntExit();
 }
@@ -96,6 +100,8 @@ void isr1(void)
 void isr2(void)
 {
 	printk("%s ran!\n", __func__);
+	/* Test current interrupt priority */
+	zassert_equal(z_arch_irq_current_prio(), 2 + _IRQ_PRIO_OFFSET, "");
 	k_sem_give(&sem[2]);
 	_IntExit();
 }
@@ -116,16 +122,23 @@ void isr2(void)
  * NVIC_SetPendingIRQ(), to trigger the pending interrupt. And we check
  * that the corresponding interrupt handler is getting called or not.
  *
- * @see irq_enable(), z_irq_priority_set(), NVIC_SetPendingIRQ()
+ * Addtionally, @ref z_arch_irq_current_prio is tested in the thread mode and
+ * interrupt context.
+ *
+ * @see irq_enable(), z_irq_priority_set(), NVIC_SetPendingIRQ(),
+ *	z_arch_irq_current_prio()
  *
  */
 void test_arm_irq_vector_table(void)
 {
 	printk("Test Cortex-M IRQs installed directly in the vector table\n");
 
+	/* Test that current prio indicates thread mode. */
+	zassert_equal(z_arch_irq_current_prio(), INT_MAX, "");
+
 	for (int ii = 0; ii < 3; ii++) {
 		irq_enable(_ISR_OFFSET + ii);
-		z_irq_priority_set(_ISR_OFFSET + ii, 0, 0);
+		z_irq_priority_set(_ISR_OFFSET + ii, ii, 0);
 		k_sem_init(&sem[ii], 0, UINT_MAX);
 	}
 
