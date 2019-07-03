@@ -328,6 +328,20 @@ void z_irq_priority_set(unsigned int irq, unsigned int prio, uint32_t flags)
 }
 
 /**
+ * @brief Return current context priority.
+ *
+ * @return Interrupt priority or INT_MAX if in thread mode.
+ */
+int z_arch_irq_current_prio(void)
+{
+	if (_kernel.nested == 0) {
+		return INT_MAX;
+	} else {
+		return hw_irq_ctrl_get_cur_prio();
+	}
+}
+
+/**
  * Similar to ARM's NVIC_SetPendingIRQ
  * set a pending IRQ from SW
  *
@@ -400,6 +414,15 @@ void NVIC_SetPendingIRQ(IRQn_Type IRQn)
 void NVIC_ClearPendingIRQ(IRQn_Type IRQn)
 {
 	hw_irq_ctrl_clear_irq(IRQn);
+}
+
+/*
+ * Replacement for ARMs NVIC_GetPriority()
+ * Return the programmed priority of IRQn
+ */
+unsigned int NVIC_GetPriority(IRQn_Type IRQn)
+{
+	return hw_irq_ctrl_get_prio(IRQn);
 }
 
 /*

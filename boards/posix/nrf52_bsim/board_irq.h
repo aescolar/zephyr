@@ -10,6 +10,7 @@
 
 #include "sw_isr_table.h"
 #include "zephyr/types.h"
+#include "NRF_regs.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -18,6 +19,8 @@ extern "C" {
 void z_isr_declare(unsigned int irq_p, int flags, void isr_p(void *),
 		void *isr_param_p);
 void z_irq_priority_set(unsigned int irq, unsigned int prio, u32_t flags);
+int z_arch_irq_current_prio(void);
+unsigned int NVIC_GetPriority(IRQn_Type IRQn);
 
 /**
  * Configure a static interrupt.
