@@ -63,8 +63,10 @@ void nrf_802154_clock_hfclk_start(void)
     clk_m16 = device_get_binding(DT_INST_0_NORDIC_NRF_CLOCK_LABEL "_16M");
     __ASSERT_NO_MSG(clk_m16 != NULL);
 
-    clock_control_on(clk_m16, (void *)1); /* Blocking call. */
-
+    clock_control_on(clk_m16, NULL);
+    /* Block until clock is ready. */
+    while (clock_control_get_status(clk_m16, NULL) !=
+		CLOCK_CONTROL_STATUS_ON) {}
     hfclk_is_running = true;
 
     nrf_802154_clock_hfclk_ready();
@@ -94,7 +96,7 @@ void nrf_802154_clock_lfclk_start(void)
     clk_k32 = device_get_binding(DT_INST_0_NORDIC_NRF_CLOCK_LABEL "_32K");
     __ASSERT_NO_MSG(clk_k32 != NULL);
 
-    clock_control_on(clk_k32, (void *)CLOCK_CONTROL_NRF_K32SRC);
+    clock_control_on(clk_k32, NULL);
 
     lfclk_is_running = true;
 
