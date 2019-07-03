@@ -548,7 +548,11 @@ static int hf_clock_enable(bool on, bool blocking)
 			/* Do not request HFCLK multiple times. */
 			return 0;
 		}
-		ret = clock_control_on(clock, (void *)blocking);
+		ret = clock_control_on(clock, NULL);
+		while (blocking &&
+			clock_control_get_status(clk_m16, NULL) !=
+					CLOCK_CONTROL_STATUS_ON) {
+		}
 	} else {
 		if (!clock_requested) {
 			/* Cancel the operation if clock has not
@@ -556,14 +560,7 @@ static int hf_clock_enable(bool on, bool blocking)
 			 */
 			return 0;
 		}
-		ret = clock_control_off(clock, (void *)blocking);
-		if (ret == -EBUSY) {
-			/* This is an expected behaviour.
-			 * -EBUSY means that some other module has also
-			 * requested the clock to run.
-			 */
-			ret = 0;
-		}
+		ret = clock_control_off(clock, NULL);
 	}
 
 	if (ret && (blocking || (ret != -EINPROGRESS))) {
