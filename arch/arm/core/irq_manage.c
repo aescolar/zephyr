@@ -132,6 +132,20 @@ void z_irq_spurious(void *unused)
 	__reserved();
 }
 
+int z_arch_irq_current_prio(void)
+{
+	u32_t isr_vector_num = __get_IPSR() & IPSR_ISR_Msk;
+	s32_t irq_type;
+
+	if (isr_vector_num == 0) {
+		return INT_MAX;
+	}
+
+	irq_type = ((s32_t)isr_vector_num - 16);
+
+	return (NVIC_GetPriority((IRQn_Type)irq_type) & 0xFF);
+}
+
 /* FIXME: IRQ direct inline functions have to be placed here and not in
  * arch/cpu.h as inline functions due to nasty circular dependency between
  * arch/cpu.h and kernel_structs.h; the inline functions typically need to

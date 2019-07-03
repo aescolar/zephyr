@@ -153,7 +153,15 @@ extern void z_irq_spurious(void *unused);
 extern void _isr_wrapper(void);
 #endif
 
+/**
+ * @brief Return current context priority.
+ *
+ * @return Interrupt priority or INT_MAX if in thread mode.
+ */
+extern int z_arch_irq_current_prio(void);
+
 #endif /* _ASMLANGUAGE */
+
 
 #ifdef __cplusplus
 }
