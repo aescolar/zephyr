@@ -6,13 +6,13 @@
 
 menuconfig UPDATEHUB
 	bool"UpdateHub Firmware Over-the-Air support"
+	depends on !MINIMAL_LIBC
 	select FLASH
 	select REBOOT
 	select IMG_MANAGER
 	select BOOTLOADER_MCUBOOT
 	select MPU_ALLOW_FLASH_WRITE
 	select NETWORKING
-	select NEWLIB_LIBC
 	select NET_UDP
 	select NET_SOCKETS
 	select NET_SOCKETS_POSIX_NAMES
