@@ -11,6 +11,10 @@ if SOC_SERIES_STM32H7X
 
 source "soc/arm/st_stm32/stm32h7/Kconfig.defconfig.stm32h7*"
 
+choice LIBC_IMPLEMENTATION
+	default NEWLIB_LIBC
+endchoice
+
 config SOC_SERIES
 	default "stm32h7"
 
