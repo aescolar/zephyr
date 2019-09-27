@@ -6,7 +6,7 @@
 
 menuconfig UPDATEHUB
 	bool"UpdateHub Firmware Over-the-Air support"
-	depends on !MINIMAL_LIBC
+	select REQUIRES_FULL_LIBC
 	select FLASH
 	select REBOOT
 	select IMG_MANAGER

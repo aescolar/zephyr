@@ -8,7 +8,7 @@
 menuconfig COUNTER_RTC_STM32
 	bool "STM32 Counter RTC driver"
 	depends on SOC_FAMILY_STM32
-	depends on !MINIMAL_LIBC
+	select REQUIRES_FULL_LIBC
 	select USE_STM32_LL_RTC
 	select USE_STM32_LL_PWR
 	select USE_STM32_LL_RCC

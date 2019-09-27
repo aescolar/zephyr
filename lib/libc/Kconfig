@@ -8,9 +8,16 @@
 
 menu "C Library"
 
+config REQUIRES_FULL_LIBC
+	bool
+	help
+	  Helper symbol to indicate some feature requires a C library implementation
+	  with more functionality than what MINIMAL_LIBC provides
+
 choice LIBC_IMPLEMENTATION
 	prompt "C Library Implementation"
 	default EXTERNAL_LIBC if NATIVE_APPLICATION
+	default NEWLIB_LIBC if REQUIRES_FULL_LIBC
 	default MINIMAL_LIBC
 
 config MINIMAL_LIBC

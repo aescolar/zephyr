@@ -7,7 +7,7 @@ config HAS_STLIB
 
 config HAS_STMEMSC
 	bool
-	depends on !MINIMAL_LIBC
+	select REQUIRES_FULL_LIBC
 	imply NEWLIB_LIBC_FLOAT_PRINTF
 
 if HAS_STMEMSC
