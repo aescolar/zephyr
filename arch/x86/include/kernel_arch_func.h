@@ -12,7 +12,10 @@
 #include <ia32/kernel_arch_func.h>
 #endif
 
-#define z_arch_is_in_isr() (_kernel.nested != 0U)
+static inline bool z_arch_is_in_isr(void)
+{
+	return _kernel.nested != 0U;
+}
 
 #ifndef _ASMLANGUAGE
 
