@@ -1,14 +1,155 @@
-arch-arc:
+# File format description
+# #######################
+# Subsystem_Name:
+#     status:      One of the following:
+#          Maintained: Someone actually looks after it.
+#          Odd Fixes: It has a maintainer but they don't have time to do
+#            much other than throw the odd patch in. See below..
+#          Orphan:  No current maintainer [but maybe you could take the
+#            role as you write your new code].
+#          Obsolete:  Old code. Something tagged obsolete generally means
+#            it has been replaced by a better system and you
+#            should be using that.
+#     description: (can be several lines, only for humans' sake)
+#     maintainer:  [GH account name]
+#     collaborators:{Tier 2 sub-maintainer} [GH account name]
+#     inform:      When a PR is sent to area inform these [can either be a GH account
+#                  name, or email/maillist]
+#     labels:       GH_labels: (to be auto added to PR)
+#     files: 
+#     files-regex: Regex of files, matches are part of the subsystem
+#     files-exclude:
+#     files-regex-exclude: Regex of files, matches will be *excluded* from the
+#                  subystem even if they match F patterns
+# 
+# Flow
+# ####
+#
+# Each new PR, is checked by automatically by a script which does the following:
+#
+# - users in <maintainers> & <collaborators> are added automatically as reviewers
+#   in the GH pull request
+# 
+# - Labels in <labels> are automatically added to the PR
+# 
+# - The script which drives ZephyrBot creates a comment with info like below
+#   (To create visibility to new contibutors)
+#     " This PR affects the following subsystems:
+#      Subsystem Name 1:
+#        Maintainers: <List of maintainers>
+#        Collaborators: <List of sub-maintainers>
+#        Status: ...
+#        CC: @<list of to GH users be informed>
+#     "
+# - An e-mail is sent to all e-mail addresses in <inform>
+# 
+# - Ideally any file in the tree will fall into some category
+# 
+# 
+# Approving modifications to tgis MAINTAINERS.yml file:
+# 
+# - Changing <maintainers> lines requires TSC approval
+# - Changing <Collaborators> lines requires the Maintainer and Collaborators
+#   of that subsystem to agree (or vote on it)
+# 
+# 
+# This same script which is used in CI is also be able to parse the file with an
+# option to check the validity/integrity of the file, as well as checking to
+# which subsystem(s) a set of files belong to, or which a patch is affecting
+
+arch_arc:
+    status: Supported
     maintainers:
-        - vonhust
         - ruuddw
+    collaborators:
+        - vonhust
     files:
         - arch/arc/
+    labels: "area: ARC"
 
-arch-arm:
+arch_arm:
+    status: Supported
     maintainers:
+        - ioannisg
+    collaborators:
         - MaureenHelm
         - galak
-        - ioannisg
     files:
         - arch/arm/
+    labels: "area: ARM"
+
+Bluetooth_LE_stack:
+    status: Supported
+    maintainers:
+        - jhedberg
+    collaborators:
+        - joerchan
+        - Vudentz
+    files:
+        - subsys/bluetooth/
+        - drivers/bluetooth/
+        - tests/bluetooth/
+        - samples/bluetooth/
+        - include/drivers/bluetooth/
+        - include/bluetooth/
+    files-regex:
+        - doc/.*/bluetooth/
+    labels: "area: Bluetooth"
+
+Bluetooth_LE_controller:
+    status: Supported
+    maintainers:
+        - cvinayak
+    collaborators:
+        - carlescufi
+        - thoh-ot
+    files:
+        - subsys/bluetooth/controller/
+
+Bluetooth_LE_Mesh:
+    collaborators:
+        - trond-snekvik 
+    files:
+        - subsys/bluetooth/mesh/
+    labels: "area: Bluetooth Mesh"
+
+Documentation:
+    status: Supported
+    maintainers:
+        - dbkinder
+    files-regex:
+        - .*\.rst
+    labels:  "area: Documentation"
+
+native_posix_and_POSIX_arch:
+    status: Supported
+    description: "POSIX architecture & SOC, native_posix board and related drivers"
+    maintainers:
+        - aescolar
+    files:
+        - arch/posix/
+        - soc/posix/
+        - boards/posix/native_posix/
+        - dts/posix/
+        - include/arch/posix/
+        - scripts/valgrind.supp
+        - tests/boards/native_posix/
+    files-regex:
+        - drivers/.*/.*native_posix.*
+    labels: "area: native port"
+
+Native_posix_flash_driver:
+    status: Maintained
+    collaborators:
+         - vanwinkeljan
+    files:
+         - drivers/flash/flash_native_posix.c
+
+NRF52_bsim:
+    status: Supported
+    maintainers:
+        - aescolar
+    files:
+        - boards/posix/nrf52_bsim/
+    labels: "platform: nrf52_bsim"
+ 

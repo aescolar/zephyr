@@ -33,11 +33,15 @@ def _main():
         subsystems = {subsys for commit_range in commit_ranges
                              for subsys in maint.commits2subsystems(commit_range)}
 
+    if subsystems:
+        print("The following subsystems are affected:\n");
+    else: 
+        print("No tracked subsystems are affected!!\n");
     for subsys in subsystems:
         print("""\
 {}:
 \tmaintainers: {}
-\tsub-maintainers: {}
+\tcollaborators: {}
 \tinform: {}""".format(subsys.name,
                        ", ".join(subsys.maintainers),
                        ", ".join(subsys.sub_maintainers),
@@ -80,7 +84,7 @@ class Maintainers:
             subsys = Subsystem()
             subsys.name = subsys_name
             subsys.maintainers = subsys_dict.get("maintainers", [])
-            subsys.sub_maintainers = subsys_dict.get("sub-maintainers", [])
+            subsys.sub_maintainers = subsys_dict.get("collaborators", [])
             subsys.inform = subsys_dict.get("inform", [])
             subsys._files = subsys_dict.get("files")
             subsys._files_regex = subsys_dict.get("files-regex")
@@ -138,8 +142,8 @@ def _check_maintainers(fname, yaml):
     if not isinstance(yaml, dict):
         ferr("empty or malformed YAML (not a dict)")
 
-    ok_keys = {"maintainers", "sub-maintainers", "inform", "files",
-               "files-regex"}
+    ok_keys = {"maintainers", "collaborators", "inform", "files",
+               "files-regex", "description", "status", "labels"}
 
     for subsys_name, subsys_dict in yaml.items():
         if not isinstance(subsys_dict, dict):
@@ -155,7 +159,7 @@ def _check_maintainers(fname, yaml):
             ferr("either 'files' or 'files-regex' (or both) must be specified "
                  "for subsystem '{}'".format(subsys_name))
 
-        for list_name in "maintainers", "sub-maintainers", "inform", "files", \
+        for list_name in "maintainers", "collaborators", "inform", "files", \
                          "files-regex":
             if list_name in subsys_dict:
                 lst = subsys_dict[list_name]
