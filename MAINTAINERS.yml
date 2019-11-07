@@ -1,0 +1,14 @@
+arch-arc:
+    maintainers:
+        - vonhust
+        - ruuddw
+    files:
+        - arch/arc/
+
+arch-arm:
+    maintainers:
+        - MaureenHelm
+        - galak
+        - ioannisg
+    files:
+        - arch/arm/
