@@ -407,3 +407,6 @@
 # Get all docs reviewed
 *.rst                                     @dbkinder
 *posix*.rst                               @dbkinder @aescolar
+# Temporary until we switch over
+MAINTAINERS.yml
+get_maintainer.py
