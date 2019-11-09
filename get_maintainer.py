@@ -44,15 +44,23 @@ def _main():
 
     try:
         maint = Maintainers(args.maintainers)
+
         if args.args_are_paths:
             for path in args.commit_ranges_or_paths:
                 if not os.path.exists(path):
                     _serr("'{}': no such file or directory".format(path))
 
+            if args.coverage_info:
+                for path in args.commit_ranges_or_paths:
+                    subs = maint.path2subsystems(path);
+                    print(path + " "+  str(len(subs)))
+
+
             subsystems = {
                 subsys for path in args.commit_ranges_or_paths
                        for subsys in maint.path2subsystems(path)
             }
+
         else:
             commit_ranges = args.commit_ranges_or_paths or ("HEAD~..",)
             subsystems = {
@@ -62,8 +70,9 @@ def _main():
     except (MaintainersError, GitError) as e:
         _serr(e)
 
-    for subsys in subsystems:
-        print("""\
+    if not args.coverage_info:
+        for subsys in subsystems:
+            print("""\
 {}
 \tmaintainers: {}
 \tcollaborators: {}
@@ -95,6 +104,10 @@ def _parse_args():
     parser.add_argument("commit_ranges_or_paths",
                         nargs="*",
                         help="Commit ranges or (with -f) paths (default: HEAD~..)")
+
+    parser.add_argument("-coverage-info",
+                        action="store_true",
+                        help="will print out for each file how many subsystems cover them, instead of which subsystems")
 
     return parser.parse_args()
 
