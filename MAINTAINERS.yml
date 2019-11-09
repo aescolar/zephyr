@@ -22,11 +22,13 @@
 #             instead.
 #
 #     maintainers:
-#         List of GitHub handles for the people who maintain (or used to
-#         maintain) the subsystem. Usually, there's only one maintainer.
+#         List of GitHub handles for the people who maintain the subsystem.
+#         Usually, there's only one maintainer.
 #
 #     collaborators:
-#         Tier 2 sub-maintainer (TODO: needs a better description)
+#         (not to be confused with the GH collaborator role)
+#         Very involved contributors, who know well and contribute significantly
+#         to the area
 #
 #     inform:
 #         List of GitHub handles for people to inform when a pull request that
@@ -105,6 +107,7 @@
 # TODO: Explain get_maintainer.py
 
 "ARC arch":
+    #Provisional entry, to be corrected
     status: maintained
     maintainers:
         - ruuddw
@@ -116,6 +119,7 @@
         - "area: ARC"
 
 "ARM arch":
+    #Provisional entry, to be corrected
     status: maintained
     maintainers:
         - ioannisg
@@ -129,6 +133,7 @@
         - "area: ARM"
 
 Bluetooth:
+    #Provisional entry, to be corrected
     status: maintained
     maintainers:
         - jhedberg
@@ -136,18 +141,19 @@ Bluetooth:
         - joerchan
         - Vudentz
     files:
-        - subsys/bluetooth/
-        - drivers/bluetooth/
-        - tests/bluetooth/
-        - samples/bluetooth/
-        - include/drivers/bluetooth/
-        - include/bluetooth/
         - doc/reference/bluetooth/
         - doc/guides/bluetooth/
+        - drivers/bluetooth/
+        - include/bluetooth/
+        - include/drivers/bluetooth/
+        - samples/bluetooth/
+        - subsys/bluetooth/
+        - tests/bluetooth/
     labels:
         - "area: Bluetooth"
 
 "Bluetooth controller":
+    #Provisional entry, to be corrected
     status: maintained
     maintainers:
         - cvinayak
@@ -158,6 +164,7 @@ Bluetooth:
         - subsys/bluetooth/controller/
 
 "Bluetooth Mesh":
+    #Provisional entry, to be corrected
     status: maintained
     collaborators:
         - trond-snekvik
@@ -166,14 +173,80 @@ Bluetooth:
     labels:
         - "area: Bluetooth Mesh"
 
+"Build system":
+    #Provisional entry, to be corrected
+    status: maintained
+    maintainers:
+        - SebastianBoe
+    files:
+        - cmake/
+    files-regex:
+        - CMakeLists.txt$
+        - \.cmake$
+    labels:
+        - "area: Build System"
+
+"Display drivers":
+    #Provisional entry, to be corrected
+    status: orphaned
+    files:
+        - drivers/display/
+        - dts/bindings/display/
+        - include/display.h
+        - include/display/
+        - include/drivers/display.h
+    labels:
+        - "area: Display"
+
 Documentation:
+    #Provisional entry, to be corrected
     status: maintained
     maintainers:
         - dbkinder
+    files:
+        - doc/
     files-regex:
         - \.rst$
+        - .*/doc/.*
     labels:
         - "area: Documentation"
+
+Kconfig:
+    #Provisional entry, to be corrected
+    status: maintained
+    maintainers:
+        - ulfalizer
+    files:
+        - scripts/kconfig/
+    labels:
+        - "area: Kconfig"
+
+Flash:
+    #Provisional entry, to be corrected
+    status: maintained
+    maintainers:
+        - nvlsianpu
+    files:
+        - drivers/flash/
+        - dts/bindings/flash_controller/
+        - include/drivers/flash.h
+        - include/flash.h
+        - samples/drivers/flash_shell/
+    labels:
+        - "area: Flash"
+
+Logging:
+    #Provisional entry, to be corrected
+    status: maintained
+    maintainers:
+        - nordic-krch
+    files:
+        - include/logging/
+        - samples/subsys/logging/
+        - subsys/logging/
+        - tests/subsys/logging/
+    labels:
+        - "area: Logging"
 
 "Native POSIX and POSIX arch":
     status: maintained
@@ -181,13 +254,14 @@ Documentation:
         - aescolar
     files:
         - arch/posix/
-        - soc/posix/
         - boards/posix/native_posix/
+        - drivers/*/*native_posix*
+        - drivers/*/*/*native_posix*
         - dts/posix/
         - include/arch/posix/
         - scripts/valgrind.supp
+        - soc/posix/
         - tests/boards/native_posix/
-        - drivers/*/*/*native_posix*
     labels:
         - "area: native port"
     description: >-
@@ -208,3 +282,93 @@ Documentation:
         - boards/posix/nrf52_bsim/
     labels:
         - "platform: nrf52_bsim"
+
+"RISCV arch":
+    #Provisional entry, to be corrected
+    status: maintained
+    maintainers:
+        - nategraff-sifive
+    collaborators:
+        - mgielda
+    files:
+        - arch/riscv/
+    labels:
+        - "area: RISCV"
+
+Sanitycheck:
+    #Provisional entry, to be corrected
+    status: maintained
+    maintainers:
+        - nashif
+    files:
+        - scripts/sanitycheck
+        - scripts/sanity_chk/
+    labels:
+        - "area: Sanitycheck"
+
+"Settings subsystem":
+    #Provisional entry, to be corrected
+    status: maintained
+    maintainers:
+        - nvlsianpu
+    files:
+        - include/settings/
+        - subsys/settings/
+        - tests/subsys/settings/
+    labels:
+        - "area: Settings"
+
+Shell:
+    #Provisional entry, to be corrected
+    status: maintained
+    maintainers:
+        - jakub-uC
+    files:
+        - include/shell/
+        - samples/subsys/shell/
+        - subsys/shell/
+        - tests/shell/
+        - tests/subsys/shell/
+    labels:
+        - "area: Shell"
+
+USB:
+    #Provisional entry, to be corrected
+    status: maintained
+    maintainers:
+        - finikorg
+    collaborators:
+        - jfischer-phytec-iot
+    files:
+        - drivers/usb/
+        - dts/bindings/usb/
+        - include/*/usb/
+        - include/usb/
+        - samples/subsys/usb/
+        - subsys/usb/
+        - tests/subsys/usb/
+    labels:
+        - "area: USB"
+
+West:
+    #Provisional entry, to be corrected
+    status: maintained
+    maintainers:
+        - mbolivar
+    files:
+        - scripts/west-commands.yml
+        - scripts/west_commands/
+    labels:
+        - "area: West"
+
+"x86 arch":
+    #Provisional entry, to be corrected
+    status: maintained
+    maintainers:
+        - andrewboie
+    collaborators:
+        - andyross
+    files:
+        - arch/x86/
+    labels:
+        - "area: X86"
