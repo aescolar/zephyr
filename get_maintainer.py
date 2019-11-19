@@ -403,10 +403,9 @@ def _check_maintainers(maints_path, yaml):
                      .format(key, area_name))
 
         if "status" not in area_dict:
-            ferr("missing 'status' key on area '{}', should be one of {}"
-                 .format(area_name, ok_status_s))
+            area_dict["status"] = None;
 
-        if area_dict["status"] not in ok_status:
+        if area_dict["status"] and area_dict["status"] not in ok_status:
             ferr("bad 'status' key on area '{}', should be one of {}"
                  .format(area_name, ok_status_s))
 
