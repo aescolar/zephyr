@@ -22,45 +22,63 @@
 SECTIONS
  {
 
-/* Located in generated directory. This file is populated by the
- * zephyr_linker_sources() Cmake function.
- */
-#include <snippets-rom-start.ld>
+  romstart.snippet :
+  {
+    /* Located in generated directory. This file is populated by the
+     * zephyr_linker_sources() Cmake function.
+     */
+    #include <snippets-rom-start.ld>
+  }
 
-#include <linker/common-rom.ld>
+  #include <linker/common-rom.ld>
 
-/* Located in generated directory. This file is populated by the
- * zephyr_linker_sources() Cmake function.
- */
-#include <snippets-rodata.ld>
+  rodata.snippet :
+  {
+    /* Located in generated directory. This file is populated by the
+     * zephyr_linker_sources() Cmake function.
+     */
+    #include <snippets-rodata.ld>
+  }
 
-/* Located in generated directory. This file is populated by the
- * zephyr_linker_sources() Cmake function.
- */
-#include <snippets-rwdata.ld>
+} INSERT AFTER .rodata;
 
-#include <linker/common-ram.ld>
 
-/* Located in generated directory. This file is populated by the
- * zephyr_linker_sources() Cmake function.
- */
-#include <snippets-ram-sections.ld>
+SECTIONS
+ {
 
-#include <arch/posix/native_tasks.ld>
+  data.snippet :
+  {
+    /* Located in generated directory.This file is populated by the
+     * zephyr_linker_sources() Cmake function.
+     */
+    #include <snippets-rwdata.ld>
+  }
 
- __data_ram_end = .;
+  #include <linker/common-ram.ld>
 
-/* Located in generated directory. This file is populated by the
- * zephyr_linker_sources() Cmake function.
- */
-#include <snippets-noinit.ld>
+  /* Located in generated directory. This file is populated by the
+   * zephyr_linker_sources() Cmake function.
+   */
+  #include <snippets-ram-sections.ld>
 
-/* Located in generated directory. This file is populated by the
- * zephyr_linker_sources() Cmake function.
- */
-#include <snippets-sections.ld>
+  #include <arch/posix/native_tasks.ld>
 
- } INSERT AFTER .data;
+  __data_ram_end = .;
+
+  noinit.snippet :
+  {
+    /* Located in generated directory.This file is populated by the
+     * zephyr_linker_sources() Cmake function.
+     */
+    #include <snippets-noinit.ld>
+  }
+
+  /* Located in generated directory. This file is populated by the
+   * zephyr_linker_sources() Cmake function.
+   */
+  #include <snippets-sections.ld>
+
+} INSERT AFTER .data;
 
 /*
  * Note that the INSERT command actually changes the meaning of the -T command
