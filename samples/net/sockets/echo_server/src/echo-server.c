@@ -22,6 +22,11 @@ LOG_MODULE_REGISTER(net_echo_server_sample, LOG_LEVEL_DBG);
 #include <zephyr/net/net_event.h>
 #include <zephyr/net/net_conn_mgr.h>
 
+#if defined(CONFIG_NET_L2_OPENTHREAD)
+#include <zephyr/net/openthread.h>
+#include <openthread/thread.h>
+#endif
+
 #include "common.h"
 #include "certificate.h"
 
@@ -229,6 +234,10 @@ SHELL_CMD_REGISTER(sample, &sample_commands,
 
 void main(void)
 {
+#if defined(CONFIG_NET_L2_OPENTHREAD)
+	openthread_start(openthread_get_default_context());
+#endif
+
 	init_app();
 
 	if (!IS_ENABLED(CONFIG_NET_CONNECTION_MANAGER)) {

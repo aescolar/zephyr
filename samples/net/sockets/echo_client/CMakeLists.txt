@@ -18,6 +18,7 @@ if(CONFIG_MBEDTLS_KEY_EXCHANGE_PSK_ENABLED AND
 endif()
 
 target_sources(                     app PRIVATE src/echo-client.c)
+target_sources_ifdef(CONFIG_SETTINGS_CUSTOM app PRIVATE src/settings_backend.c)
 target_sources_ifdef(CONFIG_NET_UDP app PRIVATE src/udp.c)
 target_sources_ifdef(CONFIG_NET_TCP app PRIVATE src/tcp.c)
 target_sources_ifdef(CONFIG_NET_VLAN app PRIVATE src/vlan.c)
@@ -31,3 +32,8 @@ generate_inc_file_for_target(
     src/echo-apps-cert.der
     ${gen_dir}/echo-apps-cert.der.inc
     )
+
+zephyr_include_directories(
+  $ENV{BSIM_COMPONENTS_PATH}/libUtilv1/src/
+  $ENV{BSIM_COMPONENTS_PATH}/libPhyComv1/src/
+  )
