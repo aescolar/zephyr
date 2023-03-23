@@ -43,3 +43,31 @@ endif()
 set(ENV{BSIM_COMPONENTS_PATH} ${BSIM_COMPONENTS_PATH})
 set(ENV{BSIM_OUT_PATH} ${BSIM_OUT_PATH})
 
+
+# Let's check that it is new enough and built,
+# so we provide better information to users than a compile error
+
+set(REQUIRED_BSIM_lib2G4PhyComv1_VERSION 2.1)
+
+function(bsim_handle_not_built_error)
+  get_filename_component(BSIM_ROOT_PATH ${BSIM_COMPONENTS_PATH}/.. ABSOLUTE)
+  message(FATAL_ERROR "Please ensure you have the latest babblesim and rebuild it, by doing\n\
+ west update\n\
+ cd ${BSIM_ROOT_PATH} ; make everything\n"
+  )
+endfunction(bsim_handle_not_built_error)
+
+#Let's check that the *built* version is new enough
+if (EXISTS ${BSIM_OUT_PATH}/lib/lib2G4PhyComv1.version)
+  file(READ ${BSIM_OUT_PATH}/lib/lib2G4PhyComv1.version lib2G4PhyComv1_VERSION)
+  string(STRIP ${lib2G4PhyComv1_VERSION} lib2G4PhyComv1_VERSION)
+else()
+  message(WARNING "BabbleSim was never compiled")
+  bsim_handle_not_built_error()
+endif()
+
+if (lib2G4PhyComv1_VERSION VERSION_LESS REQUIRED_BSIM_lib2G4PhyComv1_VERSION)
+  message(WARNING "Built lib2G4PhyComv1 version = ${lib2G4PhyComv1_VERSION} < \
+ ${REQUIRED_BSIM_lib2G4PhyComv1_VERSION} (required version)")
+  bsim_handle_not_built_error()
+endif()
