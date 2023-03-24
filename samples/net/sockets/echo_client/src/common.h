@@ -5,6 +5,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+#include <zephyr/kernel.h>
+
 /* Value of 0 will cause the IP stack to select next free port */
 #define MY_PORT 0
 
