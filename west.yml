@@ -37,7 +37,7 @@ manifest:
       groups:
         - hal
     - name: edtt
-      revision: fc998bcaed44796c3800a3e62cf026bd9403d299
+      revision: 64e5105ad82390164fb73fc654be3f73a608209a
       path: tools/edtt
       groups:
         - tools
@@ -83,7 +83,7 @@ manifest:
       groups:
         - hal
     - name: hal_nordic
-      revision: 6c9f23498ee6a225fee049c8c5b2e1ac760bd4a8
+      revision: 6c6b666ab3bc02b6fa0696ab7bd15658a694a03a
       path: modules/hal/nordic
       groups:
         - hal
@@ -197,7 +197,7 @@ manifest:
       groups:
         - tools
     - name: nrf_hw_models
-      revision: ad21dabc84c6574944d978cce2079dbe1ede38c6
+      revision: c5daf6abe8f8d8dd19134e659d06f119dccd3a98
       path: modules/bsim_hw_models/nrf_hw_models
     - name: open-amp
       revision: aedcc262f93bbb1b0c2f58026911575729b7465c
