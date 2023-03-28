@@ -71,3 +71,6 @@ if (lib2G4PhyComv1_VERSION VERSION_LESS REQUIRED_BSIM_lib2G4PhyComv1_VERSION)
  ${REQUIRED_BSIM_lib2G4PhyComv1_VERSION} (required version)")
   bsim_handle_not_built_error()
 endif()
+
+
+set(VARIABLE_NAME VALUE_OF_VARIABLE CACHE INTERNAL "")
