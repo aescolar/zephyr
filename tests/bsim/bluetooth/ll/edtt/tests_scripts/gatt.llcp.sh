@@ -30,6 +30,6 @@ Execute \
   -s=${SIMULATION_ID} -d=2 -v=${VERBOSITY_LEVEL} -RealEncryption=1
 
 Execute ./bs_2G4_phy_v1 -v=${VERBOSITY_LEVEL} -s=${SIMULATION_ID} \
-  -D=3 -sim_length=3600e6 $@
+  -D=3 -sim_length=3600e6 -stop_on_diff $@
 
 wait_for_background_jobs

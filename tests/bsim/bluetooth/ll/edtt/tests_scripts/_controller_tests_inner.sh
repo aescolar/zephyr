@@ -103,6 +103,6 @@ _Execute \
   -s=${SIMULATION_ID} -d=1 -v=${VERBOSITY_LEVEL_DEV2} -RealEncryption=1
 
 _Execute ./bs_2G4_phy_v1 -v=${VERBOSITY_LEVEL_PHY} -s=${SIMULATION_ID} \
-  -D=4 -sim_length=3600e6 -dump_imm $@
+  -D=4 -sim_length=3600e6 -dump_imm -stop_on_diff $@
 
 wait_for_background_jobs

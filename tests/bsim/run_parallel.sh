@@ -78,7 +78,7 @@ if [ `command -v parallel` ]; then
     parallel '
     echo "<testcase name=\"{}\" time=\"0\">"
     start=$(date +%s%N)
-    {} $@ &> {#}.log ; result=$?
+    {} $@  -stop_on_diff &> {#}.log ; result=$?
     dur=$(($(date +%s%N) - $start))
     dur_s=$(awk -vdur=$dur "BEGIN { printf(\"%0.3f\", dur/1000000000)}")
     if [ $result -ne 0 ]; then
