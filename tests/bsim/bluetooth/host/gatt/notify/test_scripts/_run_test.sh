@@ -16,6 +16,6 @@ Execute ./bs_${BOARD_TS}_tests_bsim_bluetooth_host_gatt_notify_prj_conf \
     -v=${verbosity_level} -s=${simulation_id} -d=1 -testid=${server_id}
 
 Execute ./bs_2G4_phy_v1 -v=${verbosity_level} -s=${simulation_id} \
-    -D=2 -sim_length=60e6 $@
+    -D=2 -sim_length=60e6 -stop_on_diff $@
 
 wait_for_background_jobs
