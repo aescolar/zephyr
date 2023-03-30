@@ -31,6 +31,12 @@ LOG_MODULE_REGISTER(net_echo_client_sample, LOG_LEVEL_DBG);
 #include <zephyr/net/net_event.h>
 #include <zephyr/net/conn_mgr.h>
 
+#if defined(CONFIG_NET_L2_OPENTHREAD)
+#include <zephyr/net/openthread.h>
+#include <zephyr/net/socket.h>
+#include <openthread/thread.h>
+#endif
+
 #if defined(CONFIG_USERSPACE)
 #include <zephyr/app_memory/app_memdomain.h>
 K_APPMEM_PARTITION_DEFINE(app_partition);
@@ -310,6 +316,27 @@ static int start_client(void)
 
 int main(void)
 {
+#if defined(CONFIG_NET_L2_OPENTHREAD)
+	struct openthread_context *context = openthread_get_default_context();
+
+	__ASSERT_NO_MSG(context != NULL);
+
+	if (0) {
+		otError error;
+		otLinkModeConfig mode;
+
+		openthread_api_mutex_lock(context);
+		mode = otThreadGetLinkMode(context->instance);
+		mode.mRxOnWhenIdle = false;
+		mode.mDeviceType = false;
+		mode.mNetworkData = false;
+		error = otThreadSetLinkMode(context->instance, mode);
+		openthread_api_mutex_unlock(context);
+	}
+
+	openthread_start(context);
+#endif
+
 	init_app();
 
 	if (!IS_ENABLED(CONFIG_NET_CONNECTION_MANAGER)) {
