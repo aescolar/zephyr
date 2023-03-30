@@ -10,8 +10,8 @@ LL/CON/PER/BV-42-C
 #LL/CON/PER/BV-78-C # Needs testcase implementation update
 #LL/CON/PER/BV-80-C # Needs testcase implementation update
 #LL/CON/PER/BV-81-C # Needs testcase implementation update
-LL/DDI/ADV/BI-05-C
-LL/DDI/ADV/BI-06-C
+#LL/DDI/ADV/BI-05-C
+#LL/DDI/ADV/BI-06-C
 LL/DDI/ADV/BV-01-C
 LL/DDI/ADV/BV-02-C
 LL/DDI/ADV/BV-03-C
@@ -28,9 +28,9 @@ LL/DDI/ADV/BV-17-C
 LL/DDI/ADV/BV-18-C
 LL/DDI/ADV/BV-19-C
 LL/DDI/ADV/BV-20-C
-LL/DDI/ADV/BV-22-C
+#LL/DDI/ADV/BV-22-C
 #LL/DDI/ADV/BV-27-C # Fails due to https://github.com/zephyrproject-rtos/zephyr/issues/53137
-LL/DDI/ADV/BV-28-C
+#LL/DDI/ADV/BV-28-C
 #LL/DDI/ADV/BV-45-C # Fails due to https://github.com/zephyrproject-rtos/zephyr/issues/53137
 #LL/DDI/ADV/BV-47-C # Fails due to https://github.com/zephyrproject-rtos/zephyr/issues/53137
 #LL/DDI/ADV/BV-49-C # Fails due to https://github.com/zephyrproject-rtos/zephyr/issues/53137
@@ -69,7 +69,7 @@ LL/SEC/ADV/BV-17-C
 LL/SEC/ADV/BV-18-C
 LL/SEC/ADV/BV-20-C
 LL/SEC/SCN/BV-01-C
-LL/TIM/ADV/BV-03-C
-LL/TIM/ADV/BV-04-C
-LL/TIM/ADV/BV-05-C
-LL/TIM/ADV/BV-07-C
+#LL/TIM/ADV/BV-03-C
+#LL/TIM/ADV/BV-04-C
+#LL/TIM/ADV/BV-05-C
+#LL/TIM/ADV/BV-07-C
