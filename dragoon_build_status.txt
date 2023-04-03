@@ -1,0 +1,39 @@
+
+BUILDING:
+app=tests/bluetooth/bsim_bt/bsim_test_adv_chain
+app=tests/bluetooth/bsim_bt/bsim_test_gatt
+app=tests/bluetooth/bsim_bt/bsim_test_gatt_write
+app=tests/bluetooth/bsim_bt/bsim_test_l2cap
+app=tests/bluetooth/bsim_bt/bsim_test_l2cap_userdata
+app=tests/bluetooth/bsim_bt/bsim_test_l2cap_stress
+app=tests/bluetooth/bsim_bt/edtt_ble_test_app/hci_test_app conf_file=prj_dut_llcp.conf
+app=tests/bluetooth/bsim_bt/edtt_ble_test_app/hci_test_app conf_file=prj_tst_llcp.conf
+app=tests/bluetooth/bsim_bt/edtt_ble_test_app/hci_test_app conf_file=prj_dut.conf
+app=tests/bluetooth/bsim_bt/edtt_ble_test_app/hci_test_app conf_file=prj_tst.conf
+app=tests/bluetooth/bsim_bt/edtt_ble_test_app/gatt_test_app
+app=tests/bluetooth/bsim_bt/edtt_ble_test_app/gatt_test_app conf_file=prj_llcp.conf
+app=tests/bluetooth/bsim_bt/bsim_test_mesh
+app=tests/bluetooth/bsim_bt/bsim_test_mesh conf_file=prj_low_lat.conf
+app=tests/bluetooth/bsim_bt/bsim_test_mesh conf_file=prj_pst.conf
+app=tests/bluetooth/bsim_bt/bsim_test_mesh conf_file=prj_gatt.conf
+app=tests/bluetooth/bsim_bt/bsim_test_disable
+app=tests/bluetooth/bsim_bt/bsim_test_notify
+app=tests/bluetooth/bsim_bt/bsim_test_notify_multiple
+app=tests/bluetooth/bsim_bt/bsim_test_gatt_caching
+app=tests/bluetooth/bsim_bt/bsim_test_eatt conf_file=prj_multiple_conn.conf
+app=tests/bluetooth/bsim_bt/bsim_test_app conf_file=prj_split.conf
+app=tests/bluetooth/bsim_bt/bsim_test_app conf_file=prj_split_privacy.conf
+app=tests/bluetooth/bsim_bt/bsim_test_app conf_file=prj_split_low_lat.conf
+
+FAIL to BUILD:
+app=tests/bluetooth/bsim_bt/bsim_test_iso
+app=tests/bluetooth/bsim_bt/bsim_test_iso conf_file=prj_vs_dp.conf
+app=tests/bluetooth/bsim_bt/bsim_test_audio
+app=tests/bluetooth/bsim_bt/bsim_test_advx
+#Due to MAX CONN:
+app=tests/bluetooth/bsim_bt/bsim_test_bond_overwrite_allowed
+app=tests/bluetooth/bsim_bt/bsim_test_bond_overwrite_denied
+app=tests/bluetooth/bsim_bt/bsim_test_eatt_notif
+app=tests/bluetooth/bsim_bt/bsim_test_eatt conf_file=prj_collision.conf
+app=tests/bluetooth/bsim_bt/bsim_test_eatt conf_file=prj_autoconnect.conf
+app=tests/bluetooth/bsim_bt/bsim_test_multiple
