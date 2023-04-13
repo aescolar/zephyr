@@ -1,0 +1,21 @@
+/*
+ * Copyright (c) 2023 Nordic Semiconductor ASA
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+/ {
+	uart0: uart {
+		status = "okay";
+		compatible = "zephyr,native-posix-uart";
+		/* Dummy current-speed entry to comply with serial
+		 * DTS binding
+		 */
+		current-speed = <0>;
+	};
+
+	chosen {
+		zephyr,console = &uart0;
+		zephyr,shell-uart = &uart0;
+	};
+};
