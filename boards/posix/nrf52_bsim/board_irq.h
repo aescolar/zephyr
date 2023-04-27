@@ -75,6 +75,17 @@ void nrfbsim_SEV_model(void);
 #define ARCH_ISR_DIRECT_HEADER()   do { } while (false)
 #define ARCH_ISR_DIRECT_FOOTER(a)  do { } while (false)
 
+#if defined(CONFIG_DYNAMIC_DIRECT_INTERRUPTS)
+/* Define ARM's ARM_IRQ_DIRECT_DYNAMIC_CONNECT as no-op.
+ * This macro still requires the dynamic interrupt to be attached later
+ * and that interrupt must comply with Zephyr signature, which should return if it
+ * needs to reschedule or not. So instead of forcing the rescheduling decision at build time,
+ * we simply rely on the interrupt
+ * <---- TODO: Maybe we should add an extra flag in the interrupt controller
+ * but that can easily get overwriten when connecting the interrupt  */
+#define ARM_IRQ_DIRECT_DYNAMIC_CONNECT(irq_p, priority_p, flags_p, resch)
+#endif /* CONFIG_DYNAMIC_DIRECT_INTERRUPTS */
+
 #ifdef CONFIG_PM
 extern void posix_irq_check_idle_exit(void);
 #define ARCH_ISR_DIRECT_PM() posix_irq_check_idle_exit()

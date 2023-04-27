@@ -11,7 +11,7 @@ source "soc/arm/nordic_nrf/Kconfig.peripherals"
 endif # BOARD_NRF52_BSIM
 
 
-# This would eventually be shared by a possible family of simulated NRF boards
+# These would eventually be shared by a possible family of simulated NRF boards
 # which use BabbleSim. When that happens, we can move this to a common
 # Kconfig file
 
@@ -26,3 +26,11 @@ config SOC_SERIES_BSIM_NRF52X
 	depends on SOC_SERIES_BSIM_NRFXX
 	help
 	  Any NRF52 simulated SOC with BabbleSim, based on the POSIX arch
+
+config DYNAMIC_DIRECT_INTERRUPTS
+	bool "Support for dynamic direct interrupts"
+	depends on DYNAMIC_INTERRUPTS
+	help
+	  Replica of ARM's arch kconfig option, as some applications
+	  will use that feature
+
