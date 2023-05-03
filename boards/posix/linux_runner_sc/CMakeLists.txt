@@ -53,3 +53,23 @@ zephyr_ld_options(
 # This was in general ok, but with some host compilers and C library versions
 # it led to problems. So we override it to 2011 for native_posix.
 set_property(GLOBAL PROPERTY CSTD c11)
+
+set_property(GLOBAL APPEND PROPERTY extra_post_build_commands
+  COMMAND
+  ${ZEPHYR_BASE}/boards/posix/linux_runner_sc/runner/finnish_build.sh
+)
+set_property(
+  GLOBAL APPEND PROPERTY
+  extra_post_build_byproducts
+  ${CMAKE_BINARY_DIR}/linux_runner.exe
+)
+
+set_property(GLOBAL APPEND PROPERTY
+    extra_post_build_commands
+    COMMAND
+    ${CMAKE_COMMAND} -E copy linux_runner.exe ${KERNEL_EXE_NAME}
+    )
+set_property(GLOBAL APPEND PROPERTY
+    extra_post_build_byproducts
+    ${KERNEL_EXE_NAME}
+)

@@ -1,0 +1,6 @@
+
+* Handle build of runner and common link, automatically (<- prefered) and/or thru sysbuild
+* Create CPU_#N_ hooks
+* Properly refactor board code
+* Move LINUX_RUNNER_IF to basic header
+* ReName zephyr.elf to something like cpu_#n.sw.o

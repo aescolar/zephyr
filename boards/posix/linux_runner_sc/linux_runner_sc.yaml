@@ -1,4 +1,4 @@
-identifier: native_posix
+identifier: linux_runner_sc
 name: Native 32-bit POSIX port
 type: native
 simulation: native
