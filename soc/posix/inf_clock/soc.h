@@ -16,7 +16,10 @@
 extern "C" {
 #endif
 
-void posix_soc_clean_up(void);
+#define LINUX_RUNNER_IF __attribute__ ((visibility ("default"))) /* __attribute__((used))*/
+
+LINUX_RUNNER_IF void posix_soc_clean_up(void);
+
 
 #ifdef __cplusplus
 }
