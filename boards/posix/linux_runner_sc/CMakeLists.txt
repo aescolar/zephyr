@@ -44,7 +44,7 @@ zephyr_compile_options(
 
 zephyr_ld_options(
   -lm
-  -r
+#  -r
 )
 
 # Override the C standard used for compilation to C 2011
