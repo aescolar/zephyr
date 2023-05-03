@@ -1,0 +1,64 @@
+
+- Decide if runner is own repo (or even replica)
+  -> star in linux_embedded_runner/ folder
+~- Decide if runner is bsim component~ <- No due to expected resistance from Zephyr to adopt
+- Decide on build of runner itself, and postlink:
+  ->  Start w make (easy for me), most likely a demand for cmake will follow
+
+ (done) * Create CPU_#N_ hooks
+ (done) * Initial refactor board code
+
+------------
+
+ * Test gprof
+
+ * ¿Move arch core and soc core to LER?
+ 
+ * More proper refactor of board/ler code
+   * includes in src/include to be only what is really public, everything else into private headers
+
+ * Host trampolines
+   Their purpose is to enable linking to the right symbols, even if other ones exist in the embedded environment
+ ** For simple/basic APIs (no host headers includes thru (or only those expected in freestanding environments)
+ ** For complex APIs (w host headers includes thru)
+    Will require the integrator to include the stdincludes when building that libary in the embedded environment
+    (but saves the integrator from needing to split that library into another build)
+
+ * Test with embedded C library, and POSIX API
+
+* Kconfig
+ (done) * New: NATIVE_LIBRARY
+ ->  * Could also add a general BUILD_OUTPUT_LIBRARY (selected by NATIVE_LIBRARY)
+ (done) * New: NATIVE_BUILD (common to NATIVE_LIBRARY and NATIVE_APPLICATION)
+ (done) * Both NATIVE_LIBRARY and NATIVE_APPLICATION imply NATIVE_BUILD
+ -> * Piggy back on COMPILER_FREESTANDING
+ ~* New: NATIVE_MONOLITIC_APP (for native_posix and old bsim board)~
+ ~* Change libC options to allow building embedded libC with NATIVE_LIBRARY~
+ ~* Both NATIVE_LIBRARY and NATIVE_MONOLITIC_APP imply NATIVE_APPLICATION~
+
+ (done) * LER_CPU_INDEX (which CPU number is this Zephyr build targetting)
+
+ * Add kconfig options for LER instead of piggybacking on native_posix
+
+ * Test embedded libC on linux runner
+ * Test POSIX API shim on linux runner
+
+(done)* Move LINUX_RUNNER_IF to basic header
+  ~Maybe define a Processor interface macro (exactly the same content as LINUX_RUNNER_IF)~
+* ReName zephyr.elf to something like cpu_#n.sw.o (thru Kconfig)
+
+* Fix DT gen_handles input issue
+
+* Document overall way of working
+* Properly document interfaces (headers) between board and runner
+
+* Polish cmake code
+* Polish board code
+* Clean up kconfig
+* Polish linux runner code
+
+* Handle build of runner and common link for multicore thru sysbuild
+
+~* Generalize for LER_N_CPUs > 1~
+
+* Check COMPILER_SECURITY_FORTIFY (if it can be enabled)

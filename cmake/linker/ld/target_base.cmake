@@ -14,8 +14,14 @@ macro(toolchain_ld_base)
     ${TOOLCHAIN_LD_FLAGS}
   )
 
+  if (NOT CONFIG_NATIVE_LIBRARY)
+    #we do not want to garbage collect yet
+    zephyr_ld_options(
+      ${LINKERFLAGPREFIX},--gc-sections
+    )
+  endif()
+
   zephyr_ld_options(
-    ${LINKERFLAGPREFIX},--gc-sections
     ${LINKERFLAGPREFIX},--build-id=none
   )
 
