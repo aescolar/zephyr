@@ -1,0 +1,41 @@
+
+- Decide if runner is own repo (or even replica)
+  -> star in linux_embedded_runner/ folder
+~- Decide if runner is bsim component~ <- No due to expected resistance from Zephyr to adopt
+- Decide on build of runner itself, and postlink:
+  ->  Start w make (easy for me), most likely a demand for cmake will follow
+
+* Create CPU_#N_ hooks
+* Properly refactor board code
+
+
+* Kconfig
+ * New: NATIVE_LIBRARY
+   * Could also add a general BUILD_OUTPUT_LIBRARY (selected by NATIVE_LIBRARY)
+ * New: NATIVE_BUILD (common to NATIVE_LIBRARY and NATIVE_APPLICATION)
+ * Both NATIVE_LIBRARY and NATIVE_APPLICATION imply NATIVE_BUILD
+ * Piggy back on COMPILER_FREESTANDING
+ ~* New: NATIVE_MONOLITIC_APP (for native_posix and old bsim board)~
+ ~* Change libC options to allow building embedded libC with NATIVE_LIBRARY~
+ ~* Both NATIVE_LIBRARY and NATIVE_MONOLITIC_APP imply NATIVE_APPLICATION~
+
+ * LER_CPU_INDEX (which CPU number is this Zephyr build targetting)
+
+
+ * Test embedded libC on linux runner
+ * Test POSIX API shim on linux runner
+
+* Move LINUX_RUNNER_IF to basic header
+  Maybe define a Processor interface macro (exactly the same content as LINUX_RUNNER_IF)
+* ReName zephyr.elf to something like cpu_#n.sw.o (thru Kconfig)
+
+* Fix DT gen_handles input issue
+
+* Document overall way of working
+* Properly document interfaces (headers) between board and runner
+
+* Polish cmake code
+* Polish board code
+* Polish linux runner code
+
+* Handle build of runner and common link for multicore thru sysbuild

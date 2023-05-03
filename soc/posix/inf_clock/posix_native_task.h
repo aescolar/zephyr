@@ -53,7 +53,7 @@ extern "C" {
  *
  * @param level One of _NATIVE_*_LEVEL as defined in soc.h
  */
-void run_native_tasks(int level);
+__attribute__ ((visibility ("default"))) void run_native_tasks(int level);
 
 #ifdef __cplusplus
 }
