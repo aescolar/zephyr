@@ -44,7 +44,8 @@ zephyr_compile_options(
 
 zephyr_ld_options(
   -lm
-  -r
+  -Wl,--unresolved-symbols=ignore-all
+#  -r
 )
 
 # Override the C standard used for compilation to C 2011

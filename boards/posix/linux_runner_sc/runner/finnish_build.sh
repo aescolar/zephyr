@@ -1,5 +1,7 @@
 #! /usr/bin/env bash
 
+echo "** Entered Finnish_build.sh **"
+
 ARCH="-m32"
 COVERAGE_COMP=--coverage
 COVERAGE_LINK=--coverage
