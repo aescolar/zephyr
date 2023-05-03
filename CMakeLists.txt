@@ -70,11 +70,6 @@ set(CMAKE_EXECUTABLE_SUFFIX .elf)
 set(ZEPHYR_CURRENT_LINKER_PASS 0)
 set(ZEPHYR_CURRENT_LINKER_CMD    linker_zephyr_pre${ZEPHYR_CURRENT_LINKER_PASS}.cmd)
 set(ZEPHYR_LINK_STAGE_EXECUTABLE zephyr_pre${ZEPHYR_CURRENT_LINKER_PASS})
-if (NOT CONFIG_NATIVE_FREESTANDING_LIBRARY)
-  set(ZEPHYR_DEV_HANDLES_INPUT ${ZEPHYR_LINK_STAGE_EXECUTABLE})
-else()
-  set(ZEPHYR_DEV_HANDLES_INPUT "${ZEPHYR_LINK_STAGE_EXECUTABLE}.for_devhandles")
-endif()
 
 # ZEPHYR_PREBUILT_EXECUTABLE is used outside of this file, therefore keep the
 # existing variable to allow slowly cleanup of linking stage handling.
@@ -891,11 +886,11 @@ if(CONFIG_HAS_DTS)
     --output-source dev_handles.c
     --output-graphviz dev_graph.dot
     --num-dynamic-devices ${number_of_dynamic_devices}
-    --kernel $<TARGET_FILE:${ZEPHYR_DEV_HANDLES_INPUT}>
+    --kernel $<TARGET_FILE:${ZEPHYR_LINK_STAGE_EXECUTABLE}>
     --zephyr-base ${ZEPHYR_BASE}
     --start-symbol "$<TARGET_PROPERTY:linker,devices_start_symbol>"
     VERBATIM
-    DEPENDS ${ZEPHYR_DEV_HANDLES_INPUT}
+    DEPENDS ${ZEPHYR_LINK_STAGE_EXECUTABLE}
     )
   set_property(GLOBAL APPEND PROPERTY GENERATED_APP_SOURCE_FILES dev_handles.c)
 
@@ -1171,23 +1166,6 @@ if(CONFIG_USERSPACE OR CONFIG_HAS_DTS)
   )
   set_property(TARGET ${ZEPHYR_LINK_STAGE_EXECUTABLE} PROPERTY LINK_DEPENDS ${PROJECT_BINARY_DIR}/${ZEPHYR_CURRENT_LINKER_CMD})
   add_dependencies(${ZEPHYR_LINK_STAGE_EXECUTABLE} linker_zephyr_pre${ZEPHYR_CURRENT_LINKER_PASS}_script ${OFFSETS_LIB})
-  
-  if (CONFIG_NATIVE_FREESTANDING_LIBRARY)
-      add_executable(${ZEPHYR_DEV_HANDLES_INPUT} misc/empty_file.c)
-      toolchain_ld_link_elf(
-      TARGET_ELF            ${ZEPHYR_DEV_HANDLES_INPUT}
-      OUTPUT_MAP            ${PROJECT_BINARY_DIR}/${ZEPHYR_DEV_HANDLES_INPUT}.map
-      LIBRARIES_PRE_SCRIPT  ""
-      LINKER_SCRIPT         ${PROJECT_BINARY_DIR}/${ZEPHYR_CURRENT_LINKER_CMD}
-      LIBRARIES_POST_SCRIPT ""
-      DEPENDENCIES          ${CODE_RELOCATION_DEP}
-    )
-    target_link_libraries(${ZEPHYR_DEV_HANDLES_INPUT} -Lfoobar)
-    target_byproducts(TARGET ${ZEPHYR_DEV_HANDLES_INPUT}
-                      BYPRODUCTS ${PROJECT_BINARY_DIR}/${ZEPHYR_DEV_HANDLES_INPUT}.map
-  )
-  endif()
-  
 
   math(EXPR ZEPHYR_CURRENT_LINKER_PASS "1 + ${ZEPHYR_CURRENT_LINKER_PASS}")
 endif()
