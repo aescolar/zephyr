@@ -43,7 +43,7 @@ zephyr_compile_options(
 #)
 
 zephyr_ld_options(
-  -lm
+#  -lm
   -Wl,--unresolved-symbols=ignore-all
 #  -r
 )
