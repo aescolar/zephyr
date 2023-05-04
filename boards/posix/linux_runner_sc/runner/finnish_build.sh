@@ -6,7 +6,7 @@ ARCH="-m32"
 COVERAGE_COMP=--coverage
 COVERAGE_LINK=--coverage
 C_FLAGS="-g $COVERAGE_COMP $ARCH -fno-pie -fno-pic -no-pie -ffunction-sections -fdata-sections"
-C_FLAGS_FINALLINK="$C_FLAGS -Wl,--gc-sections -lm"
+C_FLAGS_FINALLINK="$C_FLAGS -Wl,--gc-sections ${LINUX_RUNNER_LINK_OPTIONS}"
 
 set -x 
 #objcopy --localize-hidden  zephyr/zephyr.elf zephyr/zephyr.post.elf -w --localize-symbols=${ZEPHYR_BASE}/boards/posix/linux_runner_sc/linker_symbols_to_localize

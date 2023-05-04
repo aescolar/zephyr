@@ -23,15 +23,6 @@ zephyr_library_include_directories(
   ${ZEPHYR_BASE}/arch/posix/include
   )
 
-if(CONFIG_HAS_SDL)
-	find_package(PkgConfig REQUIRED)
-	pkg_search_module(SDL2 REQUIRED sdl2)
-	zephyr_include_directories(${SDL2_INCLUDE_DIRS})
-	zephyr_link_libraries(${SDL2_LIBRARIES})
-	zephyr_compile_options(${SDL2_CFLAGS_OTHER})
-	zephyr_library_sources(sdl_events.c)
-endif()
-
 zephyr_compile_options(
   -fvisibility=hidden
   -ffreestanding
@@ -48,6 +39,21 @@ zephyr_ld_options(
 #  -r
 )
 
+set(LINUX_RUNNER_LINK_OPTIONS
+  "-lm"
+)
+
+if(CONFIG_HAS_SDL)
+	find_package(PkgConfig REQUIRED)
+	pkg_search_module(SDL2 REQUIRED sdl2)
+	zephyr_include_directories(${SDL2_INCLUDE_DIRS})
+	set(LINUX_RUNNER_LINK_OPTIONS
+	  "${LINUX_RUNNER_LINK_OPTIONS} ${SDL2_LINK_LIBRARIES}"
+	)
+	zephyr_compile_options(${SDL2_CFLAGS_OTHER})
+	zephyr_library_sources(sdl_events.c)
+endif()
+
 # Override the C standard used for compilation to C 2011
 # This is due to some tests using _Static_assert which is a 2011 feature, but
 # otherwise relying on compilers supporting it also when set to C99.
@@ -56,6 +62,8 @@ zephyr_ld_options(
 set_property(GLOBAL PROPERTY CSTD c11)
 
 set_property(GLOBAL APPEND PROPERTY extra_post_build_commands
+  COMMAND
+  export LINUX_RUNNER_LINK_OPTIONS=${LINUX_RUNNER_LINK_OPTIONS}
   COMMAND
   ${ZEPHYR_BASE}/boards/posix/linux_runner_sc/runner/finnish_build.sh
 )
