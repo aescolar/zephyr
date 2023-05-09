@@ -10,17 +10,18 @@
 
 
 * Kconfig
- * New: NATIVE_LIBRARY
-   * Could also add a general BUILD_OUTPUT_LIBRARY (selected by NATIVE_LIBRARY)
- * New: NATIVE_BUILD (common to NATIVE_LIBRARY and NATIVE_APPLICATION)
- * Both NATIVE_LIBRARY and NATIVE_APPLICATION imply NATIVE_BUILD
- * Piggy back on COMPILER_FREESTANDING
+ (done) * New: NATIVE_LIBRARY
+ ->  * Could also add a general BUILD_OUTPUT_LIBRARY (selected by NATIVE_LIBRARY)
+ (done) * New: NATIVE_BUILD (common to NATIVE_LIBRARY and NATIVE_APPLICATION)
+ (done) * Both NATIVE_LIBRARY and NATIVE_APPLICATION imply NATIVE_BUILD
+ -> * Piggy back on COMPILER_FREESTANDING
  ~* New: NATIVE_MONOLITIC_APP (for native_posix and old bsim board)~
  ~* Change libC options to allow building embedded libC with NATIVE_LIBRARY~
  ~* Both NATIVE_LIBRARY and NATIVE_MONOLITIC_APP imply NATIVE_APPLICATION~
 
- * LER_CPU_INDEX (which CPU number is this Zephyr build targetting)
+ (done) * LER_CPU_INDEX (which CPU number is this Zephyr build targetting)
 
+ * Create all dedicated Kconfig for this board
 
  * Test embedded libC on linux runner
  * Test POSIX API shim on linux runner
@@ -36,6 +37,9 @@
 
 * Polish cmake code
 * Polish board code
+* Clean up kconfig
 * Polish linux runner code
 
 * Handle build of runner and common link for multicore thru sysbuild
+
+* Generalize for LER_N_CPUs > 1
