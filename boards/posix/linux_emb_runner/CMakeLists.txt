@@ -64,7 +64,7 @@ set_property(GLOBAL APPEND PROPERTY extra_post_build_commands
   COMMAND
   export LINUX_RUNNER_LINK_OPTIONS=${LINUX_RUNNER_LINK_OPTIONS}
   COMMAND
-  ${ZEPHYR_BASE}/boards/posix/linux_runner_sc/runner/finnish_build.sh
+  ${ZEPHYR_BASE}/linux_embedded_runner/finnish_build.sh
 )
 set_property(
   GLOBAL APPEND PROPERTY

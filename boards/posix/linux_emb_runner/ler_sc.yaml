@@ -1,5 +1,5 @@
-identifier: linux_runner_sc_64
-name: Native 64-bit POSIX port
+identifier: ler_sc
+name: Native 32-bit POSIX port
 type: native
 simulation: native
 arch: posix
@@ -14,5 +14,9 @@ supported:
   - netif:eth
   - usb_device
   - adc
+  - i2c
+  - spi
   - gpio
   - rtc
+testing:
+  default: true
