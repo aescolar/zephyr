@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: Apache-2.0
 
-#To be moved
-config NATIVE_FREESTANDING_LIBRARY
+#To be selected instead of defaulted
+config NATIVE_LIBRARY
 	bool
 	default y
 
@@ -44,5 +44,13 @@ config SDL_THREAD_PRIORITY
 	depends on HAS_SDL
 	help
 	  Priority of SDL thread to handle events.
+
+
+config LER_CPU_INDEX
+	int "Which CPU is this build targetting"
+	default 0
+	help
+	  For multicore Linux Embedded Runners, which CPU
+	  is this build targetting
 
 endif # BOARD_NATIVE_POSIX
