@@ -44,6 +44,7 @@ RUNNER_LIB:=runner.a
 SRCS:=src/main.c
 
 INCLUDES:=\
+ -Isrc/include/ \
  -I${ZEPHYR_BASE}/linux_embedded_runner/src/include \
  \
  -I${ZEPHYR_BASE}/include \

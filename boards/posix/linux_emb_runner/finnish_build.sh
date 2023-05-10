@@ -1,5 +1,5 @@
 #! /usr/bin/env bash
 
 echo "** Entered Finnish_build.sh **"
-cd ${ZEPHYR_BASE}/linux_embedded_runner/
+cd ${LER_PATH}/
 make all

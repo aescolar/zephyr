@@ -8,6 +8,7 @@ zephyr_library_compile_definitions(NO_POSIX_CHEATS)
 
 zephyr_library_sources(
 	ler_if.c
+	posix_arch_if.c
 
 	hw_models_top.c
 	timer_model.c
@@ -66,6 +67,7 @@ if(CONFIG_HAS_SDL)
 endif()
 
 #EMBEDDED_BUILD_FOLDER to be deleted from below (we should only need the EMBEDDED_CPU_SW)
+#ZEPHYR_BASE to be deleted from below
 set_property(GLOBAL APPEND PROPERTY extra_post_build_commands
   COMMAND
   export LER_LINK_FLAGS=${LER_LINK_FLAGS}
@@ -77,6 +79,10 @@ set_property(GLOBAL APPEND PROPERTY extra_post_build_commands
   export LER_EXE=${CMAKE_BINARY_DIR}/zephyr/${KERNEL_EXE_NAME}
   COMMAND
   export LER_BUILD_PATH=${CMAKE_BINARY_DIR}/zephyr/LER
+  COMMAND
+  export LER_PATH=${LER_PATH}
+  COMMAND
+  export ZEPHYR_BASE=${ZEPHYR_BASE}
   COMMAND
   ${ZEPHYR_BASE}/boards/posix/linux_emb_runner/finnish_build.sh
 )
