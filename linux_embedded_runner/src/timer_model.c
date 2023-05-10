@@ -22,14 +22,13 @@
 #include <time.h>
 #include <stdbool.h>
 #include <math.h>
+#include "ler_utils.h"
+#include "ler_tasks.h"
+#include "ler_cmdline.h"
+#include "ler_tracing.h"
 #include "hw_models_top.h"
+#include "ler_cpu0_interrupts.h"
 #include "irq_ctrl.h"
-#include "board_soc.h"
-#include "zephyr/types.h"
-#include <zephyr/arch/posix/posix_trace.h>
-#include <zephyr/sys/util.h>
-#include "cmdline.h"
-#include "posix_native_task.h"
 
 #define DEBUG_NP_TIMER 0
 
@@ -126,7 +125,7 @@ void hwtimer_set_real_time_mode(bool new_rt)
 
 static void hwtimer_update_timer(void)
 {
-	hw_timer_timer = MIN(hw_timer_tick_timer, hw_timer_awake_timer);
+	hw_timer_timer = L_MIN(hw_timer_tick_timer, hw_timer_awake_timer);
 }
 
 static inline void host_clock_gettime(struct timespec *tv)
@@ -360,12 +359,12 @@ int64_t hwtimer_get_simu_rtc_time(void)
 
 /**
  * Return a version of the host time which would have drifted as if the host
- * real time clock had been running from the native_posix clock, and adjusted
- * both in rate and in offsets as the native_posix has been.
+ * real time clock had been running from the simulated clock, and adjusted
+ * both in rate and in offsets as the simulated one has been.
  *
  * Note that this time may be significantly ahead of the simulated time
- * (the time the Zephyr kernel thinks it is).
- * This will be the case in general if native_posix is not able to run at or
+ * (the time the embedded kernel thinks it is).
+ * This will be the case in general if the linux runner is not able to run at or
  * faster than real time.
  */
 void hwtimer_get_pseudohost_rtc_time(uint32_t *nsec, uint64_t *sec)
@@ -420,7 +419,7 @@ static void cmd_stop_at_found(char *argv, int offset)
 {
 	ARG_UNUSED(offset);
 	if (args.stop_at < 0) {
-		posix_print_error_and_exit("Error: stop-at must be positive "
+		ler_print_error_and_exit("Error: stop-at must be positive "
 					   "(%s)\n", argv);
 	}
 	hwm_set_end_of_time(args.stop_at*1e6);
@@ -452,7 +451,7 @@ static void cmd_rt_drift_found(char *argv, int offset)
 	ARG_UNUSED(argv);
 	ARG_UNUSED(offset);
 	if (!(args.rt_drift > -1)) {
-		posix_print_error_and_exit("The drift needs to be > -1. "
+		ler_print_error_and_exit("The drift needs to be > -1. "
 					  "Please use --help for more info\n");
 	}
 	args.rt_ratio = args.rt_drift + 1;
@@ -464,7 +463,7 @@ static void cmd_rt_ratio_found(char *argv, int offset)
 	ARG_UNUSED(argv);
 	ARG_UNUSED(offset);
 	if ((args.rt_ratio <= 0)) {
-		posix_print_error_and_exit("The ratio needs to be > 0. "
+		ler_print_error_and_exit("The ratio needs to be > 0. "
 					  "Please use --help for more info\n");
 	}
 	hwtimer_set_rt_ratio(args.rt_ratio);
@@ -472,12 +471,12 @@ static void cmd_rt_ratio_found(char *argv, int offset)
 
 static void cmd_rtcreset_found(char *argv, int offset)
 {
-	ARG_UNUSED(argv);
-	ARG_UNUSED(offset);
+	(void) argv;
+	(void) offset;
 	hwtimer_reset_rtc();
 }
 
-static void native_add_time_options(void)
+static void ler_add_time_options(void)
 {
 	static struct args_struct_t timer_options[] = {
 		/*
@@ -497,8 +496,8 @@ static void native_add_time_options(void)
 		"no-rt", "", 'b',
 		NULL, cmd_no_realtime_found,
 		"Do NOT slow down the execution to real time, but advance "
-		"Zephyr's time as fast as possible and decoupled from the host "
-		"time"},
+		"the simulated time as fast as possible and decoupled from "
+		"the host time"},
 
 		{false, false, false,
 		"rt-drift", "dratio", 'd',
@@ -540,7 +539,7 @@ static void native_add_time_options(void)
 
 		ARG_TABLE_ENDMARKER};
 
-	native_add_command_line_opts(timer_options);
+	ler_add_command_line_opts(timer_options);
 }
 
-NATIVE_TASK(native_add_time_options, PRE_BOOT_1, 1);
+LER_TASK(ler_add_time_options, PRE_BOOT_1, 1);

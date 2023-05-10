@@ -7,8 +7,7 @@
 #include <stdbool.h>
 #include <stdint.h>
 #include "hw_models_top.h"
-#include "board_soc.h"
-#include "board_irq.h"
+#include "ler_cpu0_interrupts.h"
 #include "irq_ctrl.h"
 
 uint64_t hw_counter_timer;

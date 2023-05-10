@@ -10,12 +10,10 @@
  */
 
 
-#ifndef _NATIVE_POSIX_RTC_H
-#define _NATIVE_POSIX_RTC_H
+#ifndef LINUX_EMBEDDED_RUNNER_RTC_H
+#define LINUX_EMBEDDED_RUNNER_RTC_H
 
-#include "hw_models_top.h"
-#include <stdbool.h>
-#include "zephyr/types.h"
+#include <stdint.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -73,4 +71,4 @@ void native_rtc_adjust_clock(double clock_correction);
 }
 #endif
 
-#endif /* _NATIVE_POSIX_RTC_H */
+#endif /* LINUX_EMBEDDED_RUNNER_RTC_H */

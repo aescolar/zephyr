@@ -1,27 +1,27 @@
 # SPDX-License-Identifier: Apache-2.0
 
+set(LER_PATH ${ZEPHYR_BASE}/linux_embedded_runner)
+
 zephyr_library()
 
 zephyr_library_compile_definitions(NO_POSIX_CHEATS)
 
 zephyr_library_sources(
-	hw_models_top.c
-	timer_model.c
-	native_rtc.c
-	irq_handler.c
-	irq_ctrl.c
-
-	tracing.c
-	cmdline_common.c
+	ler_if.c
+	posix_arch_if.c
 	cmdline.c
 	cpu_wait.c
-	hw_counter.c
+	irq_handler.c
 	)
+
+zephyr_include_directories(
+  ${LER_PATH}/src/include
+)
 
 zephyr_library_include_directories(
   ${ZEPHYR_BASE}/kernel/include
   ${ZEPHYR_BASE}/arch/posix/include
-  )
+)
 
 zephyr_compile_options(
   -fvisibility=hidden
@@ -39,13 +39,13 @@ zephyr_ld_options(
 #  -r
 )
 
-set(LINUX_RUNNER_LINK_OPTIONS
-  "${LINUX_RUNNER_LINK_OPTIONS} -lm"
+set(LER_LINK_OPTIONS
+  "${LER_LINK_OPTIONS} -lm"
 )
 
 if(CONFIG_EXTERNAL_LIBCPP)
-	set(LINUX_RUNNER_LINK_OPTIONS
-	  "${LINUX_RUNNER_LINK_OPTIONS} -lstdc++"
+	set(LER_LINK_OPTIONS
+	  "${LER_LINK_OPTIONS} -lstdc++"
 	)
 endif()
 
@@ -53,30 +53,34 @@ if(CONFIG_HAS_SDL)
 	find_package(PkgConfig REQUIRED)
 	pkg_search_module(SDL2 REQUIRED sdl2)
 	zephyr_include_directories(${SDL2_INCLUDE_DIRS})
-	set(LINUX_RUNNER_LINK_OPTIONS
-	  "${LINUX_RUNNER_LINK_OPTIONS} ${SDL2_LINK_LIBRARIES}"
+	set(LER_LINK_OPTIONS
+	  "${LER_LINK_OPTIONS} ${SDL2_LINK_LIBRARIES}"
 	)
 	zephyr_compile_options(${SDL2_CFLAGS_OTHER})
 	zephyr_library_sources(sdl_events.c)
 endif()
 
+#EMBEDDED_BUILD_FOLDER to be deleted from below (we should only need the EMBEDDED_CPU_SW)
+#ZEPHYR_BASE to be deleted from below
 set_property(GLOBAL APPEND PROPERTY extra_post_build_commands
   COMMAND
-  export LINUX_RUNNER_LINK_OPTIONS=${LINUX_RUNNER_LINK_OPTIONS}
+  export LER_LINK_OPTIONS=${LER_LINK_OPTIONS}
   COMMAND
-  ${ZEPHYR_BASE}/linux_embedded_runner/finnish_build.sh
-)
-set_property(
-  GLOBAL APPEND PROPERTY
-  extra_post_build_byproducts
-  ${CMAKE_BINARY_DIR}/linux_runner.exe
+  export EMBEDDED_BUILD_FOLDER=${CMAKE_BINARY_DIR}/zephyr
+  COMMAND
+  export EMBEDDED_CPU_SW=${CMAKE_BINARY_DIR}/zephyr/zephyr.elf 
+  COMMAND
+  export LER_EXE=${CMAKE_BINARY_DIR}/zephyr/${KERNEL_EXE_NAME}
+  COMMAND
+  export LER_BUILD_PATH=${CMAKE_BINARY_DIR}/zephyr/LER
+  COMMAND
+  export LER_PATH=${LER_PATH}
+  COMMAND
+  export ZEPHYR_BASE=${ZEPHYR_BASE}
+  COMMAND
+  ${ZEPHYR_BASE}/boards/posix/linux_emb_runner/finnish_build.sh
 )
 
-set_property(GLOBAL APPEND PROPERTY
-    extra_post_build_commands
-    COMMAND
-    ${CMAKE_COMMAND} -E copy linux_runner.exe ${KERNEL_EXE_NAME}
-    )
 set_property(GLOBAL APPEND PROPERTY
     extra_post_build_byproducts
     ${KERNEL_EXE_NAME}

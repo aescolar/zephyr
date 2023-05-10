@@ -19,6 +19,7 @@
 #include <zephyr/sw_isr_table.h>
 #include "soc.h"
 #include <zephyr/tracing/tracing.h>
+#include "ler_cpu_if.h"
 
 typedef void (*normal_irq_f_ptr)(const void *);
 typedef int (*direct_irq_f_ptr)(void);
@@ -112,11 +113,11 @@ void posix_irq_handler(void)
 }
 
 /**
- * Thru this function the IRQ controller can raise an immediate  interrupt which
+ * Thru this function the IRQ controller can raise an immediate interrupt which
  * will interrupt the SW itself
  * (this function should only be called from the HW model code, from SW threads)
  */
-void posix_irq_handler_im_from_sw(void)
+void lrif_cpu0_irq_raised_from_sw(void)
 {
 	/*
 	 * if a higher priority interrupt than the possibly currently running is

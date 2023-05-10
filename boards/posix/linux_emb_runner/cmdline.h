@@ -13,11 +13,13 @@
 extern "C" {
 #endif
 
-__attribute__ ((visibility ("default"))) void native_handle_cmd_line(int argc, char *argv[]);
+/*
+ * To support native_posix drivers or tests which register their own arguments
+ * we provide a header with the same name as in native_posix
+ */
 void native_get_cmd_line_args(int *argc, char ***argv);
 void native_get_test_cmd_line_args(int *argc, char ***argv);
 void native_add_command_line_opts(struct args_struct_t *args);
-__attribute__ ((visibility ("default"))) void native_cleanup_cmd_line(void);
 
 #ifdef __cplusplus
 }

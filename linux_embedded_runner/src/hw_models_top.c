@@ -13,16 +13,16 @@
 #include <signal.h>
 #include <stddef.h>
 #include <stdlib.h>
-#include <pthread.h>
-#include "hw_models_top.h"
-#include "timer_model.h"
-#include "irq_ctrl.h"
-#include "posix_board_if.h"
-#include "hw_counter.h"
-#include <zephyr/arch/posix/posix_soc_if.h>
-#include "posix_arch_internal.h"
-#include <zephyr/sys/util.h>
+#include <inttypes.h>
 
+#include "ler_internal.h"
+#include "ler_tracing.h"
+#include "ler_main.h"
+
+#include "hw_models_top.h"
+#include "ler_timer_model.h"
+#include "irq_ctrl.h"
+#include "hw_counter.h"
 
 static uint64_t simu_time; /* The actual time as known by the HW models */
 static uint64_t end_of_time = NEVER; /* When will this device stop */
@@ -79,12 +79,12 @@ void hwm_set_sig_handler(void)
 	struct sigaction act;
 
 	act.sa_handler = hwm_signal_end_handler;
-	PC_SAFE_CALL(sigemptyset(&act.sa_mask));
+	LER_SAFE_CALL(sigemptyset(&act.sa_mask));
 
 	act.sa_flags = SA_RESETHAND;
 
-	PC_SAFE_CALL(sigaction(SIGTERM, &act, NULL));
-	PC_SAFE_CALL(sigaction(SIGINT, &act, NULL));
+	LER_SAFE_CALL(sigaction(SIGTERM, &act, NULL));
+	LER_SAFE_CALL(sigaction(SIGINT, &act, NULL));
 }
 
 
@@ -94,7 +94,7 @@ static void hwm_sleep_until_next_timer(void)
 		simu_time = next_timer_time;
 	} else {
 		/* LCOV_EXCL_START */
-		posix_print_warning("next_timer_time corrupted (%"PRIu64"<= %"
+		ler_print_warning("next_timer_time corrupted (%"PRIu64"<= %"
 				PRIu64", timer idx=%i)\n",
 				(uint64_t)next_timer_time,
 				(uint64_t)simu_time,
@@ -103,9 +103,9 @@ static void hwm_sleep_until_next_timer(void)
 	}
 
 	if (signaled_end || (simu_time > end_of_time)) {
-		posix_print_trace("\nStopped at %.3Lfs\n",
+		ler_print_trace("\nStopped at %.3Lfs\n",
 				((long double)simu_time)/1.0e6L);
-		posix_exit(0);
+		ler_exit(0);
 	}
 }
 
@@ -146,8 +146,7 @@ void hwm_one_event(void)
 		break;
 	default:
 		/* LCOV_EXCL_START */
-		posix_print_error_and_exit(
-					   "next_timer_index corrupted\n");
+		ler_print_error_and_exit("next_timer_index corrupted\n");
 		break;
 		/* LCOV_EXCL_STOP */
 	}
@@ -169,11 +168,6 @@ void hwm_set_end_of_time(uint64_t new_end_of_time)
 uint64_t hwm_get_time(void)
 {
 	return simu_time;
-}
-
-uint64_t posix_get_hw_cycle(void)
-{
-	return hwm_get_time();
 }
 
 /**

@@ -8,13 +8,11 @@
 
 #include <stdint.h>
 #include <stdbool.h>
+#include "ler_internal.h"
+#include "ler_cpu_if.h"
+#include "ler_cpu0_interrupts.h"
 #include "hw_models_top.h"
 #include "irq_ctrl.h"
-#include "irq_handler.h"
-#include <zephyr/arch/posix/arch.h> /* for find_lsb_set() */
-#include "board_soc.h"
-#include "posix_soc.h"
-#include "zephyr/types.h"
 
 uint64_t irq_ctrl_timer = NEVER;
 
@@ -125,7 +123,7 @@ uint32_t hw_irq_ctrl_change_lock(uint32_t new_lock)
 
 	if ((previous_lock == true) && (new_lock == false)) {
 		if (irq_status != 0U) {
-			posix_irq_handler_im_from_sw();
+			lrif_cpu0_irq_raised_from_sw();
 		}
 	}
 	return previous_lock;
@@ -206,7 +204,7 @@ static inline void hw_irq_ctrl_irq_raise_prefix(unsigned int irq)
  * This function is meant to be used by either the SW manual IRQ raising
  * or by HW which wants the IRQ to be raised in one delta cycle from now
  */
-void hw_irq_ctrl_set_irq(unsigned int irq)
+LINUX_RUNNER_IF void hw_irq_ctrl_set_irq(unsigned int irq) //TODO remove LINUX_RUNNER_IF
 {
 	hw_irq_ctrl_irq_raise_prefix(irq);
 	if ((irqs_locked == false) || (lock_ignore)) {
@@ -233,7 +231,7 @@ static void irq_raising_from_hw_now(void)
 	 */
 	if ((irqs_locked == false) || (lock_ignore)) {
 		lock_ignore = false;
-		posix_interrupt_raised();
+		lrif_cpu0_irq_raised();
 	}
 }
 
@@ -260,7 +258,7 @@ void hw_irq_ctrl_raise_im_from_sw(unsigned int irq)
 	hw_irq_ctrl_irq_raise_prefix(irq);
 
 	if (irqs_locked == false) {
-		posix_irq_handler_im_from_sw();
+		lrif_cpu0_irq_raised_from_sw();
 	}
 }
 
