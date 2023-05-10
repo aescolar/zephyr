@@ -76,6 +76,8 @@ set_property(GLOBAL APPEND PROPERTY extra_post_build_commands
   COMMAND
   export LER_EXE=${CMAKE_BINARY_DIR}/zephyr/${KERNEL_EXE_NAME}
   COMMAND
+  export LER_BUILD_PATH=${CMAKE_BINARY_DIR}/zephyr/LER
+  COMMAND
   ${ZEPHYR_BASE}/boards/posix/linux_emb_runner/finnish_build.sh
 )
 
