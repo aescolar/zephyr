@@ -5,8 +5,8 @@
  */
 
 /*
- * Interface the Linux Embedded Runner expects from
- * each the embedded CPU
+ * Interfaces the Linux Embedded Runner expects from
+ * each embedded CPU
  */
 
 #ifndef LINUX_EMBEDDED_RUNNER_LER_CPU_IF_H

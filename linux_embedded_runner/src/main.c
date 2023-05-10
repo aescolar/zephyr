@@ -39,7 +39,7 @@
 #include "cmdline.h"
 #include "irq_ctrl.h"
 
-void posix_exit(int exit_code)
+void ler_exit(int exit_code)
 {
 	static int max_exit_code;
 
