@@ -28,23 +28,21 @@
  */
 
 
+#include <stdio.h>
+#include <stdlib.h>
+
 #include "ler_cpu_if.h"
 #include "ler_tasks.h"
+#include "ler_cmdline.h"
+#include "ler_utils.h"
 
-#include <stdio.h>
-#include <soc.h>
 #include "hw_models_top.h"
-#include <stdlib.h>
-#include <zephyr/sys/util.h>
-#include <zephyr/sys/time_units.h>
-#include "cmdline.h"
-#include "irq_ctrl.h"
 
 void ler_exit(int exit_code)
 {
 	static int max_exit_code;
 
-	max_exit_code = MAX(exit_code, max_exit_code);
+	max_exit_code = L_MAX(exit_code, max_exit_code);
 	/*
 	 * posix_soc_clean_up may not return if this is called from a SW thread,
 	 * but instead it would get posix_exit() recalled again
@@ -53,7 +51,7 @@ void ler_exit(int exit_code)
 	lrif_cpu0_cleanup();
 	run_ler_tasks(LERTASK_ON_EXIT_LEVEL);
 	hwm_cleanup();
-	native_cleanup_cmd_line();
+	ler_cleanup_cmd_line();
 	exit(max_exit_code);
 }
 
@@ -76,7 +74,7 @@ static void ler_init(int argc, char *argv[])
 	run_ler_tasks(LERTASK_PRE_BOOT_1_LEVEL);
 	lrif_cpu0_pre_cmdline_hooks();
 
-	native_handle_cmd_line(argc, argv);
+	ler_handle_cmd_line(argc, argv);
 
 	run_ler_tasks(LERTASK_PRE_BOOT_2_LEVEL);
 	lrif_cpu0_pre_hw_init_hooks();

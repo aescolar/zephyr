@@ -8,12 +8,15 @@
 #define LINUX_EMBEDDED_RUNNER_LER_UTILS_H
 
 
-#define _STRINGIFY(x) #x
-#define STRINGIFY(s) _STRINGIFY(s)
+#define _LER_STRINGIFY(x) #x
+#define LER_STRINGIFY(s) _LER_STRINGIFY(s)
 
 /* concatenate the values of the arguments into one */
-#define _DO_CONCAT(x, y) x ## y
-#define _CONCAT(x, y) _DO_CONCAT(x, y)
+#define LER_DO_CONCAT(x, y) x ## y
+#define LER_CONCAT(x, y) LER_DO_CONCAT(x, y)
+
+#define L_MAX(a,b)  (((a) > (b)) ? (a) : (b))
+#define L_MIN(a, b) (((a) < (b)) ? (a) : (b))
 
 #ifndef ARG_UNUSED
 #define ARG_UNUSED(x) (void)(x)

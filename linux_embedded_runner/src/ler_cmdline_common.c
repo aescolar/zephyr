@@ -1,19 +1,20 @@
 /*
  * Copyright (c) 2018 Oticon A/S
+ * Copyright (c) 2023 Nordic Semiconductor ASA
  *
  * SPDX-License-Identifier: Apache-2.0
  */
 
+#include <stdint.h>
 #include <string.h>
 #include <strings.h>
 #include <stdbool.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <math.h>
-#include <zephyr/arch/posix/posix_trace.h>
-#include "posix_board_if.h"
-#include "zephyr/types.h"
-#include "cmdline_common.h"
+#include "cpu_ler_if.h"
+#include "ler_tracing.h"
+#include "ler_cmdline_common.h"
 
 /**
  * Check if <arg> is the option <option>
@@ -64,7 +65,7 @@ int cmd_is_option(const char *arg, const char *option, int with_value)
 	}
 
 	if (arg[of] == 0) { /* we need a value to follow */
-		posix_print_error_and_exit("Incorrect option syntax '%s'. The "
+		ler_print_error_and_exit("Incorrect option syntax '%s'. The "
 					   "value should follow the options. "
 					   "For example --ratio=3\n",
 					   arg);
@@ -161,7 +162,7 @@ void cmd_read_option_value(const char *str, void *dest, const char type,
 		*(double *)dest = strtod(str, &endptr);
 		break;
 	default:
-		posix_print_error_and_exit(CMD_TYPE_ERROR, type);
+		ler_print_error_and_exit(CMD_TYPE_ERROR, type);
 		/* Unreachable */
 		break;
 	}
@@ -171,7 +172,7 @@ void cmd_read_option_value(const char *str, void *dest, const char type,
 	}
 
 	if (error) {
-		posix_print_error_and_exit("Error reading value of %s '%s'. Use"
+		ler_print_error_and_exit("Error reading value of %s '%s'. Use"
 					   " --help for usage information\n",
 					   option, str);
 	}
@@ -216,7 +217,7 @@ void cmd_args_set_defaults(struct args_struct_t args_struct[])
 			*(double *)args_struct[count].dest = (double)NAN;
 			break;
 		default:
-			posix_print_error_and_exit(CMD_TYPE_ERROR,
+			ler_print_error_and_exit(CMD_TYPE_ERROR,
 						   args_struct[count].type);
 			break;
 		}
@@ -259,7 +260,7 @@ static void cmd_gen_switch_syntax(char *buf, int size,
 	}
 
 	if (ret < 0) {
-		posix_print_error_and_exit("Unexpected error in %s %i\n",
+		ler_print_error_and_exit("Unexpected error in %s %i\n",
 					   __FILE__, __LINE__);
 	}
 	if (size - ret < 0) {
@@ -369,7 +370,7 @@ static void cmd_handle_this_matched_arg(char *argv, int offset,
 			if (arg_element->type == 'b') {
 				*(bool *)arg_element->dest = true;
 			} else {
-				posix_print_error_and_exit(CMD_ERR_BOOL_SWI);
+				ler_print_error_and_exit(CMD_ERR_BOOL_SWI);
 			}
 		} else { /* if not a switch we need to read its value */
 			cmd_read_option_value(&argv[offset],
@@ -396,7 +397,7 @@ bool cmd_parse_one_arg(char *argv, struct args_struct_t args_struct[])
 
 	if (cmd_is_help_option(argv)) {
 		cmd_print_long_help(args_struct);
-		posix_exit(0);
+		ler_exit(0);
 	}
 
 	while (args_struct[count].option != NULL) {

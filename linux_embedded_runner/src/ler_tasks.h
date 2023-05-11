@@ -7,6 +7,8 @@
 #ifndef _LINUX_EMBEDDED_RUNNER_LER_TASKS_H
 #define _LINUX_EMBEDDED_RUNNER_LER_TASKS_H
 
+#include "ler_utils.h"
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -35,8 +37,9 @@ extern "C" {
  * The function must take no parameters and return nothing.
  */
 #define LER_TASK(fn, level, prio)	\
-	static void (* const _CONCAT(__ler_task_, fn))() __used __noasan \
-	__attribute__((__section__(".ler_" #level STRINGIFY(prio) "_task")))\
+	static void (* const LER_CONCAT(__ler_task_, fn))() \
+	__attribute__((__used__)) \
+	__attribute__((__section__(".ler_" #level LER_STRINGIFY(prio) "_task")))\
 	= fn
 
 #define LERTASK_PRE_BOOT_1_LEVEL	0

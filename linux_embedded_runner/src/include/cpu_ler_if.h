@@ -12,6 +12,8 @@
 #ifndef LINUX_EMBEDDED_RUNNER_LER_CPU_IF_H
 #define LINUX_EMBEDDED_RUNNER_LER_CPU_IF_H
 
+#include "ler_tracing.h"
+
 #ifdef __cplusplus
 extern "C" {
 #endif
