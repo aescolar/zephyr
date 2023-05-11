@@ -19,10 +19,9 @@ extern "C" {
 /**
  * @brief Terminate the execution
  *
- * exit_code: Requested exist code to th shell
- *            Note that other components may have requested
- *            a different exit code (!= 0) and may have
- *            precedence
+ * exit_code: Requested exit code to the shell
+ *            Note that other components may have requested a different
+ *            exit code which may have precedence if it was !=0
  */
 void ler_exit(int exit_code);
 

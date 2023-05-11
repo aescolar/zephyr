@@ -29,6 +29,7 @@
 
 
 #include "ler_cpu_if.h"
+#include "ler_tasks.h"
 
 #include <stdio.h>
 #include <soc.h>
@@ -50,6 +51,7 @@ void ler_exit(int exit_code)
 	 * ASAP from the HW thread
 	 */
 	lrif_cpu0_cleanup();
+	run_ler_tasks(LERTASK_ON_EXIT_LEVEL);
 	hwm_cleanup();
 	native_cleanup_cmd_line();
 	exit(max_exit_code);
@@ -71,15 +73,21 @@ static void ler_init(int argc, char *argv[])
 	setvbuf(stdout, NULL, _IOLBF, 512);
 	setvbuf(stderr, NULL, _IOLBF, 512);
 
+	run_ler_tasks(LERTASK_PRE_BOOT_1_LEVEL);
 	lrif_cpu0_pre_cmdline_hooks();
 
 	native_handle_cmd_line(argc, argv);
 
+	run_ler_tasks(LERTASK_PRE_BOOT_2_LEVEL);
 	lrif_cpu0_pre_hw_init_hooks();
 
 	hwm_init();
 
+	run_ler_tasks(LERTASK_PRE_BOOT_3_LEVEL);
+
 	lrif_cpu0_boot();
+
+	run_ler_tasks(LERTASK_FIRST_SLEEP_LEVEL);
 }
 
 /**

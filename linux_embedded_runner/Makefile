@@ -28,20 +28,22 @@ no_default:
 
 ARCH:=-m32
 DEBUG:=-g
-OPT:=
+OPT:=-O0
 WARNINGS:=-Wall -Wpedantic
 COVERAGE:=--coverage
 CPPFLAGS:=
 NO_PIE:=-fno-pie -fno-pic -no-pie
-CFLAGS:=${ARCH} ${DEBUG} ${COVERAGE} ${NO_PIE} -ffunction-sections -fdata-sections \
- -MMD -MP -std=c11
+DEPENDFLAGS=-MMD -MP
+CFLAGS:=${ARCH} ${DEBUG} ${COVERAGE} ${OPT} ${NO_PIE} -ffunction-sections -fdata-sections \
+  ${DEPENDFLAGS} -std=c11
 FINALLINK_FLAGS:=${ARCH} ${COVERAGE} ${NO_PIE} \
   -Wl,--gc-sections \
   ${LER_LINK_OPTIONS}
 
 RUNNER_LIB:=runner.a
 
-SRCS:=src/main.c
+SRCS:=src/main.c \
+ src/ler_tasks.c
 
 INCLUDES:=\
  -Isrc/include/ \
@@ -65,17 +67,21 @@ ${LER_BUILD_PATH}/%.o: %.c Makefile | ${LER_BUILD_PATH}
 	@if [ ! -d $(dir $@) ]; then mkdir -p $(dir $@); fi
 	@${CC} ${CPPFLAGS} ${INCLUDES} ${CFLAGS} -c $< -o $@
 
+${LER_BUILD_PATH}/linker_script.ld : other/linker_script.pre.ld
+	@${CC} -x c -E -P $< -o $@  ${DEPENDFLAGS}
+
 ${LER_BUILD_PATH}/${RUNNER_LIB}: ${OBJS}
 	@rm ${LER_BUILD_PATH}/${RUNNER_LIB} &> /dev/null ; true
 	@${AR} -cr ${LER_BUILD_PATH}/${RUNNER_LIB} ${OBJS}
 
-${LER_EXE}: ${LER_BUILD_PATH}/${RUNNER_LIB} ${EMBEDDED_CPU_SW}
+${LER_EXE}: ${LER_BUILD_PATH}/${RUNNER_LIB} ${EMBEDDED_CPU_SW} ${LER_BUILD_PATH}/linker_script.ld
 	@if [ -z ${EMBEDDED_CPU_SW} ] || [ ! -f ${EMBEDDED_CPU_SW} ]; then \
 	  echo "Erorr: Input embedded CPU SW not found (EMBEDDED_CPU_SW=${EMBEDDED_CPU_SW} )"; \
 	  false; \
 	fi
 	@objcopy --localize-hidden ${EMBEDDED_CPU_SW} ${LER_BUILD_PATH}/cpu_0.sw.o -w --localize-symbol=_*
-	@gcc ${LER_BUILD_PATH}/${RUNNER_LIB} ${LER_BUILD_PATH}/cpu_0.sw.o -o $@ ${FINALLINK_FLAGS}
+	@gcc ${LER_BUILD_PATH}/${RUNNER_LIB} ${LER_BUILD_PATH}/cpu_0.sw.o -o $@ ${FINALLINK_FLAGS} \
+	-T ${LER_BUILD_PATH}/linker_script.ld
 
 Makefile: ;
 
