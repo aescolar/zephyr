@@ -5,6 +5,7 @@
  */
 
 #include <stdbool.h>
+#include "hw_models_top.h"
 #include "timer_model.h"
 #include <zephyr/arch/posix/posix_soc_if.h>
 #include <posix_board_if.h>

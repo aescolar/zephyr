@@ -11,7 +11,6 @@ zephyr_library_sources(
 	posix_arch_if.c
 	
 	hw_models_top.c
-	timer_model.c
 	native_rtc.c
 	irq_handler.c
 	irq_ctrl.c
@@ -21,11 +20,14 @@ zephyr_library_sources(
 	hw_counter.c
 	)
 
-zephyr_library_include_directories(
+zephyr_include_directories(
   ${LER_PATH}/src/include
+)
+
+zephyr_library_include_directories(
   ${ZEPHYR_BASE}/kernel/include
   ${ZEPHYR_BASE}/arch/posix/include
-  )
+)
 
 zephyr_compile_options(
   -fvisibility=hidden

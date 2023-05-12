@@ -16,6 +16,8 @@
 #include "posix_soc.h"
 #include "zephyr/types.h"
 
+#include "ler_cpu_if.h" //TODO remove
+
 uint64_t irq_ctrl_timer = NEVER;
 
 
@@ -206,7 +208,7 @@ static inline void hw_irq_ctrl_irq_raise_prefix(unsigned int irq)
  * This function is meant to be used by either the SW manual IRQ raising
  * or by HW which wants the IRQ to be raised in one delta cycle from now
  */
-void hw_irq_ctrl_set_irq(unsigned int irq)
+LINUX_RUNNER_IF void hw_irq_ctrl_set_irq(unsigned int irq) //TODO remove LINUX_RUNNER_IF
 {
 	hw_irq_ctrl_irq_raise_prefix(irq);
 	if ((irqs_locked == false) || (lock_ignore)) {

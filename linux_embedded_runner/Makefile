@@ -31,7 +31,7 @@ DEBUG:=-g
 OPT:=-O0
 WARNINGS:=-Wall -Wpedantic
 COVERAGE:=--coverage
-CPPFLAGS:=
+CPPFLAGS:=-D_POSIX_C_SOURCE=200809 -D_XOPEN_SOURCE=600 -D_XOPEN_SOURCE_EXTENDED
 NO_PIE:=-fno-pie -fno-pic -no-pie
 DEPENDFLAGS=-MMD -MP
 CFLAGS:=${ARCH} ${DEBUG} ${COVERAGE} ${OPT} ${NO_PIE} -ffunction-sections -fdata-sections \
@@ -46,7 +46,8 @@ SRCS:=src/main.c \
  src/ler_trace.c \
  src/ler_tasks.c \
  src/ler_cmdline.c \
- src/ler_cmdline_common.c
+ src/ler_cmdline_common.c \
+ src/timer_model.c
 
 INCLUDES:=\
  -Isrc/include/ \
@@ -83,8 +84,8 @@ ${LER_EXE}: ${LER_BUILD_PATH}/${RUNNER_LIB} ${EMBEDDED_CPU_SW} ${LER_BUILD_PATH}
 	  false; \
 	fi
 	@objcopy --localize-hidden ${EMBEDDED_CPU_SW} ${LER_BUILD_PATH}/cpu_0.sw.o -w --localize-symbol=_*
-	@gcc ${LER_BUILD_PATH}/${RUNNER_LIB} ${LER_BUILD_PATH}/cpu_0.sw.o -o $@ ${FINALLINK_FLAGS} \
-	-T ${LER_BUILD_PATH}/linker_script.ld
+	@gcc ${LER_BUILD_PATH}/cpu_0.sw.o ${LER_BUILD_PATH}/${RUNNER_LIB} \
+	-o $@ ${FINALLINK_FLAGS} -T ${LER_BUILD_PATH}/linker_script.ld
 
 Makefile: ;
 
