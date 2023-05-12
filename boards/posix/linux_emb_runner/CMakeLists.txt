@@ -39,13 +39,13 @@ zephyr_ld_options(
 #  -r
 )
 
-set(LER_LINK_FLAGS
-  "${LER_LINK_FLAGS} -lm"
+set(LER_LINK_OPTIONS
+  "${LER_LINK_OPTIONS} -lm"
 )
 
 if(CONFIG_EXTERNAL_LIBCPP)
-	set(LER_LINK_FLAGS
-	  "${LER_LINK_FLAGS} -lstdc++"
+	set(LER_LINK_OPTIONS
+	  "${LER_LINK_OPTIONS} -lstdc++"
 	)
 endif()
 
@@ -53,8 +53,8 @@ if(CONFIG_HAS_SDL)
 	find_package(PkgConfig REQUIRED)
 	pkg_search_module(SDL2 REQUIRED sdl2)
 	zephyr_include_directories(${SDL2_INCLUDE_DIRS})
-	set(LER_LINK_FLAGS
-	  "${LER_LINK_FLAGS} ${SDL2_LINK_LIBRARIES}"
+	set(LER_LINK_OPTIONS
+	  "${LER_LINK_OPTIONS} ${SDL2_LINK_LIBRARIES}"
 	)
 	zephyr_compile_options(${SDL2_CFLAGS_OTHER})
 	zephyr_library_sources(sdl_events.c)
@@ -64,7 +64,7 @@ endif()
 #ZEPHYR_BASE to be deleted from below
 set_property(GLOBAL APPEND PROPERTY extra_post_build_commands
   COMMAND
-  export LER_LINK_FLAGS=${LER_LINK_FLAGS}
+  export LER_LINK_OPTIONS=${LER_LINK_OPTIONS}
   COMMAND
   export EMBEDDED_BUILD_FOLDER=${CMAKE_BINARY_DIR}/zephyr
   COMMAND

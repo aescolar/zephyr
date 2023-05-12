@@ -13,9 +13,10 @@ LER_EXE?=${LER_BUILD_PATH}/${EXE_NAME}
 LER_LINK_FLAGS?=
 EMBEDDED_CPU_SW?=
 
-SHELL:=bash
-CC:=gcc
-AR:=ar
+SHELL?=bash
+LER_CC?=gcc
+LER_AR?=ar
+LER_OBJCOPY?=objcopy
 
 no_default:
 	@echo "There is no default rule, please specify what you want to build,\
@@ -52,22 +53,22 @@ ${LER_BUILD_PATH}:
 
 ${LER_BUILD_PATH}/%.o: %.c Makefile
 	@if [ ! -d $(dir $@) ]; then mkdir -p $(dir $@); fi
-	@${CC} ${CPPFLAGS} ${INCLUDES} ${CFLAGS} -c $< -o $@
+	${LER_CC} ${CPPFLAGS} ${INCLUDES} ${CFLAGS} -c $< -o $@
 
 ${LER_BUILD_PATH}/linker_script.ld : other/linker_script.pre.ld | ${LER_BUILD_PATH}
-	@${CC} -x c -E -P $< -o $@  ${DEPENDFLAGS}
+	${LER_CC} -x c -E -P $< -o $@  ${DEPENDFLAGS}
 
 ${LER_BUILD_PATH}/${RUNNER_LIB}: ${OBJS}
-	@rm ${LER_BUILD_PATH}/${RUNNER_LIB} &> /dev/null ; true
-	@${AR} -cr ${LER_BUILD_PATH}/${RUNNER_LIB} ${OBJS}
+	if [ -f $@ ]; then rm $@ ; fi
+	${LER_AR} -cr $@ ${OBJS}
 
 ${LER_EXE}: ${LER_BUILD_PATH}/${RUNNER_LIB} ${EMBEDDED_CPU_SW} ${LER_BUILD_PATH}/linker_script.ld
 	@if [ -z ${EMBEDDED_CPU_SW} ] || [ ! -f ${EMBEDDED_CPU_SW} ]; then \
 	  echo "Erorr: Input embedded CPU SW not found (EMBEDDED_CPU_SW=${EMBEDDED_CPU_SW} )"; \
 	  false; \
 	fi
-	@objcopy --localize-hidden ${EMBEDDED_CPU_SW} ${LER_BUILD_PATH}/cpu_0.sw.o -w --localize-symbol=_*
-	@gcc ${LER_BUILD_PATH}/cpu_0.sw.o ${LER_BUILD_PATH}/${RUNNER_LIB} \
+	${LER_OBJCOPY} --localize-hidden ${EMBEDDED_CPU_SW} ${LER_BUILD_PATH}/cpu_0.sw.o -w --localize-symbol=_*
+	${LER_CC} ${LER_BUILD_PATH}/cpu_0.sw.o ${LER_BUILD_PATH}/${RUNNER_LIB} \
 	-o $@ ${FINALLINK_FLAGS} -T ${LER_BUILD_PATH}/linker_script.ld
 
 Makefile: ;
@@ -80,14 +81,18 @@ all: link_with_esw
 
 clean:
 	@echo "Deleting intermediate compilation results + libraries + executables (*.d .o .a .exe)"
-	@find $(LER_BUILD_PATH) -name "*.o" -or -name "*.exe" -or -name "*.a" -or -name "*.d" | xargs rm -f
+	find $(LER_BUILD_PATH) -name "*.o" -or -name "*.exe" -or -name "*.a" -or -name "*.d" | xargs rm -f
 
 clean_coverage:
-	@find $(LER_BUILD_PATH) -name "*.gcda" -or -name "*.gcno" | xargs rm -f ; true
+	find $(LER_BUILD_PATH) -name "*.gcda" -or -name "*.gcno" | xargs rm -f ; true
 
 clean_all: clean clean_coverage ;
 
 .PHONY: clean clean_coverage clean_all link_with_esw runner_lib no_default all ${DEPENDFILES}
+
+ifndef LER_VERBOSE
+.SILENT:
+endif
 
 help:
 	@echo "**********************************"

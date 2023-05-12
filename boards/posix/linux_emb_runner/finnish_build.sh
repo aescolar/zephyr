@@ -2,4 +2,4 @@
 
 echo "** Entered Finnish_build.sh **"
 cd ${LER_PATH}/
-make all
+make all --warn-undefined-variables #LER_VERBOSE=1
