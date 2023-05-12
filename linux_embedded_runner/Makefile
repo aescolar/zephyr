@@ -42,12 +42,7 @@ FINALLINK_FLAGS:=${ARCH} ${COVERAGE} ${NO_PIE} \
 
 RUNNER_LIB:=runner.a
 
-SRCS:=src/main.c \
- src/ler_trace.c \
- src/ler_tasks.c \
- src/ler_cmdline.c \
- src/ler_cmdline_common.c \
- src/timer_model.c
+SRCS:=$(shell ls src/*.c )
 
 INCLUDES:=\
  -Isrc/include/ \

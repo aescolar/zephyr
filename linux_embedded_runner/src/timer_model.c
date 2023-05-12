@@ -26,10 +26,9 @@
 #include "ler_tasks.h"
 #include "ler_cmdline.h"
 #include "ler_tracing.h"
-
 #include "hw_models_top.h"
+#include "ler_cpu0_interrupts.h"
 #include "irq_ctrl.h"
-#include "board_soc.h"
 
 #define DEBUG_NP_TIMER 0
 

@@ -4,8 +4,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#ifndef _NATIVE_POSIX_HW_COUNTER_H
-#define _NATIVE_POSIX_HW_COUNTER_H
+#ifndef LINUX_EMBEDDED_RUNNER_HW_COUNTER_H
+#define LINUX_EMBEDDED_RUNNER_HW_COUNTER_H
 
 #include <stdint.h>
 
@@ -26,4 +26,4 @@ uint64_t hw_counter_get_value(void);
 }
 #endif
 
-#endif /* _NATIVE_POSIX_HW_COUNTER_H */
+#endif /* LINUX_EMBEDDED_RUNNER_HW_COUNTER_H */

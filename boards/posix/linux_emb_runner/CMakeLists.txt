@@ -9,15 +9,13 @@ zephyr_library_compile_definitions(NO_POSIX_CHEATS)
 zephyr_library_sources(
 	ler_if.c
 	posix_arch_if.c
+	cmdline.c
+	cpu_wait.c
 	
 	hw_models_top.c
 	native_rtc.c
 	irq_handler.c
 	irq_ctrl.c
-
-	cmdline.c
-	cpu_wait.c
-	hw_counter.c
 	)
 
 zephyr_include_directories(
