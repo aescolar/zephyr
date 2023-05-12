@@ -25,3 +25,7 @@ void lrif_cpu0_boot(void){
 void lrif_cpu0_cleanup(void){
 	posix_soc_clean_up();
 }
+
+void lrif_cpu0_irq_raised(void){
+	posix_interrupt_raised();
+}

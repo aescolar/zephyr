@@ -6,17 +6,12 @@
 # Linux executable by linking it to the the embeded cpu library
 
 # By default all the build output is placed under the _build folder, but the user can override it
-# setting this variable
+# setting the LER_BUILD_PATH
 LER_BUILD_PATH?=$(abspath _build/)
 EXE_NAME?=linux_runner.exe
 LER_EXE?=${LER_BUILD_PATH}/${EXE_NAME}
 LER_LINK_FLAGS?=
 EMBEDDED_CPU_SW?=
-
-#TODO: remove this, we should eventually only get the EMBEDDED_CPU_SW variable
-ifeq ("$(wildcard $(EMBEDDED_BUILD_FOLDER))","")
-$(error EMBEDDED_BUILD_FOLDER (${EMBEDDED_BUILD_FOLDER}) does not point to a folder )
-endif
 
 SHELL:=bash
 CC:=gcc
@@ -44,14 +39,7 @@ RUNNER_LIB:=runner.a
 
 SRCS:=$(shell ls src/*.c )
 
-INCLUDES:=\
- -Isrc/include/ \
- -I${ZEPHYR_BASE}/linux_embedded_runner/src/include \
- \
- -I${ZEPHYR_BASE}/include \
- -I${ZEPHYR_BASE}/soc/posix/inf_clock/ \
- -I${ZEPHYR_BASE}/boards/posix/linux_emb_runner/ \
- -include ${EMBEDDED_BUILD_FOLDER}/include/generated/autoconf.h
+INCLUDES:=-Isrc/include/
 
 OBJS=$(abspath $(addprefix $(LER_BUILD_PATH)/,${SRCS:.c=.o}))
 
@@ -62,11 +50,11 @@ DEPENDFILES:=$(addsuffix .d,$(basename ${OBJS}))
 ${LER_BUILD_PATH}:
 	@if [ ! -d ${LER_BUILD_PATH} ]; then mkdir -p ${LER_BUILD_PATH}; fi
 
-${LER_BUILD_PATH}/%.o: %.c Makefile | ${LER_BUILD_PATH}
+${LER_BUILD_PATH}/%.o: %.c Makefile
 	@if [ ! -d $(dir $@) ]; then mkdir -p $(dir $@); fi
 	@${CC} ${CPPFLAGS} ${INCLUDES} ${CFLAGS} -c $< -o $@
 
-${LER_BUILD_PATH}/linker_script.ld : other/linker_script.pre.ld
+${LER_BUILD_PATH}/linker_script.ld : other/linker_script.pre.ld | ${LER_BUILD_PATH}
 	@${CC} -x c -E -P $< -o $@  ${DEPENDFLAGS}
 
 ${LER_BUILD_PATH}/${RUNNER_LIB}: ${OBJS}

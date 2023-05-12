@@ -5,8 +5,11 @@
 - Decide on build of runner itself, and postlink:
   ->  Start w make (easy for me), most likely a demand for cmake will follow
 
-* Create CPU_#N_ hooks
-* Properly refactor board code
+ (done) * Create CPU_#N_ hooks
+ (done) * Initial refactor board code
+ 
+ * More proper refactor of board/ler code
+   * includes in src/include to be only what is really public, everything else into private headers
 
 
 * Kconfig
@@ -26,8 +29,8 @@
  * Test embedded libC on linux runner
  * Test POSIX API shim on linux runner
 
-* Move LINUX_RUNNER_IF to basic header
-  Maybe define a Processor interface macro (exactly the same content as LINUX_RUNNER_IF)
+(done)* Move LINUX_RUNNER_IF to basic header
+  ~Maybe define a Processor interface macro (exactly the same content as LINUX_RUNNER_IF)~
 * ReName zephyr.elf to something like cpu_#n.sw.o (thru Kconfig)
 
 * Fix DT gen_handles input issue
@@ -42,4 +45,4 @@
 
 * Handle build of runner and common link for multicore thru sysbuild
 
-* Generalize for LER_N_CPUs > 1
+~* Generalize for LER_N_CPUs > 1~

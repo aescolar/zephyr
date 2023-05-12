@@ -9,12 +9,9 @@
 #include <string.h>
 #include "ler_cmdline_common.h"
 #include "ler_tracing.h"
-
-
-#include "zephyr/types.h"
+#include "ler_timer_model.h"
 #include "hw_models_top.h"
-#include "timer_model.h"
-#include <zephyr/toolchain.h>
+
 
 
 static int s_argc, test_argc;

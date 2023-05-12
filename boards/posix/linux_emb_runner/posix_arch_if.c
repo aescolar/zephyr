@@ -4,6 +4,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+#include <stdint.h>
 #include <stdlib.h> /* for exit */
 #include <stdio.h>  /* for printfs */
 #include <stdarg.h> /* for va args */
@@ -49,4 +50,8 @@ void posix_print_trace(const char *format, ...)
 int posix_trace_over_tty(int file_number)
 {
 	return ler_trace_over_tty(file_number);
+}
+
+uint64_t posix_get_hw_cycle(void){
+	return hwm_get_time();
 }

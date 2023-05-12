@@ -11,11 +11,7 @@ zephyr_library_sources(
 	posix_arch_if.c
 	cmdline.c
 	cpu_wait.c
-	
-	hw_models_top.c
-	native_rtc.c
 	irq_handler.c
-	irq_ctrl.c
 	)
 
 zephyr_include_directories(

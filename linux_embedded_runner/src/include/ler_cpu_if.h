@@ -22,6 +22,8 @@ LINUX_RUNNER_IF void lrif_cpu0_pre_cmdline_hooks(void);
 LINUX_RUNNER_IF void lrif_cpu0_pre_hw_init_hooks(void);
 LINUX_RUNNER_IF void lrif_cpu0_boot(void);
 LINUX_RUNNER_IF void lrif_cpu0_cleanup(void);
+LINUX_RUNNER_IF void lrif_cpu0_irq_raised(void);
+LINUX_RUNNER_IF void lrif_cpu0_irq_raised_from_sw(void);
 
 #ifdef __cplusplus
 }

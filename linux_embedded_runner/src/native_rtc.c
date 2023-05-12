@@ -8,10 +8,10 @@
  * API to the native_posix (Real) Time Clock
  */
 
+#include "ler_tracing.h"
 #include "native_rtc.h"
 #include "hw_models_top.h"
-#include "timer_model.h"
-#include <zephyr/arch/posix/posix_trace.h>
+#include "ler_timer_model.h"
 
 /**
  * Return the (simulation) time in microseconds
@@ -31,7 +31,7 @@ uint64_t native_rtc_gettime_us(int clock_type)
 		return sec * 1000000UL + nsec / 1000U;
 	}
 
-	posix_print_error_and_exit("Unknown clock source %i\n",
+	ler_print_error_and_exit("Unknown clock source %i\n",
 				   clock_type);
 	return 0;
 }
