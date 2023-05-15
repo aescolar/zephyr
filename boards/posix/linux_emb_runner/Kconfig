@@ -1,14 +1,10 @@
 # SPDX-License-Identifier: Apache-2.0
 
-#To be selected instead of defaulted
-config NATIVE_LIBRARY
-	bool
-	default y
-
 config BOARD_NATIVE_POSIX
 	bool
 	select NATIVE_POSIX_TIMER
 	select NATIVE_POSIX_CONSOLE
+#	select NATIVE_LIBRARY	
 
 if BOARD_NATIVE_POSIX
 

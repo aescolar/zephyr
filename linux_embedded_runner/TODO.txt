@@ -7,10 +7,24 @@
 
  (done) * Create CPU_#N_ hooks
  (done) * Initial refactor board code
+
+------------
+
+ * Test gprof
+
+ * ¿Move arch core and soc core to LER?
  
  * More proper refactor of board/ler code
    * includes in src/include to be only what is really public, everything else into private headers
 
+ * Host trampolines
+   Their purpose is to enable linking to the right symbols, even if other ones exist in the embedded environment
+ ** For simple/basic APIs (no host headers includes thru (or only those expected in freestanding environments)
+ ** For complex APIs (w host headers includes thru)
+    Will require the integrator to include the stdincludes when building that libary in the embedded environment
+    (but saves the integrator from needing to split that library into another build)
+
+ * Test with embedded C library, and POSIX API
 
 * Kconfig
  (done) * New: NATIVE_LIBRARY
@@ -24,7 +38,7 @@
 
  (done) * LER_CPU_INDEX (which CPU number is this Zephyr build targetting)
 
- * Create all dedicated Kconfig for this board
+ * Add kconfig options for LER instead of piggybacking on native_posix
 
  * Test embedded libC on linux runner
  * Test POSIX API shim on linux runner
@@ -46,3 +60,5 @@
 * Handle build of runner and common link for multicore thru sysbuild
 
 ~* Generalize for LER_N_CPUs > 1~
+
+* Check COMPILER_SECURITY_FORTIFY (if it can be enabled)
