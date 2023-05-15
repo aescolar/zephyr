@@ -2,6 +2,20 @@
 
 if BOARD_NATIVE_POSIX
 
+config NATIVE_LIBRARY
+	default y
+
+#config NATIVE_APPLICATION
+#	default y
+
+choice LIBC_IMPLEMENTATION
+	default EXTERNAL_LIBC
+endchoice # LIBC_IMPLEMENTATION
+
+choice LIBCPP_IMPLEMENTATION
+	default EXTERNAL_LIBCPP
+endchoice # LIBCPP_IMPLEMENTATION
+
 config BUILD_OUTPUT_BIN
 	default n
 
