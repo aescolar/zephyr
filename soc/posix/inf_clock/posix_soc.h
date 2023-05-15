@@ -14,7 +14,7 @@ extern "C" {
 #endif
 
 void posix_interrupt_raised(void);
-__attribute__ ((visibility ("default"))) void posix_boot_cpu(void);
+void posix_boot_cpu(void);
 int  posix_is_cpu_running(void);
 void posix_change_cpu_state_and_wait(bool halted);
 
