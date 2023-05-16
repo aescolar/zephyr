@@ -72,6 +72,8 @@ set_property(GLOBAL APPEND PROPERTY extra_post_build_commands
   COMMAND
   export LER_LINK_OPTIONS=${LER_LINK_OPTIONS}
   COMMAND
+  export LER_BUILD_OPTIONS=${LER_BUILD_OPTIONS}
+  COMMAND
   export EMBEDDED_BUILD_FOLDER=${CMAKE_BINARY_DIR}/zephyr
   COMMAND
   export EMBEDDED_CPU_SW=${CMAKE_BINARY_DIR}/zephyr/zephyr.elf 
