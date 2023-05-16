@@ -49,6 +49,24 @@ if(CONFIG_EXTERNAL_LIBCPP)
 	)
 endif()
 
+if(CONFIG_GPROF)
+	set(LER_LINK_OPTIONS
+	  "${LER_LINK_OPTIONS} -pg"
+	)
+endif()
+
+if(CONFIG_64BIT)
+  # By default the linux embedded runner builds and links a 32bits (x86) executable
+  # we override it to build a 64 bit one
+	set(LER_LINK_OPTIONS
+	  "${LER_LINK_OPTIONS} -m64"
+	)
+	set(LER_BUILD_OPTIONS
+	  "${LER_BUILD_OPTIONS} -m64"
+	)
+endif()
+
+
 if(CONFIG_HAS_SDL)
 	find_package(PkgConfig REQUIRED)
 	pkg_search_module(SDL2 REQUIRED sdl2)
@@ -65,6 +83,8 @@ endif()
 set_property(GLOBAL APPEND PROPERTY extra_post_build_commands
   COMMAND
   export LER_LINK_OPTIONS=${LER_LINK_OPTIONS}
+  COMMAND
+  export LER_BUILD_OPTIONS=${LER_BUILD_OPTIONS}
   COMMAND
   export EMBEDDED_BUILD_FOLDER=${CMAKE_BINARY_DIR}/zephyr
   COMMAND
