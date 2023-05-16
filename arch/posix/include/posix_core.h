@@ -7,11 +7,11 @@
 #define ZEPHYR_ARCH_POSIX_INCLUDE_POSIX_CORE_H_
 
 #include <zephyr/kernel.h>
+#include "bottom_if.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
-
 
 typedef struct {
 	k_thread_entry_t entry_point;
@@ -39,14 +39,13 @@ typedef struct {
 } posix_thread_status_t;
 
 
-void posix_new_thread(posix_thread_status_t *ptr);
-void posix_swap(int next_allowed_thread_nbr, int this_thread_nbr);
-void posix_main_thread_start(int next_allowed_thread_nbr);
-void posix_init_multithreading(void);
-void posix_core_clean_up(void);
-
-void posix_new_thread_pre_start(void); /* defined in thread.c */
 void posix_irq_check_idle_exit(void);
+
+#if POSIX_ARCH_DEBUG_PRINTS
+#define PC_DEBUG(fmt, ...) posix_print_trace(PREFIX fmt, __VA_ARGS__)
+#else
+#define PC_DEBUG(...)
+#endif
 
 #ifdef __cplusplus
 }
