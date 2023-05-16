@@ -49,6 +49,12 @@ if(CONFIG_EXTERNAL_LIBCPP)
 	)
 endif()
 
+if(CONFIG_GPROF)
+	set(LER_LINK_OPTIONS
+	  "${LER_LINK_OPTIONS} -pg"
+	)
+endif()
+
 if(CONFIG_HAS_SDL)
 	find_package(PkgConfig REQUIRED)
 	pkg_search_module(SDL2 REQUIRED sdl2)
