@@ -1,6 +1,18 @@
+- Decide own repo / in-tree , own arch / modify POSIX arch
+
+
+- Write all code
+- DTS fix
+- Document interfaces
+- Drivers for embeded libC version
+- Polish all code to merge quality
+- Write docs
+
+---------------
+
 
 - Decide if runner is own repo (or even replica)
-  -> star in linux_embedded_runner/ folder
+  -> start in linux_embedded_runner/ folder
 ~- Decide if runner is bsim component~ <- No due to expected resistance from Zephyr to adopt
 - Decide on build of runner itself, and postlink:
   ->  Start w make (easy for me), most likely a demand for cmake will follow
@@ -40,8 +52,8 @@
 
  * Add kconfig options for LER instead of piggybacking on native_posix
 
- * Test embedded libC on linux runner
- * Test POSIX API shim on linux runner
+ (done) * Test embedded libC on linux runner
+ (done) * Test POSIX API shim on linux runner
 
 (done)* Move LINUX_RUNNER_IF to basic header
   ~Maybe define a Processor interface macro (exactly the same content as LINUX_RUNNER_IF)~
@@ -62,3 +74,5 @@
 ~* Generalize for LER_N_CPUs > 1~
 
 * Check COMPILER_SECURITY_FORTIFY (if it can be enabled)
+
+* Polish for clang / support out of the box

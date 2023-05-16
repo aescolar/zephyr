@@ -31,7 +31,7 @@ CPPFLAGS:=-D_POSIX_C_SOURCE=200809 -D_XOPEN_SOURCE=600 -D_XOPEN_SOURCE_EXTENDED
 NO_PIE:=-fno-pie -fno-pic -no-pie
 DEPENDFLAGS=-MMD -MP
 CFLAGS:=${ARCH} ${DEBUG} ${COVERAGE} ${OPT} ${NO_PIE} -ffunction-sections -fdata-sections \
-  ${DEPENDFLAGS} -std=c11
+  ${DEPENDFLAGS} -std=c11 ${LER_BUILD_OPTIONS}
 FINALLINK_FLAGS:=${ARCH} ${COVERAGE} ${NO_PIE} \
   -Wl,--gc-sections \
   ${LER_LINK_OPTIONS}

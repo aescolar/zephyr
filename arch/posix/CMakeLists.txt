@@ -80,6 +80,13 @@ if(NOT ${LLVM_SANITIZERS_ARG} STREQUAL "")
   set(LLVM_SANITIZERS_ARG "-fsanitize=${LLVM_SANITIZERS_ARG}")
   zephyr_compile_options("${LLVM_SANITIZERS_ARG}")
   zephyr_link_libraries("${LLVM_SANITIZERS_ARG}")
+
+  set(LER_LINK_OPTIONS
+    "${LER_LINK_OPTIONS} ${LLVM_SANITIZERS_ARG}" CACHE INTERNAL " "
+  )
+  set(LER_BUILD_OPTIONS
+    "${LER_BUILD_OPTIONS} ${LLVM_SANITIZERS_ARG}" CACHE INTERNAL " "
+  )
 endif()
 
 
