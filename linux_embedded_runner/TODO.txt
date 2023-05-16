@@ -62,3 +62,5 @@
 ~* Generalize for LER_N_CPUs > 1~
 
 * Check COMPILER_SECURITY_FORTIFY (if it can be enabled)
+
+* Polish for clang / support out of the box
