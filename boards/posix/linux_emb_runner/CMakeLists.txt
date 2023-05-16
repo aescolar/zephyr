@@ -55,6 +55,18 @@ if(CONFIG_GPROF)
 	)
 endif()
 
+if(CONFIG_64BIT)
+  # By default the linux embedded runner builds and links a 32bits (x86) executable
+  # we override it to build a 64 bit one
+	set(LER_LINK_OPTIONS
+	  "${LER_LINK_OPTIONS} -m64"
+	)
+	set(LER_BUILD_OPTIONS
+	  "${LER_BUILD_OPTIONS} -m64"
+	)
+endif()
+
+
 if(CONFIG_HAS_SDL)
 	find_package(PkgConfig REQUIRED)
 	pkg_search_module(SDL2 REQUIRED sdl2)
