@@ -6,7 +6,7 @@ zephyr_library_sources(
 	cpuhalt.c
 	fatal.c
 	irq.c
-	posix_core.c
+	bottom.c
 	swap.c
 	thread.c
 	)

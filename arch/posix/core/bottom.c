@@ -1,5 +1,6 @@
 /*
  * Copyright (c) 2017 Oticon A/S
+ * Copyright (c) 2023 Nordic Semiconductor ASA
  *
  * SPDX-License-Identifier: Apache-2.0
  */
@@ -41,24 +42,19 @@
 #include <stdbool.h>
 #include <stdlib.h>
 #include <string.h>
-
-#include "posix_core.h"
+#include <stdint.h>
+#include "bottom_if.h"
 #include "posix_arch_internal.h"
-#include <zephyr/arch/posix/posix_soc_if.h>
-#include "kernel_internal.h"
-#include <zephyr/kernel_structs.h>
-#include "ksched.h"
-#include "kswap.h"
-
-#define PREFIX     "POSIX arch core: "
-#define ERPREFIX   PREFIX"error on "
-#define NO_MEM_ERR PREFIX"Can't allocate memory\n"
 
 #if POSIX_ARCH_DEBUG_PRINTS
 #define PC_DEBUG(fmt, ...) posix_print_trace(PREFIX fmt, __VA_ARGS__)
 #else
 #define PC_DEBUG(...)
 #endif
+
+#define PREFIX     "POSIX arch core: "
+#define ERPREFIX   PREFIX"error on "
+#define NO_MEM_ERR PREFIX"Can't allocate memory\n"
 
 #define PC_ALLOC_CHUNK_SIZE 64
 #define PC_REUSE_ABORTED_ENTRIES 0
@@ -73,7 +69,7 @@ struct threads_table_el {
 	pthread_t thread; /* Actual pthread_t as returned by native kernel */
 	int thead_cnt; /* For debugging: Unique, consecutive, thread number */
 	/* Pointer to the status kept in the Zephyr thread stack */
-	posix_thread_status_t *t_status;
+	void *t_status;
 };
 
 static struct threads_table_el *threads_table;
@@ -300,9 +296,7 @@ static void *posix_thread_starter(void *arg)
 
 	posix_new_thread_pre_start();
 
-	posix_thread_status_t *ptr = threads_table[thread_idx].t_status;
-
-	z_thread_entry(ptr->entry_point, ptr->arg1, ptr->arg2, ptr->arg3);
+	posix_arch_thread_entry(threads_table[thread_idx].t_status);
 
 	/*
 	 * We only reach this point if the thread actually returns which should
@@ -361,12 +355,15 @@ static int ttable_get_empty_slot(void)
 }
 
 /**
- * Called from arch_new_thread(),
- * Create a new POSIX thread for the new Zephyr thread.
- * arch_new_thread() picks from the kernel structures what it is that we need
- * to call with what parameters
+ * Create a new POSIX thread for the new hosted OS thread.
+ *
+ * Returns a unique integer thread identifier/index, which should be used
+ * to refer to this thread for future calls to the posix core.
+ *
+ * It takes as parameter a pointer which will be passed to
+ * posix_arch_thread_entry() when the thread is swapped in
  */
-void posix_new_thread(posix_thread_status_t *ptr)
+int posix_new_thread(void *ptr)
 {
 	int t_slot;
 
@@ -375,7 +372,6 @@ void posix_new_thread(posix_thread_status_t *ptr)
 	threads_table[t_slot].running = false;
 	threads_table[t_slot].thead_cnt = thread_create_count++;
 	threads_table[t_slot].t_status = ptr;
-	ptr->thread_idx = t_slot;
 
 	PC_SAFE_CALL(pthread_create(&threads_table[t_slot].thread,
 				  NULL,
@@ -388,6 +384,7 @@ void posix_new_thread(posix_thread_status_t *ptr)
 		t_slot,
 		threads_table[t_slot].thread);
 
+	return t_slot;
 }
 
 /**
@@ -454,17 +451,36 @@ void posix_core_clean_up(void)
 }
 
 
-void posix_abort_thread(int thread_idx)
+/*
+ * Mark a thread as being aborted. This will result in the underlying pthread
+ * being terminated some time later:
+ *   If the thread is marking itself as aborting, as soon as it is swapped out
+ *   by the hosted (embedded) OS
+ *   If another thread, at some non-specific time in the future (But note that no
+ *   embedded part of the thread will execute anymore)
+ *
+ * *  thread_idx : The thread identifier as provided during creation
+ * *  self       : Should be true (!=0) if this call is happening from that thread
+ *                 itself
+ */
+void posix_abort_thread(int thread_idx, int self)
 {
-	if (threads_table[thread_idx].state != USED) { /* LCOV_EXCL_BR_LINE */
-		/* The thread may have been already aborted before */
-		return; /* LCOV_EXCL_LINE */
+	if (self) {
+		PC_DEBUG("Thread [%i] %i: %s Marked myself "
+			"as aborting\n",
+			threads_table[thread_idx].thead_cnt,
+			thread_idx,
+			__func__);
+	} else {
+		if (threads_table[thread_idx].state != USED) { /* LCOV_EXCL_BR_LINE */
+			/* The thread may have been already aborted before */
+			return; /* LCOV_EXCL_LINE */
+		}
+
+		PC_DEBUG("Aborting not scheduled thread [%i] %i\n",
+			threads_table[thread_idx].thead_cnt,
+			thread_idx);
 	}
-
-	PC_DEBUG("Aborting not scheduled thread [%i] %i\n",
-		threads_table[thread_idx].thead_cnt,
-		thread_idx);
-
 	threads_table[thread_idx].state = ABORTING;
 	/*
 	 * Note: the native thread will linger in RAM until it catches the
@@ -475,62 +491,13 @@ void posix_abort_thread(int thread_idx)
 	 */
 }
 
-
-#if defined(CONFIG_ARCH_HAS_THREAD_ABORT)
-void z_impl_k_thread_abort(k_tid_t thread)
-{
-	unsigned int key;
-	int thread_idx;
-
-	posix_thread_status_t *tstatus =
-					(posix_thread_status_t *)
-					thread->callee_saved.thread_status;
-
-	thread_idx = tstatus->thread_idx;
-
-	key = irq_lock();
-
-	if (_current == thread) {
-		if (tstatus->aborted == 0) { /* LCOV_EXCL_BR_LINE */
-			tstatus->aborted = 1;
-		} else {
-			posix_print_warning(/* LCOV_EXCL_LINE */
-				PREFIX"The kernel is trying to abort and swap "
-				"out of an already aborted thread %i. This "
-				"should NOT have happened\n",
-				thread_idx);
-		}
-		threads_table[thread_idx].state = ABORTING;
-		PC_DEBUG("Thread [%i] %i: %s Marked myself "
-			"as aborting\n",
-			threads_table[thread_idx].thead_cnt,
-			thread_idx,
-			__func__);
-	}
-
-	z_thread_abort(thread);
-
-	if (tstatus->aborted == 0) {
-		PC_DEBUG("%s aborting now [%i] %i\n",
-			__func__,
-			threads_table[thread_idx].thead_cnt,
-			thread_idx);
-
-		tstatus->aborted = 1;
-		posix_abort_thread(thread_idx);
-	} else {
-		PC_DEBUG("%s ignoring re_abort of [%i] "
-			"%i\n",
-			__func__,
-			threads_table[thread_idx].thead_cnt,
-			thread_idx);
-	}
-
-	/* The abort handler might have altered the ready queue. */
-	z_reschedule_irqlock(key);
+/*
+ * Return a thread identifier which is unique for this
+ * run. This identifier is only meant for debug purposes
+ */
+int posix_get_unique_thread_id(int thread_idx){
+	return threads_table[thread_idx].thead_cnt;
 }
-#endif
-
 
 /*
  * Notes about coverage:
