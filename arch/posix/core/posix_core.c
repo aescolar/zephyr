@@ -10,7 +10,8 @@ static void* ts_state;
 
 void posix_arch_init(void)
 {
-	ts_state = lct_init();
+	extern void posix_arch_thread_entry(void *pa_thread_status);
+	ts_state = lct_init(posix_arch_thread_entry);
 }
 
 void posix_arch_clean_up(void)

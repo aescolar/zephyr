@@ -50,10 +50,10 @@
 #include <string.h>
 #include <stdint.h>
 #include "lct_if.h"
-#include "posix_arch_internal.h"
+#include "ler_internal.h"
 
 #if LTS_ARCH_DEBUG_PRINTS
-#define LTS_DEBUG(fmt, ...) posix_print_trace(PREFIX fmt, __VA_ARGS__)
+#define LTS_DEBUG(fmt, ...) ler_print_trace(PREFIX fmt, __VA_ARGS__)
 #else
 #define LTS_DEBUG(...)
 #endif
@@ -88,6 +88,8 @@ struct ts_status_t {
 	struct threads_table_el *threads_table;
 	int thread_create_count; /* For debugging. Thread creation counter */
 	int threads_table_size;
+	/* Pointer to the host OS function to be called when a thread is started */
+	void (*fptr)(void *);
 	/*
 	 * Conditional variable to block/awake all threads during swaps()
 	 * (we only need 1 mutex and 1 cond variable for all threads)
@@ -177,7 +179,7 @@ static void lct_let_run(struct ts_status_t *this, int next_allowed_th)
 	 * we reach our own lct_wait_until_allowed() while loop or abort_tail()
 	 * mutex release
 	 */
-	PC_SAFE_CALL(pthread_cond_broadcast(&this->cond_threads));
+	LER_SAFE_CALL(pthread_cond_broadcast(&this->cond_threads));
 }
 
 
@@ -187,7 +189,7 @@ static void lct_preexit_cleanup(struct ts_status_t* this)
 	/*
 	 * Release the mutex so the next allowed thread can run
 	 */
-	PC_SAFE_CALL(pthread_mutex_unlock(&this->mtx_threads));
+	LER_SAFE_CALL(pthread_mutex_unlock(&this->mtx_threads));
 
 	/* We detach ourselves so nobody needs to join to us */
 	pthread_detach(pthread_self());
@@ -262,7 +264,7 @@ static void lct_cleanup_handler(void *arg)
 #endif
 
 
-	PC_SAFE_CALL(pthread_mutex_unlock(&this->mtx_threads));
+	LER_SAFE_CALL(pthread_mutex_unlock(&this->mtx_threads));
 
 	/* We detach ourselves so nobody needs to join to us */
 	pthread_detach(pthread_self());
@@ -290,7 +292,7 @@ static void *lct_thread_starter(void *arg)
 	 * We block until all other running threads reach the while loop
 	 * in posix_wait_until_allowed() and they release the mutex
 	 */
-	PC_SAFE_CALL(pthread_mutex_lock(&this->mtx_threads));
+	LER_SAFE_CALL(pthread_mutex_lock(&this->mtx_threads));
 
 	/*
 	 * The program may have been finished before this thread ever got to run
@@ -315,14 +317,14 @@ static void *lct_thread_starter(void *arg)
 	 */
 	lct_wait_until_allowed(this, thread_idx);
 
-	posix_arch_thread_entry(element->payload);
+	this->fptr(element->payload);
 
 	/*
 	 * We only reach this point if the thread actually returns which should
 	 * not happen. But we handle it gracefully just in case
 	 */
 	/* LCOV_EXCL_START */
-	posix_print_trace(PREFIX"Thread [%i] %i [%lu] ended!?!\n",
+	ler_print_trace(PREFIX"Thread [%i] %i [%lu] ended!?!\n",
 			element->thead_cnt,
 			thread_idx,
 			pthread_self());
@@ -360,7 +362,7 @@ static int ttable_get_empty_slot(struct ts_status_t *this)
 				(this->threads_table_size + LTS_ALLOC_CHUNK_SIZE)
 				* sizeof(struct threads_table_el));
 	if (this->threads_table == NULL) { /* LCOV_EXCL_BR_LINE */
-		posix_print_error_and_exit(NO_MEM_ERR); /* LCOV_EXCL_LINE */
+		ler_print_error_and_exit(NO_MEM_ERR); /* LCOV_EXCL_LINE */
 	}
 
 	/* Clear new piece of table */
@@ -395,7 +397,7 @@ int lct_new_thread(void *this_arg, void *payload)
 	this->threads_table[t_slot].ts_status = this;
 	this->threads_table[t_slot].thread_idx = t_slot;
 
-	PC_SAFE_CALL(pthread_create(&this->threads_table[t_slot].thread,
+	LER_SAFE_CALL(pthread_create(&this->threads_table[t_slot].thread,
 				  NULL,
 				  lct_thread_starter,
 				  (void *)&this->threads_table[t_slot]));
@@ -413,7 +415,7 @@ int lct_new_thread(void *this_arg, void *payload)
  * Called from zephyr_wrapper()
  * prepare whatever needs to be prepared to be able to start threads
  */
-void *lct_init(void)
+void *lct_init(void (*fptr)(void *))
 {
 	struct ts_status_t *this;
 
@@ -426,24 +428,25 @@ void *lct_init(void)
 	 */
 	this = calloc(1, sizeof(struct ts_status_t));
 	if (this == NULL) { /* LCOV_EXCL_BR_LINE */
-		posix_print_error_and_exit(NO_MEM_ERR); /* LCOV_EXCL_LINE */
+		ler_print_error_and_exit(NO_MEM_ERR); /* LCOV_EXCL_LINE */
 	}
 
+	this->fptr = fptr;
 	this->thread_create_count = 0;
 	this->currently_allowed_thread = -1;
 
-	PC_SAFE_CALL(pthread_cond_init(&this->cond_threads, NULL));
-	PC_SAFE_CALL(pthread_mutex_init(&this->mtx_threads, NULL));
+	LER_SAFE_CALL(pthread_cond_init(&this->cond_threads, NULL));
+	LER_SAFE_CALL(pthread_mutex_init(&this->mtx_threads, NULL));
 
 	this->threads_table = calloc(LTS_ALLOC_CHUNK_SIZE,
 				sizeof(struct threads_table_el));
 	if (this->threads_table == NULL) { /* LCOV_EXCL_BR_LINE */
-		posix_print_error_and_exit(NO_MEM_ERR); /* LCOV_EXCL_LINE */
+		ler_print_error_and_exit(NO_MEM_ERR); /* LCOV_EXCL_LINE */
 	}
 
 	this->threads_table_size = LTS_ALLOC_CHUNK_SIZE;
 
-	PC_SAFE_CALL(pthread_mutex_lock(&this->mtx_threads));
+	LER_SAFE_CALL(pthread_mutex_lock(&this->mtx_threads));
 
 	return (void*)this;
 }
@@ -479,7 +482,7 @@ void lct_clean_up(void *this_arg)
 
 		/* LCOV_EXCL_START */
 		if (pthread_cancel(this->threads_table[i].thread)) {
-			posix_print_warning(
+			ler_print_warning(
 				PREFIX"cleanup: could not stop thread %i\n",
 				i);
 		}
