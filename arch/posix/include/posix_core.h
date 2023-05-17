@@ -7,7 +7,6 @@
 #define ZEPHYR_ARCH_POSIX_INCLUDE_POSIX_CORE_H_
 
 #include <zephyr/kernel.h>
-#include "bottom_if.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -40,6 +39,12 @@ typedef struct {
 
 
 void posix_irq_check_idle_exit(void);
+void posix_arch_init(void);
+void posix_arch_clean_up(void);
+void posix_swap(int next_allowed_thread_nbr, int this_th_nbr);
+void posix_main_thread_start(int next_allowed_thread_nbr);
+int posix_new_thread(void *payload);
+void posix_abort_thread(int thread_idx, int self);
 
 #if POSIX_ARCH_DEBUG_PRINTS
 #define PC_DEBUG(fmt, ...) posix_print_trace(PREFIX fmt, __VA_ARGS__)

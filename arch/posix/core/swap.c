@@ -19,7 +19,6 @@
 #include <zephyr/irq.h>
 #include "kswap.h"
 #include <zephyr/pm/pm.h>
-#include "bottom_if.h"
 
 int arch_swap(unsigned int key)
 {
