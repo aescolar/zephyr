@@ -8,27 +8,13 @@
 #define LINUX_EMBEDDED_RUNNER_LER_INTERNAL_H
 
 #include <stdbool.h>
+#include <stdint.h>
 #include "ler_tracing.h"
+#include "ler_safe_call.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
-
-#ifndef unlikely
-#define unlikely(x) (__builtin_expect((bool)!!(x), false) != 0L)
-#endif
-
-#define LER_SAFE_CALL(a) ler_safe_call(a, #a)
-
-static inline void ler_safe_call(int test, const char *test_str)
-{
-	/* LCOV_EXCL_START */ /* See Note1 */
-	if (unlikely(test)) {
-		ler_print_error_and_exit("Error on: %s\n",
-					   test_str);
-	}
-	/* LCOV_EXCL_STOP */
-}
 
 /**
  *
