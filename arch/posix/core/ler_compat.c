@@ -40,3 +40,8 @@ void ler_print_trace(const char *format, ...)
 	posix_vprint_trace(format, variable_args);
 	va_end(variable_args);
 }
+
+void ler_exit(int exit_code){
+	extern void posix_exit(int);
+	posix_exit(exit_code);
+}
