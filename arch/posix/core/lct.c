@@ -5,6 +5,12 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+/*
+ * Linux embedded runner, CPU Thread emulation (lct)
+ * TODO: rename LTS to LCT, fix comments, change bottom -> lct,..
+ * Clear function names, specially in interface
+ */
+
 /**
  * Here is where things actually happen for the POSIX arch
  *
@@ -36,75 +42,81 @@
  *
  */
 
-#define POSIX_ARCH_DEBUG_PRINTS 0
+#define LTS_ARCH_DEBUG_PRINTS 0
 
 #include <pthread.h>
 #include <stdbool.h>
 #include <stdlib.h>
 #include <string.h>
 #include <stdint.h>
-#include "bottom_if.h"
+#include "lct_if.h"
 #include "posix_arch_internal.h"
 
-#if POSIX_ARCH_DEBUG_PRINTS
-#define PC_DEBUG(fmt, ...) posix_print_trace(PREFIX fmt, __VA_ARGS__)
+#if LTS_ARCH_DEBUG_PRINTS
+#define LTS_DEBUG(fmt, ...) posix_print_trace(PREFIX fmt, __VA_ARGS__)
 #else
-#define PC_DEBUG(...)
+#define LTS_DEBUG(...)
 #endif
 
-#define PREFIX     "POSIX arch core: "
+#define PREFIX     "Tread Simulator: "
 #define ERPREFIX   PREFIX"error on "
 #define NO_MEM_ERR PREFIX"Can't allocate memory\n"
 
-#define PC_ALLOC_CHUNK_SIZE 64
-#define PC_REUSE_ABORTED_ENTRIES 0
+#define LTS_ALLOC_CHUNK_SIZE 64
+#define LTS_REUSE_ABORTED_ENTRIES 0
 /* tests/kernel/threads/scheduling/schedule_api fails when setting
- * PC_REUSE_ABORTED_ENTRIES => don't set it by now
+ * LTS_REUSE_ABORTED_ENTRIES => don't set it by now
  */
 
-static int threads_table_size;
+struct ts_status_t;
+
 struct threads_table_el {
+	struct ts_status_t *ts_status; /* Pointer to the overall status of the threading simulator instance */
+	int thread_idx; /* Index of this element in the bottom instance threads_table*/
+
 	enum {NOTUSED = 0, USED, ABORTING, ABORTED, FAILED} state;
 	bool running;     /* Is this the currently running thread */
 	pthread_t thread; /* Actual pthread_t as returned by native kernel */
 	int thead_cnt; /* For debugging: Unique, consecutive, thread number */
-	/* Pointer to the status kept in the Zephyr thread stack */
-	void *t_status;
+
+	/* Pointer to data from the hosted OS architecture
+	 * What that is, if anything, is up to that the hosted OS */
+	void *payload;
 };
 
-static struct threads_table_el *threads_table;
+struct ts_status_t {
+	struct threads_table_el *threads_table;
+	int thread_create_count; /* For debugging. Thread creation counter */
+	int threads_table_size;
+	/*
+	 * Conditional variable to block/awake all threads during swaps()
+	 * (we only need 1 mutex and 1 cond variable for all threads)
+	 */
+	pthread_cond_t cond_threads;
+	/* Mutex for the conditional variable posix_core_cond_threads */
+	pthread_mutex_t mtx_threads;
+	/* Token which tells which process is allowed to run now */
+	int currently_allowed_thread;
+	bool terminate; /* Are we terminating the program == cleaning up */
+};
 
-static int thread_create_count; /* For debugging. Thread creation counter */
-
-/*
- * Conditional variable to block/awake all threads during swaps()
- * (we only need 1 mutex and 1 cond variable for all threads)
- */
-static pthread_cond_t cond_threads = PTHREAD_COND_INITIALIZER;
-/* Mutex for the conditional variable posix_core_cond_threads */
-static pthread_mutex_t mtx_threads = PTHREAD_MUTEX_INITIALIZER;
-/* Token which tells which process is allowed to run now */
-static int currently_allowed_thread;
-
-static bool terminate; /* Are we terminating the program == cleaning up */
-
-static void posix_wait_until_allowed(int this_th_nbr);
-static void *posix_thread_starter(void *arg);
-static void posix_preexit_cleanup(void);
+static void lct_wait_until_allowed(struct ts_status_t* this, int this_th_nbr);
+static void *lct_thread_starter(void *arg);
+static void lct_preexit_cleanup(struct ts_status_t* this);
 
 /**
  * Helper function, run by a thread is being aborted
  */
-static void abort_tail(int this_th_nbr)
+static void abort_tail(struct ts_status_t* this, int this_th_nbr)
 {
-	PC_DEBUG("Thread [%i] %i: %s: Aborting (exiting) (rel mut)\n",
+	LTS_DEBUG("Thread [%i] %i: %s: Aborting (exiting) (rel mut)\n",
 		threads_table[this_th_nbr].thead_cnt,
 		this_th_nbr,
 		__func__);
 
-	threads_table[this_th_nbr].running = false;
-	threads_table[this_th_nbr].state = ABORTED;
-	posix_preexit_cleanup();
+	this->threads_table[this_th_nbr].running = false;
+	this->threads_table[this_th_nbr].state = ABORTED;
+	lct_preexit_cleanup(this);
 	pthread_exit(NULL);
 }
 
@@ -117,28 +129,28 @@ static void abort_tail(int this_th_nbr)
  * In normal circumstances, the mutex is only unlocked internally in
  * pthread_cond_wait() while waiting for cond_threads to be signaled
  */
-static void posix_wait_until_allowed(int this_th_nbr)
+static void lct_wait_until_allowed(struct ts_status_t* this, int this_th_nbr)
 {
-	threads_table[this_th_nbr].running = false;
+	this->threads_table[this_th_nbr].running = false;
 
-	PC_DEBUG("Thread [%i] %i: %s: Waiting to be allowed to run (rel mut)\n",
-		threads_table[this_th_nbr].thead_cnt,
+	LTS_DEBUG("Thread [%i] %i: %s: Waiting to be allowed to run (rel mut)\n",
+		this->threads_table[this_th_nbr].thead_cnt,
 		this_th_nbr,
 		__func__);
 
-	while (this_th_nbr != currently_allowed_thread) {
-		pthread_cond_wait(&cond_threads, &mtx_threads);
+	while (this_th_nbr != this->currently_allowed_thread) {
+		pthread_cond_wait(&this->cond_threads, &this->mtx_threads);
 
-		if (threads_table &&
-		    (threads_table[this_th_nbr].state == ABORTING)) {
-			abort_tail(this_th_nbr);
+		if (this->threads_table &&
+		    (this->threads_table[this_th_nbr].state == ABORTING)) {
+			abort_tail(this, this_th_nbr);
 		}
 	}
 
-	threads_table[this_th_nbr].running = true;
+	this->threads_table[this_th_nbr].running = true;
 
-	PC_DEBUG("Thread [%i] %i: %s(): I'm allowed to run! (hav mut)\n",
-		threads_table[this_th_nbr].thead_cnt,
+	LTS_DEBUG("Thread [%i] %i: %s(): I'm allowed to run! (hav mut)\n",
+		this->threads_table[this_th_nbr].thead_cnt,
 		this_th_nbr,
 		__func__);
 }
@@ -148,32 +160,34 @@ static void posix_wait_until_allowed(int this_th_nbr)
  * Helper function to let the thread <next_allowed_th> run
  * Note: posix_let_run() can only be called with the mutex locked
  */
-static void posix_let_run(int next_allowed_th)
+static void lct_let_run(struct ts_status_t *this, int next_allowed_th)
 {
-	PC_DEBUG("%s: We let thread [%i] %i run\n",
+	LTS_DEBUG("%s: We let thread [%i] %i run\n",
 		__func__,
-		threads_table[next_allowed_th].thead_cnt,
+		this->threads_table[next_allowed_th].thead_cnt,
 		next_allowed_th);
 
 
-	currently_allowed_thread = next_allowed_th;
+	this->currently_allowed_thread = next_allowed_th;
 
 	/*
 	 * We let all threads know one is able to run now (it may even be us
 	 * again if fancied)
 	 * Note that as we hold the mutex, they are going to be blocked until
-	 * we reach our own posix_wait_until_allowed() while loop
+	 * we reach our own lct_wait_until_allowed() while loop or abort_tail()
+	 * mutex release
 	 */
-	PC_SAFE_CALL(pthread_cond_broadcast(&cond_threads));
+	PC_SAFE_CALL(pthread_cond_broadcast(&this->cond_threads));
 }
 
 
-static void posix_preexit_cleanup(void)
+static void lct_preexit_cleanup(struct ts_status_t* this)
 {
+	//TODO: consider moving the pthread_exit() here
 	/*
 	 * Release the mutex so the next allowed thread can run
 	 */
-	PC_SAFE_CALL(pthread_mutex_unlock(&mtx_threads));
+	PC_SAFE_CALL(pthread_mutex_unlock(&this->mtx_threads));
 
 	/* We detach ourselves so nobody needs to join to us */
 	pthread_detach(pthread_self());
@@ -185,18 +199,19 @@ static void posix_preexit_cleanup(void)
  *
  * called from arch_swap() which does the picking from the kernel structures
  */
-void posix_swap(int next_allowed_thread_nbr, int this_th_nbr)
+void lct_posix_swap(void *this_arg, int next_allowed_thread_nbr, int this_th_nbr)
 {
-	posix_let_run(next_allowed_thread_nbr);
+	struct ts_status_t *this = (struct ts_status_t *)this_arg;
+	lct_let_run(this, next_allowed_thread_nbr);
 
-	if (threads_table[this_th_nbr].state == ABORTING) {
-		PC_DEBUG("Thread [%i] %i: %s: Aborting curr.\n",
-			threads_table[this_th_nbr].thead_cnt,
+	if (this->threads_table[this_th_nbr].state == ABORTING) {
+		LTS_DEBUG("Thread [%i] %i: %s: Aborting curr.\n",
+			this->threads_table[this_th_nbr].thead_cnt,
 			this_th_nbr,
 			__func__);
-		abort_tail(this_th_nbr);
+		abort_tail(this, this_th_nbr);
 	} else {
-		posix_wait_until_allowed(this_th_nbr);
+		lct_wait_until_allowed(this, this_th_nbr);
 	}
 }
 
@@ -210,20 +225,25 @@ void posix_swap(int next_allowed_thread_nbr, int this_th_nbr)
  * init thread lingering. Instead here we exit the init thread after enabling
  * the new one
  */
-void posix_main_thread_start(int next_allowed_thread_nbr)
+void lct_main_thread_start(void *this_arg, int next_allowed_thread_nbr)
 {
-	posix_let_run(next_allowed_thread_nbr);
-	PC_DEBUG("%s: Init thread dying now (rel mut)\n",
+	struct ts_status_t *this = (struct ts_status_t *)this_arg;
+
+	lct_let_run(this, next_allowed_thread_nbr);
+	LTS_DEBUG("%s: Init thread dying now (rel mut)\n",
 		__func__);
-	posix_preexit_cleanup();
+	lct_preexit_cleanup(this);
 	pthread_exit(NULL);
 }
 
 /**
  * Handler called when any thread is cancelled or exits
  */
-static void posix_cleanup_handler(void *arg)
+static void lct_cleanup_handler(void *arg)
 {
+	struct threads_table_el* element = (struct threads_table_el*)arg;
+	struct ts_status_t *this = element->ts_status;
+
 	/*
 	 * If we are not terminating, this is just an aborted thread,
 	 * and the mutex was already released
@@ -231,20 +251,18 @@ static void posix_cleanup_handler(void *arg)
 	 * caught waiting for it could terminate
 	 */
 
-	if (!terminate) {
+	if (!this->terminate) {
 		return;
 	}
 
-#if POSIX_ARCH_DEBUG_PRINTS
-	posix_thread_status_t *ptr = (posix_thread_status_t *) arg;
-
-	PC_DEBUG("Thread %i: %s: Canceling (rel mut)\n",
-		ptr->thread_idx,
+#if LTS_ARCH_DEBUG_PRINTS
+	LTS_DEBUG("Thread %i: %s: Canceling (rel mut)\n",
+		element->thread_idx,
 		__func__);
 #endif
 
 
-	PC_SAFE_CALL(pthread_mutex_unlock(&mtx_threads));
+	PC_SAFE_CALL(pthread_mutex_unlock(&this->mtx_threads));
 
 	/* We detach ourselves so nobody needs to join to us */
 	pthread_detach(pthread_self());
@@ -256,12 +274,15 @@ static void posix_cleanup_handler(void *arg)
  *
  * Spawned from posix_new_thread() below
  */
-static void *posix_thread_starter(void *arg)
+static void *lct_thread_starter(void *arg)
 {
-	int thread_idx = (intptr_t)arg;
+	struct threads_table_el* element = (struct threads_table_el*)arg;
+	struct ts_status_t *this = element->ts_status;
 
-	PC_DEBUG("Thread [%i] %i: %s: Starting\n",
-		threads_table[thread_idx].thead_cnt,
+	int thread_idx = element->thread_idx;
+
+	LTS_DEBUG("Thread [%i] %i: %s: Starting\n",
+		this->threads_table[thread_idx].thead_cnt,
 		thread_idx,
 		__func__);
 
@@ -269,22 +290,22 @@ static void *posix_thread_starter(void *arg)
 	 * We block until all other running threads reach the while loop
 	 * in posix_wait_until_allowed() and they release the mutex
 	 */
-	PC_SAFE_CALL(pthread_mutex_lock(&mtx_threads));
+	PC_SAFE_CALL(pthread_mutex_lock(&this->mtx_threads));
 
 	/*
 	 * The program may have been finished before this thread ever got to run
 	 */
 	/* LCOV_EXCL_START */ /* See Note1 */
-	if (!threads_table) {
-		posix_cleanup_handler(arg);
+	if (!this->threads_table || this->terminate) {
+		lct_cleanup_handler(arg);
 		pthread_exit(NULL);
 	}
 	/* LCOV_EXCL_STOP */
 
-	pthread_cleanup_push(posix_cleanup_handler, arg);
+	pthread_cleanup_push(lct_cleanup_handler, arg);
 
-	PC_DEBUG("Thread [%i] %i: %s: After start mutex (hav mut)\n",
-		threads_table[thread_idx].thead_cnt,
+	LTS_DEBUG("Thread [%i] %i: %s: After start mutex (hav mut)\n",
+		element->thead_cnt,
 		thread_idx,
 		__func__);
 
@@ -292,11 +313,9 @@ static void *posix_thread_starter(void *arg)
 	 * The thread would try to execute immediately, so we block it
 	 * until allowed
 	 */
-	posix_wait_until_allowed(thread_idx);
+	lct_wait_until_allowed(this, thread_idx);
 
-	posix_new_thread_pre_start();
-
-	posix_arch_thread_entry(threads_table[thread_idx].t_status);
+	posix_arch_thread_entry(element->payload);
 
 	/*
 	 * We only reach this point if the thread actually returns which should
@@ -304,13 +323,13 @@ static void *posix_thread_starter(void *arg)
 	 */
 	/* LCOV_EXCL_START */
 	posix_print_trace(PREFIX"Thread [%i] %i [%lu] ended!?!\n",
-			threads_table[thread_idx].thead_cnt,
+			element->thead_cnt,
 			thread_idx,
 			pthread_self());
 
 
-	threads_table[thread_idx].running = false;
-	threads_table[thread_idx].state = FAILED;
+	element->running = false;
+	element->state = FAILED;
 
 	pthread_cleanup_pop(1);
 
@@ -321,13 +340,13 @@ static void *posix_thread_starter(void *arg)
 /**
  * Return the first free entry index in the threads table
  */
-static int ttable_get_empty_slot(void)
+static int ttable_get_empty_slot(struct ts_status_t *this)
 {
 
-	for (int i = 0; i < threads_table_size; i++) {
-		if ((threads_table[i].state == NOTUSED)
-			|| (PC_REUSE_ABORTED_ENTRIES
-			&& (threads_table[i].state == ABORTED))) {
+	for (int i = 0; i < this->threads_table_size; i++) {
+		if ((this->threads_table[i].state == NOTUSED)
+			|| (LTS_REUSE_ABORTED_ENTRIES
+			&& (this->threads_table[i].state == ABORTED))) {
 			return i;
 		}
 	}
@@ -337,21 +356,21 @@ static int ttable_get_empty_slot(void)
 	 * => we expand the table
 	 */
 
-	threads_table = realloc(threads_table,
-				(threads_table_size + PC_ALLOC_CHUNK_SIZE)
+	this->threads_table = realloc(this->threads_table,
+				(this->threads_table_size + LTS_ALLOC_CHUNK_SIZE)
 				* sizeof(struct threads_table_el));
-	if (threads_table == NULL) { /* LCOV_EXCL_BR_LINE */
+	if (this->threads_table == NULL) { /* LCOV_EXCL_BR_LINE */
 		posix_print_error_and_exit(NO_MEM_ERR); /* LCOV_EXCL_LINE */
 	}
 
 	/* Clear new piece of table */
-	(void)memset(&threads_table[threads_table_size], 0,
-		     PC_ALLOC_CHUNK_SIZE * sizeof(struct threads_table_el));
+	(void)memset(&this->threads_table[this->threads_table_size], 0,
+		     LTS_ALLOC_CHUNK_SIZE * sizeof(struct threads_table_el));
 
-	threads_table_size += PC_ALLOC_CHUNK_SIZE;
+	this->threads_table_size += LTS_ALLOC_CHUNK_SIZE;
 
 	/* The first newly created entry is good: */
-	return threads_table_size - PC_ALLOC_CHUNK_SIZE;
+	return this->threads_table_size - LTS_ALLOC_CHUNK_SIZE;
 }
 
 /**
@@ -363,26 +382,29 @@ static int ttable_get_empty_slot(void)
  * It takes as parameter a pointer which will be passed to
  * posix_arch_thread_entry() when the thread is swapped in
  */
-int posix_new_thread(void *ptr)
+int lct_new_thread(void *this_arg, void *payload)
 {
+	struct ts_status_t *this = (struct ts_status_t *)this_arg;
 	int t_slot;
 
-	t_slot = ttable_get_empty_slot();
-	threads_table[t_slot].state = USED;
-	threads_table[t_slot].running = false;
-	threads_table[t_slot].thead_cnt = thread_create_count++;
-	threads_table[t_slot].t_status = ptr;
+	t_slot = ttable_get_empty_slot(this);
+	this->threads_table[t_slot].state = USED;
+	this->threads_table[t_slot].running = false;
+	this->threads_table[t_slot].thead_cnt = this->thread_create_count++;
+	this->threads_table[t_slot].payload = payload;
+	this->threads_table[t_slot].ts_status = this;
+	this->threads_table[t_slot].thread_idx = t_slot;
 
-	PC_SAFE_CALL(pthread_create(&threads_table[t_slot].thread,
+	PC_SAFE_CALL(pthread_create(&this->threads_table[t_slot].thread,
 				  NULL,
-				  posix_thread_starter,
-				  (void *)(intptr_t)t_slot));
+				  lct_thread_starter,
+				  (void *)&this->threads_table[t_slot]));
 
-	PC_DEBUG("%s created thread [%i] %i [%lu]\n",
+	LTS_DEBUG("%s created thread [%i] %i [%lu]\n",
 		__func__,
-		threads_table[t_slot].thead_cnt,
+		this->threads_table[t_slot].thead_cnt,
 		t_slot,
-		threads_table[t_slot].thread);
+		this->threads_table[t_slot].thread);
 
 	return t_slot;
 }
@@ -391,22 +413,39 @@ int posix_new_thread(void *ptr)
  * Called from zephyr_wrapper()
  * prepare whatever needs to be prepared to be able to start threads
  */
-void posix_init_multithreading(void)
+void *lct_init(void)
 {
-	thread_create_count = 0;
+	struct ts_status_t *this;
 
-	currently_allowed_thread = -1;
-
-	threads_table = calloc(PC_ALLOC_CHUNK_SIZE,
-				sizeof(struct threads_table_el));
-	if (threads_table == NULL) { /* LCOV_EXCL_BR_LINE */
+	/*
+	 * Note: This (and the calloc below) won't be free'd by this code
+	 * but left for the OS to clear at process end.
+	 * This is a conscious choice, see lct_clean_up() for mroe info.
+	 * If you got here due to valgrind's leak report, please use the
+	 * provided valgrind suppression file valgrind.supp
+	 */
+	this = calloc(1, sizeof(struct ts_status_t));
+	if (this == NULL) { /* LCOV_EXCL_BR_LINE */
 		posix_print_error_and_exit(NO_MEM_ERR); /* LCOV_EXCL_LINE */
 	}
 
-	threads_table_size = PC_ALLOC_CHUNK_SIZE;
+	this->thread_create_count = 0;
+	this->currently_allowed_thread = -1;
 
+	PC_SAFE_CALL(pthread_cond_init(&this->cond_threads, NULL));
+	PC_SAFE_CALL(pthread_mutex_init(&this->mtx_threads, NULL));
 
-	PC_SAFE_CALL(pthread_mutex_lock(&mtx_threads));
+	this->threads_table = calloc(LTS_ALLOC_CHUNK_SIZE,
+				sizeof(struct threads_table_el));
+	if (this->threads_table == NULL) { /* LCOV_EXCL_BR_LINE */
+		posix_print_error_and_exit(NO_MEM_ERR); /* LCOV_EXCL_LINE */
+	}
+
+	this->threads_table_size = LTS_ALLOC_CHUNK_SIZE;
+
+	PC_SAFE_CALL(pthread_mutex_lock(&this->mtx_threads));
+
+	return (void*)this;
 }
 
 /**
@@ -415,7 +454,7 @@ void posix_init_multithreading(void)
  * (the CPU is assumed halted. Otherwise we will cancel ourselves)
  *
  * This function cannot guarantee the threads will be cancelled before the HW
- * thread exists. The only way to do that, would be  to wait for each of them in
+ * thread exists. The only way to do that, would be to wait for each of them in
  * a join (without detaching them, but that could lead to locks in some
  * convoluted cases. As a call to this function can come from an ASSERT or other
  * error termination, we better do not assume things are working fine.
@@ -423,22 +462,23 @@ void posix_init_multithreading(void)
  * will not hang
  *
  */
-void posix_core_clean_up(void)
+void lct_clean_up(void *this_arg)
 {
+	struct ts_status_t *this = (struct ts_status_t *)this_arg;
 
-	if (!threads_table) { /* LCOV_EXCL_BR_LINE */
+	if (!this->threads_table) { /* LCOV_EXCL_BR_LINE */
 		return; /* LCOV_EXCL_LINE */
 	}
 
-	terminate = true;
+	this->terminate = true;
 
-	for (int i = 0; i < threads_table_size; i++) {
-		if (threads_table[i].state != USED) {
+	for (int i = 0; i < this->threads_table_size; i++) {
+		if (this->threads_table[i].state != USED) {
 			continue;
 		}
 
 		/* LCOV_EXCL_START */
-		if (pthread_cancel(threads_table[i].thread)) {
+		if (pthread_cancel(this->threads_table[i].thread)) {
 			posix_print_warning(
 				PREFIX"cleanup: could not stop thread %i\n",
 				i);
@@ -446,8 +486,17 @@ void posix_core_clean_up(void)
 		/* LCOV_EXCL_STOP */
 	}
 
-	free(threads_table);
-	threads_table = NULL;
+	/*
+	 * This is the cleanup we do not do:
+	 *
+	 * free(this->threads_table);
+	 * this->threads_table = NULL;
+         *
+	 * (void)pthread_cond_destroy(&this->cond_threads);
+	 * (void)pthread_mutex_destroy(&this->mtx_threads);
+         *
+	 * free(this);
+	 */
 }
 
 
@@ -463,25 +512,27 @@ void posix_core_clean_up(void)
  * *  self       : Should be true (!=0) if this call is happening from that thread
  *                 itself
  */
-void posix_abort_thread(int thread_idx, int self)
+void lct_abort_thread(void *this_arg, int thread_idx, int self)
 {
+	struct ts_status_t *this = (struct ts_status_t *)this_arg;
+
 	if (self) {
-		PC_DEBUG("Thread [%i] %i: %s Marked myself "
+		LTS_DEBUG("Thread [%i] %i: %s Marked myself "
 			"as aborting\n",
-			threads_table[thread_idx].thead_cnt,
+			this->threads_table[thread_idx].thead_cnt,
 			thread_idx,
 			__func__);
 	} else {
-		if (threads_table[thread_idx].state != USED) { /* LCOV_EXCL_BR_LINE */
+		if (this->threads_table[thread_idx].state != USED) { /* LCOV_EXCL_BR_LINE */
 			/* The thread may have been already aborted before */
 			return; /* LCOV_EXCL_LINE */
 		}
 
-		PC_DEBUG("Aborting not scheduled thread [%i] %i\n",
-			threads_table[thread_idx].thead_cnt,
+		LTS_DEBUG("Aborting not scheduled thread [%i] %i\n",
+			this->threads_table[thread_idx].thead_cnt,
 			thread_idx);
 	}
-	threads_table[thread_idx].state = ABORTING;
+	this->threads_table[thread_idx].state = ABORTING;
 	/*
 	 * Note: the native thread will linger in RAM until it catches the
 	 * mutex or awakes on the condition.
@@ -495,8 +546,10 @@ void posix_abort_thread(int thread_idx, int self)
  * Return a thread identifier which is unique for this
  * run. This identifier is only meant for debug purposes
  */
-int posix_get_unique_thread_id(int thread_idx){
-	return threads_table[thread_idx].thead_cnt;
+int lct_get_unique_thread_id(void *this_arg, int thread_idx){
+	struct ts_status_t *this = (struct ts_status_t *)this_arg;
+
+	return this->threads_table[thread_idx].thead_cnt;
 }
 
 /*

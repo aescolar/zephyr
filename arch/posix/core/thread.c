@@ -19,7 +19,6 @@
 #include <zephyr/wait_q.h>
 
 #include "posix_core.h"
-#include "bottom_if.h"
 #include <zephyr/arch/posix/posix_soc_if.h>
 
 /* Note that in this arch we cheat quite a bit: we use as stack a normal
@@ -51,14 +50,10 @@ void arch_new_thread(struct k_thread *thread, k_thread_stack_t *stack,
 	thread_status->thread_idx = posix_new_thread((void *)thread_status);
 }
 
-void posix_new_thread_pre_start(void)
-{
-	posix_irq_full_unlock();
-}
-
 void posix_arch_thread_entry(void *pa_thread_status)
 {
 	posix_thread_status_t *ptr = pa_thread_status;
+	posix_irq_full_unlock();
 	z_thread_entry(ptr->entry_point, ptr->arg1, ptr->arg2, ptr->arg3);
 }
 
