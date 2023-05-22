@@ -1,6 +1,6 @@
 common:
   tags: clib
-  arch_exclude: posix
+  filter: not CONFIG_NATIVE_APPLICATION
 tests:
   libraries.libc:
     ignore_faults: true
