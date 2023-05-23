@@ -10,19 +10,19 @@
 
 ------------
 
- * Test gprof
+ (done) * Test gprof (done)
 
- * ¿Move arch core and soc core to LER?
+ (done) * ¿Move arch core and soc core to LER? (done initial)
  
  * More proper refactor of board/ler code
    * includes in src/include to be only what is really public, everything else into private headers
 
- * Host trampolines
-   Their purpose is to enable linking to the right symbols, even if other ones exist in the embedded environment
- ** For simple/basic APIs (no host headers includes thru (or only those expected in freestanding environments)
- ** For complex APIs (w host headers includes thru)
-    Will require the integrator to include the stdincludes when building that libary in the embedded environment
-    (but saves the integrator from needing to split that library into another build)
+ ~* Host trampolines~
+ ~  Their purpose is to enable linking to the right symbols, even if other ones exist in the embedded environment~
+ ~** For simple/basic APIs (no host headers includes thru (or only those expected in freestanding environments)~
+ ~** For complex APIs (w host headers includes thru)~
+ ~   Will require the integrator to include the stdincludes when building that libary in the embedded environment
+ ~   (but saves the integrator from needing to split that library into another build)
 
  * Test with embedded C library, and POSIX API
 
