@@ -29,9 +29,14 @@ zephyr_compile_options(
   -fno-builtin
 )
 
-#zephyr_compile_options(
-#  -nostdinc
-#)
+if(NOT CONFIG_EXTERNAL_LIBC)
+  zephyr_compile_options(
+    -nostdinc
+    -I/usr/lib/gcc/x86_64-linux-gnu/12/include
+  )
+  #TODO: The compiler headers hardcoded include is a quick hack that needs replacing with something calling gcc instead
+  # gcc -xc -E -Wp,-v /dev/null 2>&1 | grep gcc | grep -v ignoring
+endif()
 
 zephyr_ld_options(
 #  -lm

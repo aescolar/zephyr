@@ -48,7 +48,7 @@ struct itimerspec {
 
 #else /* CONFIG_NEWLIB_LIBC */
 /* Not Newlib */
-# ifdef CONFIG_ARCH_POSIX
+# if defined(CONFIG_ARCH_POSIX) && defined(COFIG_EXTERNAL_LIBC)
 #  include <bits/types/struct_timespec.h>
 #  include <bits/types/struct_itimerspec.h>
 # else
@@ -82,7 +82,7 @@ static inline int32_t _ts_to_ms(const struct timespec *to)
 	return (to->tv_sec * MSEC_PER_SEC) + (to->tv_nsec / NSEC_PER_MSEC);
 }
 
-#ifdef CONFIG_ARCH_POSIX
+#ifdef CONFIG_NATIVE_APPLICATION
 int clock_gettime(clockid_t clock_id, struct timespec *ts);
 #else
 __syscall int clock_gettime(clockid_t clock_id, struct timespec *ts);
@@ -100,7 +100,7 @@ int nanosleep(const struct timespec *rqtp, struct timespec *rmtp);
 }
 #endif
 
-#ifndef CONFIG_ARCH_POSIX
+#ifndef CONFIG_NATIVE_APPLICATION
 #include <syscalls/time.h>
 #endif /* CONFIG_ARCH_POSIX */
 
