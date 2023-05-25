@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: Apache-2.0
 
-#To be moved
-config NATIVE_FREESTANDING_LIBRARY
+#To be selected instead of defaulted
+config NATIVE_LIBRARY
 	bool
 	default y
 
