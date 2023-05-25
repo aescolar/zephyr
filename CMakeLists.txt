@@ -346,7 +346,7 @@ if(NOT CONFIG_NATIVE_APPLICATION)
   toolchain_ld_baremetal()
 endif()
 
-if(CONFIG_CPP AND NOT CONFIG_MINIMAL_LIBCPP AND NOT CONFIG_NATIVE_FREESTANDING_LIBRARY)
+if(CONFIG_CPP AND NOT CONFIG_MINIMAL_LIBCPP AND NOT CONFIG_NATIVE_LIBRARY)
   # @Intent: Set linker specific flags for C++
   toolchain_ld_cpp()
 endif()
@@ -389,8 +389,8 @@ zephyr_compile_options($<$<COMPILE_LANGUAGE:CXX>:$<TARGET_PROPERTY:compiler-cpp,
 # @Intent: Do not make position independent code / executable
 zephyr_compile_options($<$<COMPILE_LANGUAGE:C>:$<TARGET_PROPERTY:compiler,no_position_independent>>)
 zephyr_compile_options($<$<COMPILE_LANGUAGE:CXX>:$<TARGET_PROPERTY:compiler,no_position_independent>>)
-if (NOT CONFIG_NATIVE_FREESTANDING_LIBRARY)
-  # In case of CONFIG_NATIVE_FREESTANDING_LIBRARY we also don't want position independent code,
+if (NOT CONFIG_NATIVE_LIBRARY)
+  # In case of CONFIG_NATIVE_LIBRARY we also don't want position independent code,
   # but we cannot tell that to the linker yet as we are first only doing a
   # relocatable link into a static library
   zephyr_link_libraries($<TARGET_PROPERTY:linker,no_position_independent>)
@@ -1193,7 +1193,7 @@ if(CONFIG_USERSPACE OR CONFIG_HAS_DTS)
     LIBRARIES_POST_SCRIPT ""
     DEPENDENCIES          ${CODE_RELOCATION_DEP}
   )
-  if (CONFIG_NATIVE_FREESTANDING_LIBRARY)
+  if (CONFIG_NATIVE_LIBRARY)
     target_link_libraries(${ZEPHYR_LINK_STAGE_EXECUTABLE} "-Wl,-no-pie")
   endif()
   target_byproducts(TARGET ${ZEPHYR_LINK_STAGE_EXECUTABLE}
@@ -1413,7 +1413,7 @@ toolchain_ld_link_elf(
   LINKER_SCRIPT         ${PROJECT_BINARY_DIR}/${ZEPHYR_CURRENT_LINKER_CMD}
   DEPENDENCIES          ${CODE_RELOCATION_DEP}
 )
-if (CONFIG_NATIVE_FREESTANDING_LIBRARY)
+if (CONFIG_NATIVE_LIBRARY)
   target_link_libraries(${ZEPHYR_LINK_STAGE_EXECUTABLE} "-r")
 endif()
 target_byproducts(TARGET ${ZEPHYR_LINK_STAGE_EXECUTABLE}
