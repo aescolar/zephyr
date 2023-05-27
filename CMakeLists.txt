@@ -1196,7 +1196,7 @@ if(CONFIG_USERSPACE OR CONFIG_HAS_DTS)
     DEPENDENCIES          ${CODE_RELOCATION_DEP}
   )
   if (CONFIG_NATIVE_LIBRARY)
-    target_link_libraries(${ZEPHYR_LINK_STAGE_EXECUTABLE} "-Wl,-no-pie")
+    #target_link_libraries(${ZEPHYR_LINK_STAGE_EXECUTABLE} "-Wl,-no-pie")
   endif()
   target_byproducts(TARGET ${ZEPHYR_LINK_STAGE_EXECUTABLE}
                     BYPRODUCTS ${PROJECT_BINARY_DIR}/${ZEPHYR_LINK_STAGE_EXECUTABLE}.map
@@ -1416,7 +1416,7 @@ toolchain_ld_link_elf(
   DEPENDENCIES          ${CODE_RELOCATION_DEP}
 )
 if (CONFIG_NATIVE_LIBRARY)
-  target_link_libraries(${ZEPHYR_LINK_STAGE_EXECUTABLE} "-r")
+  #target_link_libraries(${ZEPHYR_LINK_STAGE_EXECUTABLE} "-r")
 endif()
 target_byproducts(TARGET ${ZEPHYR_LINK_STAGE_EXECUTABLE}
                   BYPRODUCTS ${PROJECT_BINARY_DIR}/${ZEPHYR_LINK_STAGE_EXECUTABLE}.map

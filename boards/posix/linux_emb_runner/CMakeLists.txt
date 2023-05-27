@@ -40,8 +40,8 @@ endif()
 
 zephyr_ld_options(
 #  -lm
-  -Wl,--unresolved-symbols=ignore-all
-#  -r
+#  -Wl,--unresolved-symbols=ignore-all
+  -r
 )
 
 set(LER_LINK_OPTIONS
