@@ -1,0 +1,16 @@
+# SPDX-License-Identifier: Apache-2.0
+
+config BOARD_NATSIM_SC_32BIT
+	bool "Native simulation, 32-bit mode"
+	select BOARD_NATSIM_SC
+	help
+	  Will produce a console Linux process which can be executed natively
+	  as a 32-bit executable.
+
+config BOARD_NATSIM_SC_64BIT
+	bool "Native simulation, 64-bit mode"
+	select BOARD_NATSIM_SC
+	select 64BIT
+	help
+	  Will produce a console Linux process which can be executed natively
+	  as a 64-bit executable.
