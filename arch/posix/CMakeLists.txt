@@ -36,10 +36,12 @@ endif()
 
 zephyr_compile_definitions(_POSIX_C_SOURCE=200809 _XOPEN_SOURCE=600 _XOPEN_SOURCE_EXTENDED)
 
-zephyr_ld_options(
-  -ldl
-  -pthread
-)
+if (CONFIG_NATIVE_APPLICATION)
+  zephyr_ld_options(
+    -ldl
+    -pthread
+  )
+endif()
 
 # About the -include directive: The reason to do it this way, is because in this
 # manner it is transparent to the application. Otherwise posix_cheats.h needs to
@@ -85,6 +87,9 @@ if(NOT ${LLVM_SANITIZERS_ARG} STREQUAL "")
   set(LLVM_SANITIZERS_ARG "-fsanitize=${LLVM_SANITIZERS_ARG}")
   zephyr_compile_options("${LLVM_SANITIZERS_ARG}")
   zephyr_link_libraries("${LLVM_SANITIZERS_ARG}")
+
+  set(NSI_LINK_OPTIONS "${NSI_LINK_OPTIONS} ${LLVM_SANITIZERS_ARG}" CACHE INTERNAL " ")
+  set(NSI_BUILD_OPTIONS "${NSI_BUILD_OPTIONS} ${LLVM_SANITIZERS_ARG}" CACHE INTERNAL " ")
 endif()
 
 # Override the C standard used for compilation to C 2011

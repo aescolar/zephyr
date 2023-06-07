@@ -1,0 +1,20 @@
+# SPDX-License-Identifier: Apache-2.0
+
+config BOARD_NATSIM_SC_32BIT
+	bool "Native simulation for 32-bit host"
+	depends on SOC_POSIX
+	select BOARD_NATSIM_SC
+	imply BOARD_NATIVE_POSIX_32BIT if NATSIM_NATIVE_POSIX_COMPAT
+	help
+	  Will produce a console Linux process which can be executed natively
+	  as a 32-bit executable.
+
+config BOARD_NATSIM_SC_64BIT
+	bool "Native simulation for 64-bit host"
+	depends on SOC_POSIX
+	select BOARD_NATSIM_SC
+	select 64BIT
+	imply BOARD_NATIVE_POSIX_64BIT if NATSIM_NATIVE_POSIX_COMPAT
+	help
+	  Will produce a console Linux process which can be executed natively
+	  as a 64-bit executable.

@@ -40,6 +40,8 @@ endif()
 # is the last station. See "logical_target_for_zephyr_elf" below for
 # details.
 set(CMAKE_EXECUTABLE_SUFFIX .elf)
+unset(NSI_LINK_OPTIONS CACHE)
+unset(NSI_BUILD_OPTIONS CACHE)
 
 # Zephyr build system will use a dynamic number of linking stages based on build
 # configuration.
