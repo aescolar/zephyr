@@ -40,6 +40,7 @@ endif()
 # is the last station. See "logical_target_for_zephyr_elf" below for
 # details.
 set(CMAKE_EXECUTABLE_SUFFIX .elf)
+add_library(native_simulator INTERFACE)
 
 # Zephyr build system will use a dynamic number of linking stages based on build
 # configuration.
@@ -1745,15 +1746,26 @@ if(CONFIG_BUILD_OUTPUT_STRIPPED)
 endif()
 
 if(CONFIG_BUILD_OUTPUT_EXE)
-  list(APPEND
-    post_build_commands
-    COMMAND
-    ${CMAKE_COMMAND} -E copy ${KERNEL_ELF_NAME} ${KERNEL_EXE_NAME}
+  if (NOT CONFIG_NATIVE_LIBRARY)
+    list(APPEND
+      post_build_commands
+      COMMAND
+      ${CMAKE_COMMAND} -E copy ${KERNEL_ELF_NAME} ${KERNEL_EXE_NAME}
+      )
+    list(APPEND
+      post_build_byproducts
+      ${KERNEL_EXE_NAME}
+      )
+  else()
+    add_custom_target(native_runner_executable
+      ALL
+      COMMAND
+      make -f ${ZEPHYR_BASE}/native_simulator/Makefile all --warn-undefined-variables -r
+        NSI_CONFIG_FILE=${CMAKE_BINARY_DIR}/zephyr/NSI/nsi_config
+      DEPENDS ${logical_target_for_zephyr_elf}
+      BYPRODUCTS ${KERNEL_EXE_NAME}
     )
-  list(APPEND
-    post_build_byproducts
-    ${KERNEL_EXE_NAME}
-    )
+  endif()
 endif()
 
 if(CONFIG_BUILD_OUTPUT_INFO_HEADER)
