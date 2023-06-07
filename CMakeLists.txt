@@ -346,7 +346,7 @@ if(NOT CONFIG_NATIVE_BUILD)
   toolchain_ld_baremetal()
 endif()
 
-if(CONFIG_CPP AND NOT CONFIG_MINIMAL_LIBCPP)
+if(CONFIG_CPP AND NOT CONFIG_MINIMAL_LIBCPP AND NOT CONFIG_NATIVE_LIBRARY)
   # @Intent: Set linker specific flags for C++
   toolchain_ld_cpp()
 endif()
@@ -389,7 +389,12 @@ zephyr_compile_options($<$<COMPILE_LANGUAGE:CXX>:$<TARGET_PROPERTY:compiler-cpp,
 # @Intent: Do not make position independent code / executable
 zephyr_compile_options($<$<COMPILE_LANGUAGE:C>:$<TARGET_PROPERTY:compiler,no_position_independent>>)
 zephyr_compile_options($<$<COMPILE_LANGUAGE:CXX>:$<TARGET_PROPERTY:compiler,no_position_independent>>)
-zephyr_link_libraries($<TARGET_PROPERTY:linker,no_position_independent>)
+if (NOT CONFIG_NATIVE_LIBRARY)
+  # In case of CONFIG_NATIVE_LIBRARY we also don't want position independent code,
+  # but we cannot tell that to the linker yet as we are first only doing a
+  # relocatable link into a static library
+  zephyr_link_libraries($<TARGET_PROPERTY:linker,no_position_independent>)
+endif()
 
 # Allow the user to inject options when calling cmake, e.g.
 # 'cmake -DEXTRA_CFLAGS="-Werror -Wno-deprecated-declarations" ..'
