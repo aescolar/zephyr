@@ -35,6 +35,11 @@ BUILD_ASSERT(sizeof(int32_t) == sizeof(int));
 BUILD_ASSERT(sizeof(int64_t) == sizeof(long long));
 BUILD_ASSERT(sizeof(intptr_t) == sizeof(long));
 
+#ifdef __cplusplus
+/* Zephyr requires an int main(void) signature with C linkage for the application main if present */
+extern int main(void);
+#endif
+
 /**
  * @brief Kernel APIs
  * @defgroup kernel_apis Kernel APIs
