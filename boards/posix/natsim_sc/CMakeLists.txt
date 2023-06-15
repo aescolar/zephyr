@@ -25,40 +25,6 @@ zephyr_library_include_directories(
   ${ZEPHYR_BASE}/arch/posix/include
 )
 
-if(NOT CONFIG_EXTERNAL_LIBC)
-	# Do not use the default standard library for this compiler,
-	# but still use the basic compiler headers
-	zephyr_compile_options(
-		-nostdinc
-		-isystem ${COMPILER_OWN_INCLUDE_PATH}
-		-ffreestanding
-		-fno-builtin
-	)
-endif()
-
-zephyr_compile_options(
-  -fvisibility=hidden
-)
-
-zephyr_ld_options(
-  -Wl,--unresolved-symbols=ignore-all
-)
-
-if(CONFIG_EXTERNAL_LIBCPP)
-  target_link_options(native_simulator INTERFACE "-lstdc++")
-endif()
-
-if(CONFIG_GPROF)
-  target_link_options(native_simulator INTERFACE "-pg")
-endif()
-
-if(CONFIG_64BIT)
-  # By default the linux embedded runner builds and links a 32bits (x86) executable
-  # we override it to build a 64 bit one
-  target_link_options(native_simulator INTERFACE "-m64")
-  target_compile_options(native_simulator INTERFACE "-m64")
-endif()
-
 if(CONFIG_HAS_SDL)
   add_subdirectory(${ZEPHYR_BASE}/boards/${ARCH}/common/sdl/ ${CMAKE_CURRENT_BINARY_DIR}/sdl)
 endif()

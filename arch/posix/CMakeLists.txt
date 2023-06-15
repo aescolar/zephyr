@@ -22,16 +22,48 @@ if (CONFIG_NATIVE_APPLICATION)
   zephyr_compile_options(
     -include ${ZEPHYR_BASE}/arch/posix/include/posix_cheats.h
   )
+elseif (CONFIG_NATIVE_LIBRARY)
+  if (CONFIG_64BIT)
+    # By default the native simulator builds and links a 32bits (x86) executable
+    target_link_options(native_simulator INTERFACE "-m64")
+    target_compile_options(native_simulator INTERFACE "-m64")
+  endif()
+  zephyr_compile_options(
+    -fvisibility=hidden
+  )
+
+  zephyr_ld_options(
+    -Wl,--unresolved-symbols=ignore-all
+  )
+  
+  if(NOT CONFIG_EXTERNAL_LIBC)
+    # Do not use the default standard library for this compiler,
+    # but still use the basic compiler headers
+    zephyr_compile_options(
+      -nostdinc
+      -isystem ${COMPILER_OWN_INCLUDE_PATH}
+      $<TARGET_PROPERTY:compiler,freestanding>
+      -fno-builtin
+    )
+  endif()
 endif()
 
-# @Intent: Obtain compiler specific flags for no freestanding compilation
-zephyr_compile_options($<TARGET_PROPERTY:compiler,hosted>)
+if(CONFIG_EXTERNAL_LIBC)
+  # @Intent: Obtain compiler specific flags for no freestanding compilation
+  zephyr_compile_options($<TARGET_PROPERTY:compiler,hosted>)
+endif()
+
+if(CONFIG_EXTERNAL_LIBCPP)
+  target_link_options(native_simulator INTERFACE "-lstdc++")
+endif()
 
 zephyr_include_directories(${BOARD_DIR})
 
 if (CONFIG_GPROF)
   zephyr_compile_options($<TARGET_PROPERTY:compiler,gprof>)
   zephyr_link_libraries($<TARGET_PROPERTY:linker,gprof>)
+  
+  target_link_options(native_simulator INTERFACE "-pg")
 endif()
 
 zephyr_compile_definitions(_POSIX_C_SOURCE=200809 _XOPEN_SOURCE=600 _XOPEN_SOURCE_EXTENDED)
