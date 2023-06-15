@@ -36,3 +36,20 @@ foreach(file_name include/stddef.h)
 
   list(APPEND NOSTDINC ${_OUTPUT})
 endforeach()
+
+if(CONFIG_NATIVE_LIBRARY AND NOT CONFIG_EXTERNAL_LIBC)
+	# Get the *compiler* include path, that is where the *compiler* provided headers are (not the
+	# default libC ones). This includes basic headers like stdint.h, stddef.h or float.h
+	# We expect something like
+	#  /usr/lib/gcc/x86_64-linux-gnu/12/include or /usr/lib/llvm-14/lib/clang/14.0.0/include
+	cmake_path(GET CMAKE_C_COMPILER FILENAME CC)
+	execute_process(
+		COMMAND ${CMAKE_C_COMPILER} -xc -E -Wp,-v ${ZEPHYR_BASE}/misc/empty_file.c
+		ERROR_VARIABLE COMPILER_OWN_INCLUDE_PATH
+		OUTPUT_QUIET
+		COMMAND_ERROR_IS_FATAL ANY
+	)
+	string(REPLACE "\n" ";" COMPILER_OWN_INCLUDE_PATH "${COMPILER_OWN_INCLUDE_PATH}")
+	list(FILTER COMPILER_OWN_INCLUDE_PATH INCLUDE REGEX " /.*${CC}")
+	string(STRIP ${COMPILER_OWN_INCLUDE_PATH} COMPILER_OWN_INCLUDE_PATH)
+endif()

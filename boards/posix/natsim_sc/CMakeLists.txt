@@ -26,19 +26,6 @@ zephyr_library_include_directories(
 )
 
 if(NOT CONFIG_EXTERNAL_LIBC)
-	# Get the *compiler* include path, that is where the *compiler* provided headers are (not the
-	# default libC ones). This includes basic headers like stdint.h, stddef.h or float.h
-	# We expect something like
-	#  /usr/lib/gcc/x86_64-linux-gnu/12/include or /usr/lib/llvm-14/lib/clang/14.0.0/include
-	cmake_path(GET CMAKE_C_COMPILER FILENAME CC)
-	execute_process(
-		COMMAND bash -c "${CMAKE_C_COMPILER} -xc -E -Wp,-v /dev/null 2>&1 | grep ' /.*${CC}'"
-		OUTPUT_VARIABLE COMPILER_OWN_INCLUDE_PATH
-		COMMAND_ERROR_IS_FATAL ANY
-	)
-	string(STRIP ${COMPILER_OWN_INCLUDE_PATH} COMPILER_OWN_INCLUDE_PATH)
-	#message(STATUS "COMPILER_OWN_INCLUDE_PATH = ${COMPILER_OWN_INCLUDE_PATH}")
-
 	# Do not use the default standard library for this compiler,
 	# but still use the basic compiler headers
 	zephyr_compile_options(
