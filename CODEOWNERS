@@ -708,6 +708,7 @@
 /modules/hal_gigadevice/                  @nandojve
 /modules/hal_nordic/nrf_802154/           @jciupis
 /modules/trusted-firmware-m/              @microbuilder
+/native_simulator/                        @aescolar
 /kernel/device.c                          @andyross @nashif
 /kernel/idle.c                            @andyross @nashif
 /samples/                                 @nashif
