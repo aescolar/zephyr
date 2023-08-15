@@ -4,6 +4,8 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 
+#Requires: tests_bsim_bluetooth_audio_prj_conf
+
 SIMULATION_ID="bass_client_sync"
 VERBOSITY_LEVEL=2
 EXECUTE_TIMEOUT=20

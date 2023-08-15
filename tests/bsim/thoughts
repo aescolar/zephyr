@@ -1,0 +1,20 @@
+Each test .sh has a
+	#Requires: tests_bsim_bluetooth_audio_prj_conf
+
+Each app that can be built has its own compile script
+compile.tests_bsim_bluetooth_audio_prj_conf.sh
+
+We find all cases to run
+We grep all "#Requires: " lines
+We remove the "#Requires: " and strip spaces
+We sort and unique them
+For each line we find the compile.${LINE}.sh:
+	convert all list into a set of (*3)
+		-o -name "compile.${LINE}.sh"
+We run in parallel all those compile scripts
+
+*3
+A=("a" "b" "c")
+for el in ${A[@]}; do echo $el ; done | awk 'NR > 1 {printf("-o ")}; {print "-name", $0".compile"}' | xargs -I {} echo {}
+
+  | awk 'NR > 1 {printf("-o ")}; {print "-name", compile.$0".sh"}' | xargs find ${ZEPHYR_BASE}/tests/bsim/
