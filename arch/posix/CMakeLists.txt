@@ -27,6 +27,32 @@ endif()
 #        We use target_link_options() instead
 add_library(native_simulator INTERFACE)
 
+define_property(GLOBAL PROPERTY NSI_CONFIG_CONTENT
+    BRIEF_DOCS "Native simulator runner configuration"
+    FULL_DOCS "Native simulator runner configuration")
+
+get_property(CCACHE GLOBAL PROPERTY RULE_LAUNCH_COMPILE)
+set(zephyr_build_path ${CMAKE_BINARY_DIR}/zephyr)
+
+set_property(GLOBAL PROPERTY NSI_CONFIG_CONTENT
+  "NSI_BUILD_OPTIONS:=$<JOIN:$<TARGET_PROPERTY:native_simulator,INTERFACE_COMPILE_OPTIONS>,\ >"
+  "NSI_BUILD_PATH:=${zephyr_build_path}/NSI"
+  "NSI_CC:=${CCACHE} ${CMAKE_C_COMPILER}"
+  "NSI_EMBEDDED_CPU_SW:=${zephyr_build_path}/${KERNEL_ELF_NAME}"
+  "NSI_EXE:=${zephyr_build_path}/${KERNEL_EXE_NAME}"
+  "NSI_EXTRA_SRCS:=$<JOIN:$<TARGET_PROPERTY:native_simulator,INTERFACE_SOURCES>,\ >"
+  "NSI_LINK_OPTIONS:=$<JOIN:$<TARGET_PROPERTY:native_simulator,INTERFACE_LINK_OPTIONS>,\ >"
+  "NSI_PATH:=${NSI_DIR}/"
+)
+
+#get_property(nsi_config_content GLOBAL PROPERTY NSI_CONFIG_CONTENT)
+
+string(REPLACE ";" "\n" nsi_config_content "$<NSI_CONFIG_CONTENT>")
+
+file(GENERATE OUTPUT "${zephyr_build_path}/NSI/nsi_config"
+  CONTENT "${nsi_config_content}"
+)
+
 if(EXISTS ${CMAKE_CURRENT_LIST_DIR}/${CMAKE_HOST_SYSTEM_NAME}.${CMAKE_HOST_SYSTEM_PROCESSOR}.cmake)
   # @Intent: Set necessary compiler & linker options for this specific host architecture & OS
   include(${CMAKE_HOST_SYSTEM_NAME}.${CMAKE_HOST_SYSTEM_PROCESSOR}.cmake)
