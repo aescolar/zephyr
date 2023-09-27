@@ -45,13 +45,11 @@
 	};
 
 	chosen {
-		/delete-property/ zephyr,flash-controller;
-		/* zephyr,flash = &flash0; */
+		zephyr,flash = &flash0;
 	};
 
 	soc {
 		/delete-node/ ficr@ff0000;
-		/delete-node/ uicr@ff8000;
 		/delete-node/ memory@20000000;
 		peripheral@50000000 {
 			/delete-node/ dcnf@0;
@@ -89,7 +87,6 @@
 			/delete-node/ qdec@34000;
 			/delete-node/ usbd@36000;
 			/delete-node/ regulator@37000;
-			/delete-node/ flash-controller@39000;
 			/delete-node/ kmu@39000;
 			/delete-node/ vmc@81000;
 			/delete-node/ gpio@842500;
@@ -107,4 +104,18 @@
 
 &ieee802154 {
 	status = "okay";
+};
+
+&flash0 {
+	reg = <0x00000000 DT_SIZE_K(1024)>;
+	partitions {
+		compatible = "fixed-partitions";
+		#address-cells = <1>;
+		#size-cells = <1>;
+
+		storage_partition: partition@0 {
+			label = "storage";
+			reg = <0x00000000 DT_SIZE_K(1024)>;
+		};
+	};
 };

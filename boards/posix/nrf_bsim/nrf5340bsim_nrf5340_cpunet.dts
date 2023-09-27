@@ -29,12 +29,11 @@
 	chosen {
 		zephyr,ieee802154 = &ieee802154;
 		/delete-property/ zephyr,flash-controller;
-		/* zephyr,flash = &flash0; */
+		zephyr,flash = &flash1;
 	};
 
 	soc {
 		/delete-node/ ficr@1ff0000;
-		/delete-node/ uicr@1ff8000;
 		/delete-node/ memory@20000000;
 		/delete-node/ memory@21000000;
 		/delete-node/ gpiote@4100a000;
@@ -44,7 +43,6 @@
 		/delete-node/ spi@41013000;
 		/delete-node/ uart@41013000;
 		/delete-node/ acl@41080000;
-		/delete-node/ flash-controller@41080000;
 		/delete-node/ vmc@41081000;
 		/delete-node/ gpio@418c0500;
 		/delete-node/ gpio@418c0800;
@@ -63,4 +61,18 @@
 
 &ieee802154 {
 	status = "okay";
+};
+
+&flash1 {
+	reg = <0x01000000 DT_SIZE_K(256)>;
+	partitions {
+		compatible = "fixed-partitions";
+		#address-cells = <1>;
+		#size-cells = <1>;
+
+		storage_partition: partition@0 {
+			label = "storage";
+			reg = <0x00000000 DT_SIZE_K(256)>;
+		};
+	};
 };
