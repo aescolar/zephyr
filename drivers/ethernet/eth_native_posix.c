@@ -468,6 +468,7 @@ static void eth_iface_init(struct net_if *iface)
 	net_if_set_link_addr(iface, ll_addr->addr, ll_addr->len,
 			     NET_LINK_ETHERNET);
 
+	eth_set_startup_automatic(IS_ENABLED(CONFIG_ETH_NATIVE_POSIX_STARTUP_AUTOMATIC));
 	ctx->dev_fd = eth_iface_create(CONFIG_ETH_NATIVE_POSIX_DEV_NAME, ctx->if_name, false);
 	if (ctx->dev_fd < 0) {
 		LOG_ERR("Cannot create %s (%d)", ctx->if_name, -errno);
@@ -475,9 +476,10 @@ static void eth_iface_init(struct net_if *iface)
 		/* Create a thread that will handle incoming data from host */
 		create_rx_handler(ctx);
 
-		eth_setup_host(ctx->if_name);
+		eth_setup_host(ctx->if_name, ETH_NATIVE_POSIX_SETUP_SCRIPT);
 
-		eth_start_script(ctx->if_name);
+		eth_start_script(ctx->if_name, ETH_NATIVE_POSIX_STARTUP_SCRIPT,
+				 ETH_NATIVE_POSIX_STARTUP_SCRIPT_USER);
 	}
 }
 
@@ -582,7 +584,7 @@ static int eth_start_device(const struct device *dev)
 
 	ret = eth_if_up(context->if_name);
 
-	eth_setup_host(context->if_name);
+	eth_setup_host(context->if_name, ETH_NATIVE_POSIX_SETUP_SCRIPT);
 
 	return ret;
 }

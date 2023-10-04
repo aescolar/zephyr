@@ -22,10 +22,12 @@
 #define ETH_NATIVE_POSIX_STARTUP_SCRIPT_USER ""
 #endif
 
+void eth_set_startup_automatic(bool new_value);
 int eth_iface_create(const char *dev_name, const char *if_name, bool tun_only);
 int eth_iface_remove(int fd);
-int eth_setup_host(const char *if_name);
-int eth_start_script(const char *if_name);
+int eth_setup_host(const char *if_name, const char *setup_script);
+int eth_start_script(const char *if_name, const char *startup_script,
+		     const char *startup_script_user);
 int eth_wait_data(int fd);
 ssize_t eth_read_data(int fd, void *buf, size_t buf_len);
 ssize_t eth_write_data(int fd, void *buf, size_t buf_len);

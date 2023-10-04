@@ -33,11 +33,12 @@
 #include <linux/if_tun.h>
 #endif
 
-#if !defined(IS_ENABLED)
-#define IS_ENABLED(cond) 0
-#endif
+static bool startup_automatic;
 
-#include "eth_native_posix_priv.h"
+void eth_set_startup_automatic(bool new_value)
+{
+	startup_automatic = new_value;
+}
 
 /* Note that we cannot create the TUN/TAP device from the setup script
  * as we need to get a file descriptor to communicate with the interface.
@@ -95,9 +96,9 @@ static int ssystem(const char *fmt, ...)
 	return -WEXITSTATUS(ret);
 }
 
-int eth_setup_host(const char *if_name)
+int eth_setup_host(const char *if_name, const char *setup_script)
 {
-	if (!IS_ENABLED(CONFIG_ETH_NATIVE_POSIX_STARTUP_AUTOMATIC)) {
+	if (!startup_automatic) {
 		return 0;
 	}
 
@@ -105,28 +106,29 @@ int eth_setup_host(const char *if_name)
 	 * check that situation in the script itself so that the -i option
 	 * we add here is ignored in that case.
 	 */
-	return ssystem("%s -i %s", ETH_NATIVE_POSIX_SETUP_SCRIPT,
+	return ssystem("%s -i %s", setup_script,
 		       if_name);
 }
 
-int eth_start_script(const char *if_name)
+int eth_start_script(const char *if_name, const char *startup_script,
+		     const char *startup_script_user)
 {
-	if (!IS_ENABLED(CONFIG_ETH_NATIVE_POSIX_STARTUP_AUTOMATIC)) {
+	if (!startup_automatic) {
 		return 0;
 	}
 
-	if (ETH_NATIVE_POSIX_STARTUP_SCRIPT[0] == '\0') {
+	if (startup_script[0] == '\0') {
 		return 0;
 	}
 
-	if (ETH_NATIVE_POSIX_STARTUP_SCRIPT_USER[0] == '\0') {
-		return ssystem("%s %s", ETH_NATIVE_POSIX_STARTUP_SCRIPT,
+	if (startup_script_user[0] == '\0') {
+		return ssystem("%s %s", startup_script,
 			       if_name);
 	} else {
 		return ssystem("sudo -u %s %s %s",
-			       ETH_NATIVE_POSIX_STARTUP_SCRIPT_USER,
-			       ETH_NATIVE_POSIX_STARTUP_SCRIPT,
-			       if_name);
+				startup_script_user,
+				startup_script,
+				if_name);
 	}
 }
 
@@ -183,7 +185,7 @@ int eth_clock_gettime(uint64_t *second, uint32_t *nanosecond)
 
 int eth_promisc_mode(const char *if_name, bool enable)
 {
-	if (!IS_ENABLED(CONFIG_ETH_NATIVE_POSIX_STARTUP_AUTOMATIC)) {
+	if (!startup_automatic) {
 		return 0;
 	}
 
@@ -198,7 +200,7 @@ int eth_promisc_mode(const char *if_name, bool enable)
 
 int eth_if_up(const char *if_name)
 {
-	if (!IS_ENABLED(CONFIG_ETH_NATIVE_POSIX_STARTUP_AUTOMATIC)) {
+	if (!startup_automatic) {
 		return 0;
 	}
 
@@ -207,7 +209,7 @@ int eth_if_up(const char *if_name)
 
 int eth_if_down(const char *if_name)
 {
-	if (!IS_ENABLED(CONFIG_ETH_NATIVE_POSIX_STARTUP_AUTOMATIC)) {
+	if (!startup_automatic) {
 		return 0;
 	}
 
