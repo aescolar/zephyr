@@ -304,13 +304,22 @@ side-effects.
 Architecture and design
 ***********************
 
+.. figure:: layering_natsim.svg
+    :align: center
+    :alt: Zephyr layering in a native simulator build
+    :figclass: align-center
+
+    Zephyr layering when built against an embedded target (left), and
+    targeting a native_simulator based board (right)
+
 .. figure:: layering.svg
     :align: center
     :alt: Zephyr layering in native build
     :figclass: align-center
 
     Zephyr layering when built against an embedded target (left), and
-    targeting a POSIX arch based board (right)
+    targeting a traditional POSIX arch based board without the native simulator, like native_posix
+    (right)
 
 .. _posix_arch_design_archl:
 

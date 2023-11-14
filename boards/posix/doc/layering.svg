@@ -1,16 +1,57 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
-<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:ev="http://www.w3.org/2001/xml-events"
-		xmlns:v="http://schemas.microsoft.com/visio/2003/SVGExtensions/" width="6.10236in" height="3.6811in"
-		viewBox="0 0 439.37 265.039" xml:space="preserve" color-interpolation-filters="sRGB" class="st9">
-	<v:documentProperties v:langID="1033" v:metric="true" v:viewMarkup="false">
+<svg
+   width="6.10236in"
+   height="3.6811in"
+   viewBox="0 0 439.37 265.039"
+   xml:space="preserve"
+   color-interpolation-filters="sRGB"
+   class="st9"
+   version="1.1"
+   id="svg152"
+   sodipodi:docname="layering.svg"
+   inkscape:version="1.1.2 (0a00cf5339, 2022-02-04)"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns:v="http://schemas.microsoft.com/visio/2003/SVGExtensions/"><defs
+   id="defs156" /><sodipodi:namedview
+   id="namedview154"
+   pagecolor="#ffffff"
+   bordercolor="#666666"
+   borderopacity="1.0"
+   inkscape:pageshadow="2"
+   inkscape:pageopacity="0.0"
+   inkscape:pagecheckerboard="0"
+   inkscape:document-units="in"
+   showgrid="false"
+   inkscape:zoom="1.8759819"
+   inkscape:cx="415.24921"
+   inkscape:cy="176.70746"
+   inkscape:window-width="2399"
+   inkscape:window-height="1422"
+   inkscape:window-x="161"
+   inkscape:window-y="0"
+   inkscape:window-maximized="1"
+   inkscape:current-layer="svg152" />
+	<v:documentProperties
+   v:langID="1033"
+   v:metric="true"
+   v:viewMarkup="false">
 		<v:userDefs>
-			<v:ud v:nameU="msvSubprocessMaster" v:prompt="" v:val="VT4(Rectangle)"/>
-			<v:ud v:nameU="msvNoAutoConnect" v:val="VT0(1):26"/>
+			<v:ud
+   v:nameU="msvSubprocessMaster"
+   v:prompt=""
+   v:val="VT4(Rectangle)" />
+			<v:ud
+   v:nameU="msvNoAutoConnect"
+   v:val="VT0(1):26" />
 		</v:userDefs>
 	</v:documentProperties>
 
-	<style type="text/css">
+	<style
+   type="text/css"
+   id="style2">
 	<![CDATA[
 		.st1 {fill:#fff2cc;stroke:#000000;stroke-linecap:round;stroke-linejoin:round;stroke-width:0.75}
 		.st2 {fill:#000000;font-family:Arial;font-size:0.916672em}
@@ -24,116 +65,374 @@
 	]]>
 	</style>
 
-	<g v:mID="14" v:index="6" v:groupContext="foregroundPage">
-		<title>Page-6</title>
-		<v:pageProperties v:drawingScale="0.0393701" v:pageScale="0.0393701" v:drawingUnits="24" v:shadowOffsetX="8.50394"
-				v:shadowOffsetY="-8.50394"/>
-		<g id="shape1-1" v:mID="1" v:groupContext="shape" transform="translate(10.4612,-46.6765)">
-			<title>Sheet.1</title>
-			<desc>CPU/SOC</desc>
-			<v:textBlock v:margins="rect(4,4,4,4)" v:tabSpace="42.5197"/>
-			<v:textRect cx="42.5197" cy="243.78" width="85.04" height="42.5197"/>
-			<rect x="0" y="222.52" width="85.0394" height="42.5197" class="st1"/>
-			<text x="17.46" y="247.08" class="st2" v:langID="6153"><v:paragraph v:horizAlign="1"/><v:tabList/>CPU/SOC</text>		</g>
-		<g id="shape2-4" v:mID="2" v:groupContext="shape" transform="translate(98.3352,-46.6765)">
-			<title>Sheet.2</title>
-			<desc>HW peripherals</desc>
-			<v:textBlock v:margins="rect(4,4,4,4)" v:tabSpace="42.5197"/>
-			<v:textRect cx="48.189" cy="243.78" width="96.38" height="42.5197"/>
-			<rect x="0" y="222.52" width="96.378" height="42.5197" class="st1"/>
-			<text x="10.29" y="247.08" class="st2" v:langID="6153"><v:paragraph v:horizAlign="1"/><v:tabList/>HW peripherals</text>		</g>
-		<g id="shape3-7" v:mID="3" v:groupContext="shape" transform="translate(109.674,-92.0309)">
-			<title>Sheet.3</title>
-			<desc>Drivers</desc>
-			<v:textBlock v:margins="rect(4,4,4,4)" v:tabSpace="42.5197"/>
-			<v:textRect cx="42.5197" cy="225.354" width="85.04" height="79.3701"/>
-			<path d="M0 265.04 L85.04 265.04 L85.04 185.67 L28.68 185.67 L28.35 211.18 L0 211.18 L0 265.04 Z" class="st3"/>
-			<text x="25.1" y="228.65" class="st2" v:langID="6153"><v:paragraph v:horizAlign="1"/><v:tabList/>Drivers</text>		</g>
-		<g id="shape4-10" v:mID="4" v:groupContext="shape" transform="translate(10.4612,-92.0309)">
-			<title>Sheet.4</title>
-			<desc>Architecture/SOC dependent layer</desc>
-			<v:textBlock v:margins="rect(4,4,4,4)" v:tabSpace="42.5197"/>
-			<v:textRect cx="48.189" cy="248.031" width="96.38" height="34.0157"/>
-			<rect x="0" y="231.024" width="96.378" height="34.0157" class="st3"/>
-			<text x="5.4" y="244.73" class="st2" v:langID="6153"><v:paragraph v:horizAlign="1"/><v:tabList/>Architecture/SOC <tspan
-						x="8.74" dy="1.2em" class="st4">dependent layer</tspan></text>		</g>
-		<g id="shape5-14" v:mID="5" v:groupContext="shape" transform="translate(10.4612,-128.881)">
-			<title>Sheet.5</title>
-			<desc>Zephyr Kernel</desc>
-			<v:textBlock v:margins="rect(4,4,4,4)" v:tabSpace="42.5197"/>
-			<v:textRect cx="62.3622" cy="243.78" width="124.73" height="42.5197"/>
-			<path d="M0 265.04 L96.38 265.04 L96.38 245.2 L124.72 245.2 L124.72 222.52 L85.04 222.52 L0 222.52 L0 265.04 Z"
-					class="st3"/>
-			<text x="45.24" y="240.48" class="st2" v:langID="6153"><v:paragraph v:horizAlign="1"/><v:tabList/>Zephyr<v:lf/><tspan
-						x="46.46" dy="1.2em" class="st4">Kernel</tspan></text>		</g>
-		<g id="shape6-18" v:mID="6" v:groupContext="shape" transform="translate(10.4612,-174.236)">
-			<title>Sheet.6</title>
-			<desc>Application</desc>
-			<v:textBlock v:margins="rect(4,4,4,4)" v:tabSpace="42.5197"/>
-			<v:textRect cx="92.126" cy="248.031" width="184.26" height="34.0157"/>
-			<rect x="0" y="231.024" width="184.252" height="34.0157" class="st3"/>
-			<text x="65.22" y="251.33" class="st2" v:langID="6153"><v:paragraph v:horizAlign="1"/><v:tabList/>Application</text>		</g>
-		<g id="shape7-21" v:mID="7" v:groupContext="shape" transform="translate(244.319,0.0951231)">
-			<title>Sheet.7</title>
-			<desc>Host OS Kernel (i.e. Linux)</desc>
-			<v:textBlock v:margins="rect(4,4,4,4)" v:tabSpace="42.5197"/>
-			<v:textRect cx="92.126" cy="243.78" width="184.26" height="42.5197"/>
-			<rect x="0" y="222.52" width="184.252" height="42.5197" class="st5"/>
-			<text x="26.71" y="247.08" class="st2" v:langID="6153"><v:paragraph v:horizAlign="1"/><v:tabList/>Host OS Kernel (i.e. Linux)</text>		</g>
-		<g id="shape8-24" v:mID="8" v:groupContext="shape" transform="translate(332.193,-47.2733)">
-			<title>Sheet.8</title>
-			<desc>HW models / host HW API adaptation</desc>
-			<v:textBlock v:margins="rect(4,4,4,4)" v:tabSpace="42.5197"/>
-			<v:textRect cx="48.189" cy="243.78" width="96.38" height="42.5197"/>
-			<rect x="0" y="222.52" width="96.378" height="42.5197" class="st6"/>
-			<text x="16.71" y="233.88" class="st2" v:langID="6153"><v:paragraph v:horizAlign="1"/><v:tabList/>HW models / <v:newlineChar/><tspan
-						x="16.71" dy="1.2em" class="st4">host HW API </tspan><tspan x="22.5" dy="1.2em" class="st4">adaptation</tspan></text>		</g>
-		<g id="shape9-29" v:mID="9" v:groupContext="shape" transform="translate(343.532,-92.6276)">
-			<title>Sheet.9</title>
-			<desc>Drivers</desc>
-			<v:textBlock v:margins="rect(4,4,4,4)" v:tabSpace="42.5197"/>
-			<v:textRect cx="42.5197" cy="225.354" width="85.04" height="79.3701"/>
-			<path d="M0 265.04 L85.04 265.04 L85.04 185.67 L28.68 185.67 L28.35 211.18 L0 211.18 L0 265.04 Z" class="st6"/>
-			<text x="25.1" y="235.25" class="st2" v:langID="6153"><v:paragraph v:horizAlign="1"/><v:tabList/><v:newlineChar/>Drivers</text>		</g>
-		<g id="shape10-32" v:mID="10" v:groupContext="shape" transform="translate(244.319,-47.2435)">
-			<title>Sheet.10</title>
-			<desc>POSIX Arch</desc>
-			<v:textBlock v:margins="rect(4,4,4,4)" v:tabSpace="42.5197"/>
-			<v:textRect cx="48.189" cy="225.339" width="96.38" height="79.3999"/>
-			<path d="M0 265.01 L85.04 265.04 L85.04 219.83 L96.38 219.83 L96.38 185.64 L0 185.64 L0 265.01 Z" class="st6"/>
-			<text x="31.38" y="222.04" class="st2" v:langID="6153"><v:paragraph v:horizAlign="1"/><v:tabList/>POSIX<v:lf/><tspan
-						x="36.88" dy="1.2em" class="st4">Arch</tspan></text>		</g>
-		<g id="shape11-36" v:mID="11" v:groupContext="shape" transform="translate(244.319,-129.478)">
-			<title>Sheet.11</title>
-			<desc>Zephyr Kernel</desc>
-			<v:textBlock v:margins="rect(4,4,4,4)" v:tabSpace="42.5197"/>
-			<v:textRect cx="62.3622" cy="243.78" width="124.73" height="42.5197"/>
-			<path d="M0 265.04 L96.38 265.04 L96.38 245.2 L124.72 245.2 L124.72 222.52 L85.04 222.52 L0 222.52 L0 265.04 Z"
-					class="st3"/>
-			<text x="45.24" y="240.48" class="st2" v:langID="6153"><v:paragraph v:horizAlign="1"/><v:tabList/>Zephyr<v:lf/><tspan
-						x="46.46" dy="1.2em" class="st4">Kernel</tspan></text>		</g>
-		<g id="shape12-40" v:mID="12" v:groupContext="shape" transform="translate(244.319,-174.832)">
-			<title>Sheet.12</title>
-			<desc>Application</desc>
-			<v:textBlock v:margins="rect(4,4,4,4)" v:tabSpace="42.5197"/>
-			<v:textRect cx="92.126" cy="248.031" width="184.26" height="34.0157"/>
-			<rect x="0" y="231.024" width="184.252" height="34.0157" class="st3"/>
-			<text x="65.22" y="251.33" class="st2" v:langID="6153"><v:paragraph v:horizAlign="1"/><v:tabList/>Application</text>		</g>
-		<g id="shape13-43" v:mID="13" v:groupContext="shape" transform="translate(33.847,-226.677)">
-			<title>Sheet.13</title>
-			<desc>Normal Zephyr layering</desc>
-			<v:textBlock v:margins="rect(4,4,4,4)" v:tabSpace="42.5197"/>
-			<v:textRect cx="67.3228" cy="250.866" width="134.65" height="28.3465"/>
-			<rect x="0" y="236.693" width="134.646" height="28.3465" class="st7"/>
-			<text x="21.03" y="246.67" class="st8" v:langID="6153"><v:paragraph v:horizAlign="1"/><v:tabList/>Normal Zephyr <tspan
-						x="42.81" dy="1.2em" class="st4">layering</tspan></text>		</g>
-		<g id="shape14-47" v:mID="14" v:groupContext="shape" transform="translate(244.319,-226.677)">
-			<title>Sheet.14</title>
-			<desc>native_posix/sim &#38; _bsim boards Zephyr layering</desc>
-			<v:textBlock v:margins="rect(4,4,4,4)" v:tabSpace="42.5197"/>
-			<v:textRect cx="92.126" cy="250.866" width="184.26" height="28.3465"/>
-			<rect x="0" y="236.693" width="184.252" height="28.3465" class="st7"/>
-			<text x="42.05" y="238.27" class="st8" v:langID="6153"><v:paragraph v:horizAlign="1"/><v:tabList/>native_posix/sim <v:newlineChar/><tspan
-						x="43.49" dy="1.2em" class="st4">&#38; _bsim boards <v:lf/></tspan><tspan x="43.88" dy="1.2em" class="st4">Zephyr layering</tspan></text>		</g>
-	</g>
+	<g
+   id="shape1-1"
+   v:mID="1"
+   v:groupContext="shape"
+   transform="translate(10.4612,-46.6765)">
+			<title
+   id="title6">Sheet.1</title>
+			<desc
+   id="desc8">CPU/SOC</desc>
+			<v:textBlock
+   v:margins="rect(4,4,4,4)"
+   v:tabSpace="42.5197" />
+			<v:textRect
+   cx="42.5197"
+   cy="243.78"
+   width="85.04"
+   height="42.5197" />
+			<rect
+   x="0"
+   y="222.52"
+   width="85.039398"
+   height="42.519699"
+   class="st1"
+   id="rect10" />
+			<text
+   x="17.459999"
+   y="247.08"
+   class="st2"
+   v:langID="6153"
+   id="text12"><v:paragraph
+   v:horizAlign="1" /><v:tabList />CPU/SOC</text>		</g><g
+   id="shape2-4"
+   v:mID="2"
+   v:groupContext="shape"
+   transform="translate(98.3352,-46.6765)">
+			<title
+   id="title15">Sheet.2</title>
+			<desc
+   id="desc17">HW peripherals</desc>
+			<v:textBlock
+   v:margins="rect(4,4,4,4)"
+   v:tabSpace="42.5197" />
+			<v:textRect
+   cx="48.189"
+   cy="243.78"
+   width="96.38"
+   height="42.5197" />
+			<rect
+   x="0"
+   y="222.52"
+   width="96.377998"
+   height="42.519699"
+   class="st1"
+   id="rect19" />
+			<text
+   x="10.29"
+   y="247.08"
+   class="st2"
+   v:langID="6153"
+   id="text21"><v:paragraph
+   v:horizAlign="1" /><v:tabList />HW peripherals</text>		</g><g
+   id="shape3-7"
+   v:mID="3"
+   v:groupContext="shape"
+   transform="translate(109.674,-92.0309)">
+			<title
+   id="title24">Sheet.3</title>
+			<desc
+   id="desc26">Drivers</desc>
+			<v:textBlock
+   v:margins="rect(4,4,4,4)"
+   v:tabSpace="42.5197" />
+			<v:textRect
+   cx="42.5197"
+   cy="225.354"
+   width="85.04"
+   height="79.3701" />
+			<path
+   d="M 0,265.04 H 85.04 V 185.67 H 28.68 l -0.33,25.51 H 0 Z"
+   class="st3"
+   id="path28" />
+			<text
+   x="25.1"
+   y="228.64999"
+   class="st2"
+   v:langID="6153"
+   id="text30"><v:paragraph
+   v:horizAlign="1" /><v:tabList />Drivers</text>		</g><g
+   id="shape4-10"
+   v:mID="4"
+   v:groupContext="shape"
+   transform="translate(10.4612,-92.0309)">
+			<title
+   id="title33">Sheet.4</title>
+			<desc
+   id="desc35">Architecture/SOC dependent layer</desc>
+			<v:textBlock
+   v:margins="rect(4,4,4,4)"
+   v:tabSpace="42.5197" />
+			<v:textRect
+   cx="48.189"
+   cy="248.031"
+   width="96.38"
+   height="34.0157" />
+			<rect
+   x="0"
+   y="231.024"
+   width="96.377998"
+   height="34.015701"
+   class="st3"
+   id="rect37" />
+			<text
+   x="5.4000001"
+   y="244.73"
+   class="st2"
+   v:langID="6153"
+   id="text41"><v:paragraph
+   v:horizAlign="1" /><v:tabList />Architecture/SOC <tspan
+   x="8.7399998"
+   dy="1.2em"
+   class="st4"
+   id="tspan39">dependent layer</tspan></text>		</g><path
+   d="m 10.4612,136.159 h 96.38 v -19.84 h 28.34 v -22.68 h -39.68 -85.04 z"
+   class="st3"
+   id="path48" /><text
+   x="47.934982"
+   y="110.49409"
+   class="st2"
+   v:langID="6153"
+   id="text52"><v:paragraph
+   v:horizAlign="1" /><v:tabList />Zephyr<v:lf /><tspan
+   x="49.15498"
+   dy="14.400001"
+   class="st4"
+   id="tspan50">Kernel</tspan></text><g
+   id="shape6-18"
+   v:mID="6"
+   v:groupContext="shape"
+   transform="translate(10.4612,-174.236)">
+			<title
+   id="title55">Sheet.6</title>
+			<desc
+   id="desc57">Application</desc>
+			<v:textBlock
+   v:margins="rect(4,4,4,4)"
+   v:tabSpace="42.5197" />
+			<v:textRect
+   cx="92.126"
+   cy="248.031"
+   width="184.26"
+   height="34.0157" />
+			<rect
+   x="0"
+   y="231.024"
+   width="184.252"
+   height="34.015701"
+   class="st3"
+   id="rect59" />
+			<text
+   x="65.220001"
+   y="251.33"
+   class="st2"
+   v:langID="6153"
+   id="text61"><v:paragraph
+   v:horizAlign="1" /><v:tabList />Application</text>		</g><g
+   id="shape7-21"
+   v:mID="7"
+   v:groupContext="shape"
+   transform="translate(244.319,0.0951231)">
+			<title
+   id="title64">Sheet.7</title>
+			<desc
+   id="desc66">Host OS Kernel (i.e. Linux)</desc>
+			<v:textBlock
+   v:margins="rect(4,4,4,4)"
+   v:tabSpace="42.5197" />
+			<v:textRect
+   cx="92.126"
+   cy="243.78"
+   width="184.26"
+   height="42.5197" />
+			<rect
+   x="0"
+   y="222.52"
+   width="184.252"
+   height="42.519699"
+   class="st5"
+   id="rect68" />
+			<text
+   x="26.709999"
+   y="247.08"
+   class="st2"
+   v:langID="6153"
+   id="text70"><v:paragraph
+   v:horizAlign="1" /><v:tabList />Host OS Kernel (i.e. Linux)</text>		</g><g
+   id="shape8-24"
+   v:mID="8"
+   v:groupContext="shape"
+   transform="translate(332.193,-47.2733)">
+			<title
+   id="title73">Sheet.8</title>
+			<desc
+   id="desc75">HW models / host HW API adaptation</desc>
+			<v:textBlock
+   v:margins="rect(4,4,4,4)"
+   v:tabSpace="42.5197" />
+			<v:textRect
+   cx="48.189"
+   cy="243.78"
+   width="96.38"
+   height="42.5197" />
+			<rect
+   x="0"
+   y="222.52"
+   width="96.377998"
+   height="42.519699"
+   class="st6"
+   id="rect77" />
+			<text
+   x="16.709999"
+   y="233.88"
+   class="st2"
+   v:langID="6153"
+   id="text83"><v:paragraph
+   v:horizAlign="1" /><v:tabList />HW models / <v:newlineChar /><tspan
+   x="16.709999"
+   dy="1.2em"
+   class="st4"
+   id="tspan79">host HW API </tspan><tspan
+   x="22.5"
+   dy="1.2em"
+   class="st4"
+   id="tspan81">adaptation</tspan></text>		</g><g
+   id="shape9-29"
+   v:mID="9"
+   v:groupContext="shape"
+   transform="translate(343.532,-92.6276)">
+			<title
+   id="title86">Sheet.9</title>
+			<desc
+   id="desc88">Drivers</desc>
+			<v:textBlock
+   v:margins="rect(4,4,4,4)"
+   v:tabSpace="42.5197" />
+			<v:textRect
+   cx="42.5197"
+   cy="225.354"
+   width="85.04"
+   height="79.3701" />
+			<path
+   d="M 0,265.04 H 85.04 V 185.67 H 28.68 l -0.33,25.51 H 0 Z"
+   class="st6"
+   id="path90" />
+			<text
+   x="25.1"
+   y="235.25"
+   class="st2"
+   v:langID="6153"
+   id="text92"><v:paragraph
+   v:horizAlign="1" /><v:tabList /><v:newlineChar />Drivers</text>		</g><path
+   d="m 244.319,217.7665 85.04,0.03 v -45.21 h 11.34 v -34.19 h -96.38 z"
+   class="st6"
+   id="path99" /><text
+   x="288.67938"
+   y="172.03807"
+   class="st2"
+   v:langID="6153"
+   id="text103"
+   style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:11.0001px;font-family:Arial;-inkscape-font-specification:'Arial, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;text-align:center;text-anchor:middle;fill:#000000"><v:paragraph
+     v:horizAlign="1" /><v:tabList /><v:lf /><tspan
+     sodipodi:role="line"
+     id="tspan2344"
+     x="288.67938"
+     y="172.03807">POSIX arch</tspan><tspan
+     sodipodi:role="line"
+     id="tspan2346"
+     x="288.67938"
+     y="185.78819">and SOC</tspan></text><path
+   d="m 244.319,135.562 h 96.38 v -19.84 h 28.34 v -22.68 h -39.68 -85.04 z"
+   class="st3"
+   id="path110" /><text
+   x="284.50378"
+   y="110.77373"
+   class="st2"
+   v:langID="6153"
+   id="text114"><v:paragraph
+   v:horizAlign="1" /><v:tabList />Zephyr<v:lf /><tspan
+   x="285.72379"
+   dy="14.400001"
+   class="st4"
+   id="tspan112">Kernel</tspan></text><g
+   id="shape12-40"
+   v:mID="12"
+   v:groupContext="shape"
+   transform="translate(244.319,-174.832)">
+			<title
+   id="title117">Sheet.12</title>
+			<desc
+   id="desc119">Application</desc>
+			<v:textBlock
+   v:margins="rect(4,4,4,4)"
+   v:tabSpace="42.5197" />
+			<v:textRect
+   cx="92.126"
+   cy="248.031"
+   width="184.26"
+   height="34.0157" />
+			<rect
+   x="0"
+   y="231.024"
+   width="184.252"
+   height="34.015701"
+   class="st3"
+   id="rect121" />
+			<text
+   x="65.220001"
+   y="251.33"
+   class="st2"
+   v:langID="6153"
+   id="text123"><v:paragraph
+   v:horizAlign="1" /><v:tabList />Application</text>		</g><g
+   id="shape13-43"
+   v:mID="13"
+   v:groupContext="shape"
+   transform="translate(33.847,-226.677)">
+			<title
+   id="title126">Sheet.13</title>
+			<desc
+   id="desc128">Normal Zephyr layering</desc>
+			<v:textBlock
+   v:margins="rect(4,4,4,4)"
+   v:tabSpace="42.5197" />
+			<v:textRect
+   cx="67.3228"
+   cy="250.866"
+   width="134.65"
+   height="28.3465" />
+			<rect
+   x="0"
+   y="236.69299"
+   width="134.646"
+   height="28.3465"
+   class="st7"
+   id="rect130" />
+			<text
+   x="21.030001"
+   y="246.67"
+   class="st8"
+   v:langID="6153"
+   id="text134"><v:paragraph
+   v:horizAlign="1" /><v:tabList />Normal Zephyr <tspan
+   x="42.810001"
+   dy="1.2em"
+   class="st4"
+   id="tspan132">layering</tspan></text>		</g><text
+   x="337.00696"
+   y="18.645618"
+   class="st8"
+   v:langID="6153"
+   id="text147"
+   style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:13.9999px;font-family:Arial;-inkscape-font-specification:'Arial, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;text-align:center;text-anchor:middle;fill:#000000"><v:paragraph
+     v:horizAlign="1" /><v:tabList /><v:newlineChar /><tspan
+     sodipodi:role="line"
+     id="tspan5461"
+     x="337.00696"
+     y="18.645618">native_posix </tspan><tspan
+     sodipodi:role="line"
+     id="tspan5463"
+     x="337.00696"
+     y="36.145493">Zephyr layering</tspan></text>
 </svg>
