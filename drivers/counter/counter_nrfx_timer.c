@@ -439,7 +439,8 @@ static const struct counter_driver_api counter_nrfx_driver_api = {
 			.channels = CC_TO_ID(DT_INST_PROP(idx, cc_num)),			\
 		},										\
 		.ch_data = counter##idx##_ch_data,						\
-		.timer = (NRF_TIMER_Type *)_CONCAT(NRF_TIMER, idx),				\
+		.timer = (NRF_TIMER_Type *)_CONCAT(NRF_TIMER,					\
+						   DT_STRING_TOKEN(DT_DRV_INST(idx), instance)),\
 		LOG_INSTANCE_PTR_INIT(log, LOG_MODULE_NAME, idx)				\
 	};											\
 	DEVICE_DT_INST_DEFINE(idx,								\
