@@ -132,6 +132,7 @@
 			max-bit-width = <32>;
 			interrupts = <12 NRF_DEFAULT_IRQ_PRIORITY>;
 			prescaler = <0>;
+			instance = "0";
 		};
 
 		ecb: ecb@4100d000 {
@@ -245,6 +246,7 @@
 			max-bit-width = <32>;
 			interrupts = <24 NRF_DEFAULT_IRQ_PRIORITY>;
 			prescaler = <0>;
+			instance = "1";
 		};
 
 		timer2: timer@41019000 {
@@ -255,6 +257,7 @@
 			max-bit-width = <32>;
 			interrupts = <25 NRF_DEFAULT_IRQ_PRIORITY>;
 			prescaler = <0>;
+			instance = "2";
 		};
 
 		swi0: swi@4101a000 {

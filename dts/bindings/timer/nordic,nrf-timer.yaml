@@ -32,3 +32,15 @@ properties:
   zli:
     type: boolean
     description: Enable event handler in the ZLI (Zero latency interrupt) context
+
+  instance:
+    type: string
+    required: true
+    description: |
+      The TIMER instance id as used in the MDK and documentation. For example for TIMER2:
+
+        instance = "2";
+
+      And for TIMER00:
+
+        instance = "00";

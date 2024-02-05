@@ -52,6 +52,7 @@ timer00: timer@55000 {
 	max-bit-width = <32>;
 	interrupts = <85 NRF_DEFAULT_IRQ_PRIORITY>;
 	prescaler = <0>;
+	instance = "00";
 };
 
 dppic10: dppic@82000 {
@@ -68,6 +69,7 @@ timer10: timer@85000 {
 	max-bit-width = <32>;
 	interrupts = <133 NRF_DEFAULT_IRQ_PRIORITY>;
 	prescaler = <0>;
+	instance = "10";
 };
 
 egu10: egu@87000 {
@@ -216,6 +218,7 @@ timer20: timer@ca000 {
 	max-bit-width = <32>;
 	interrupts = <202 NRF_DEFAULT_IRQ_PRIORITY>;
 	prescaler = <0>;
+	instance = "20";
 };
 
 timer21: timer@cb000 {
@@ -226,6 +229,7 @@ timer21: timer@cb000 {
 	max-bit-width = <32>;
 	interrupts = <203 NRF_DEFAULT_IRQ_PRIORITY>;
 	prescaler = <0>;
+	instance = "21";
 };
 
 timer22: timer@cc000 {
@@ -236,6 +240,7 @@ timer22: timer@cc000 {
 	max-bit-width = <32>;
 	interrupts = <204 NRF_DEFAULT_IRQ_PRIORITY>;
 	prescaler = <0>;
+	instance = "22";
 };
 
 timer23: timer@cd000 {
@@ -246,6 +251,7 @@ timer23: timer@cd000 {
 	max-bit-width = <32>;
 	interrupts = <205 NRF_DEFAULT_IRQ_PRIORITY>;
 	prescaler = <0>;
+	instance = "23";
 };
 
 timer24: timer@ce000 {
@@ -256,6 +262,7 @@ timer24: timer@ce000 {
 	max-bit-width = <32>;
 	interrupts = <206 NRF_DEFAULT_IRQ_PRIORITY>;
 	prescaler = <0>;
+	instance = "24";
 };
 
 adc: adc@d5000 {

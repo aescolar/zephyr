@@ -259,6 +259,7 @@ timer0: timer@f000 {
 	max-bit-width = <32>;
 	interrupts = <15 NRF_DEFAULT_IRQ_PRIORITY>;
 	prescaler = <0>;
+	instance = "0";
 };
 
 timer1: timer@10000 {
@@ -269,6 +270,7 @@ timer1: timer@10000 {
 	max-bit-width = <32>;
 	interrupts = <16 NRF_DEFAULT_IRQ_PRIORITY>;
 	prescaler = <0>;
+	instance = "1";
 };
 
 timer2: timer@11000 {
@@ -279,6 +281,7 @@ timer2: timer@11000 {
 	max-bit-width = <32>;
 	interrupts = <17 NRF_DEFAULT_IRQ_PRIORITY>;
 	prescaler = <0>;
+	instance = "2";
 };
 
 rtc0: rtc@14000 {
