@@ -243,8 +243,13 @@ void radio_reset(void)
 #endif
 
 #if defined(CONFIG_SOC_COMPATIBLE_NRF54LX)
+#if defined(CONFIG_BT_CTLR_TIFS_HW)
 	NRF_RADIO->TIMING = (0U << RADIO_TIMING_RU_Pos) &
 			    RADIO_TIMING_RU_Msk;
+#else /* !CONFIG_BT_CTLR_TIFS_HW */
+	NRF_RADIO->TIMING = (1U << RADIO_TIMING_RU_Pos) &
+			    RADIO_TIMING_RU_Msk;
+#endif /* !CONFIG_BT_CTLR_TIFS_HW */
 
 	NRF_POWER->TASKS_CONSTLAT = 1U;
 #endif /* CONFIG_SOC_COMPATIBLE_NRF54LX */
