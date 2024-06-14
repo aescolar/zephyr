@@ -1153,7 +1153,6 @@ uint32_t radio_bc_has_match(void)
 void radio_tmr_status_reset(void)
 {
 #if defined(CONFIG_BT_CTLR_NRF_GRTC)
-	NRF_GRTC->CC[HAL_CNTR_GRTC_CC_IDX_RADIO].CCEN = 0U;
 	nrf_grtc_sys_counter_compare_event_disable(NRF_GRTC, HAL_CNTR_GRTC_CC_IDX_RADIO);
 #else /* !CONFIG_BT_CTLR_NRF_GRTC */
 	nrf_rtc_event_disable(NRF_RTC, RTC_EVTENCLR_COMPARE2_Msk);
@@ -1197,7 +1196,6 @@ void radio_tmr_status_reset(void)
 void radio_tmr_tx_status_reset(void)
 {
 #if defined(CONFIG_BT_CTLR_NRF_GRTC)
-	NRF_GRTC->CC[HAL_CNTR_GRTC_CC_IDX_RADIO].CCEN = 0U;
 	nrf_grtc_sys_counter_compare_event_disable(NRF_GRTC, HAL_CNTR_GRTC_CC_IDX_RADIO);
 #else /* !CONFIG_BT_CTLR_NRF_GRTC */
 	nrf_rtc_event_disable(NRF_RTC, RTC_EVTENCLR_COMPARE2_Msk);
@@ -1245,7 +1243,6 @@ void radio_tmr_tx_status_reset(void)
 void radio_tmr_rx_status_reset(void)
 {
 #if defined(CONFIG_BT_CTLR_NRF_GRTC)
-	NRF_GRTC->CC[HAL_CNTR_GRTC_CC_IDX_RADIO].CCEN = 0U;
 	nrf_grtc_sys_counter_compare_event_disable(NRF_GRTC, HAL_CNTR_GRTC_CC_IDX_RADIO);
 #else /* !CONFIG_BT_CTLR_NRF_GRTC */
 	nrf_rtc_event_disable(NRF_RTC, RTC_EVTENCLR_COMPARE2_Msk);
@@ -1351,7 +1348,6 @@ uint32_t radio_tmr_start(uint8_t trx, uint32_t ticks_start, uint32_t remainder)
 	uint32_t cntr_l, cntr_h, cntr_h_overflow, stale;
 
 	/* Disable capture/compare */
-	NRF_GRTC->CC[HAL_CNTR_GRTC_CC_IDX_RADIO].CCEN = 0U;
 	nrf_grtc_sys_counter_compare_event_disable(NRF_GRTC, HAL_CNTR_GRTC_CC_IDX_RADIO);
 
 	/* Publish GRTC compare */
@@ -1381,11 +1377,8 @@ uint32_t radio_tmr_start(uint8_t trx, uint32_t ticks_start, uint32_t remainder)
 
 	/* Read current syscounter value */
 	do {
-		cntr_h = NRF_GRTC->SYSCOUNTER[1].SYSCOUNTERH;
 		cntr_h = nrf_grtc_sys_counter_high_get(NRF_GRTC);
-		cntr_l = NRF_GRTC->SYSCOUNTER[1].SYSCOUNTERL;
 		cntr_l = nrf_grtc_sys_counter_low_get(NRF_GRTC);
-		cntr_h_overflow = NRF_GRTC->SYSCOUNTER[1].SYSCOUNTERH;
 		cntr_h_overflow = nrf_grtc_sys_counter_high_get(NRF_GRTC);
 	} while ((cntr_h & GRTC_SYSCOUNTER_SYSCOUNTERH_BUSY_Msk) ||
 		 (cntr_h_overflow & GRTC_SYSCOUNTER_SYSCOUNTERH_OVERFLOW_Msk));
@@ -1395,7 +1388,6 @@ uint32_t radio_tmr_start(uint8_t trx, uint32_t ticks_start, uint32_t remainder)
 	NRF_GRTC->CC[HAL_CNTR_GRTC_CC_IDX_RADIO].CCL = stale;
 
 	/* Trigger a capture */
-	NRF_GRTC->TASKS_CAPTURE[HAL_CNTR_GRTC_CC_IDX_RADIO] = 1U;
 	nrf_grtc_task_trigger(NRF_GRTC, (NRF_GRTC_TASK_CAPTURE_0 +
 					 (HAL_CNTR_GRTC_CC_IDX_RADIO * sizeof(uint32_t))));
 
@@ -1415,18 +1407,14 @@ uint32_t radio_tmr_start(uint8_t trx, uint32_t ticks_start, uint32_t remainder)
 	}
 
 	/* Clear compare event, if any */
-	NRF_GRTC->EVENTS_COMPARE[HAL_CNTR_GRTC_CC_IDX_RADIO] = 0U;
 	nrf_grtc_event_clear(NRF_GRTC, HAL_CNTR_GRTC_EVENT_COMPARE_RADIO);
 
 	/* Set compare register values */
-	NRF_GRTC->CC[HAL_CNTR_GRTC_CC_IDX_RADIO].CCL = ticks_start;
-	NRF_GRTC->CC[HAL_CNTR_GRTC_CC_IDX_RADIO].CCH = cntr_h & GRTC_CC_CCH_CCH_Msk;
 	nrf_grtc_sys_counter_cc_set(NRF_GRTC, HAL_CNTR_GRTC_CC_IDX_RADIO,
 				    ((((uint64_t)cntr_h & GRTC_CC_CCH_CCH_Msk) << 32) |
 				     ticks_start));
 
 	/* Enable compare */
-	NRF_GRTC->CC[HAL_CNTR_GRTC_CC_IDX_RADIO].CCEN = 1U;
 	nrf_grtc_sys_counter_compare_event_enable(NRF_GRTC, HAL_CNTR_GRTC_CC_IDX_RADIO);
 
 #else /* !CONFIG_BT_CTLR_NRF_GRTC */
@@ -1486,7 +1474,6 @@ uint32_t radio_tmr_start_tick(uint8_t trx, uint32_t ticks_start)
 	uint32_t cntr_l, cntr_h, cntr_h_overflow, stale;
 
 	/* Disable capture/compare */
-	NRF_GRTC->CC[HAL_CNTR_GRTC_CC_IDX_RADIO].CCEN = 0U;
 	nrf_grtc_sys_counter_compare_event_disable(NRF_GRTC, HAL_CNTR_GRTC_CC_IDX_RADIO);
 
 	/* Publish GRTC compare */
@@ -1516,11 +1503,8 @@ uint32_t radio_tmr_start_tick(uint8_t trx, uint32_t ticks_start)
 
 	/* Read current syscounter value */
 	do {
-		cntr_h = NRF_GRTC->SYSCOUNTER[1].SYSCOUNTERH;
 		cntr_h = nrf_grtc_sys_counter_high_get(NRF_GRTC);
-		cntr_l = NRF_GRTC->SYSCOUNTER[1].SYSCOUNTERL;
 		cntr_l = nrf_grtc_sys_counter_low_get(NRF_GRTC);
-		cntr_h_overflow = NRF_GRTC->SYSCOUNTER[1].SYSCOUNTERH;
 		cntr_h_overflow = nrf_grtc_sys_counter_high_get(NRF_GRTC);
 	} while ((cntr_h & GRTC_SYSCOUNTER_SYSCOUNTERH_BUSY_Msk) ||
 		 (cntr_h_overflow & GRTC_SYSCOUNTER_SYSCOUNTERH_OVERFLOW_Msk));
@@ -1530,7 +1514,6 @@ uint32_t radio_tmr_start_tick(uint8_t trx, uint32_t ticks_start)
 	NRF_GRTC->CC[HAL_CNTR_GRTC_CC_IDX_RADIO].CCL = stale;
 
 	/* Trigger a capture */
-	NRF_GRTC->TASKS_CAPTURE[HAL_CNTR_GRTC_CC_IDX_RADIO] = 1U;
 	nrf_grtc_task_trigger(NRF_GRTC, (NRF_GRTC_TASK_CAPTURE_0 +
 					 (HAL_CNTR_GRTC_CC_IDX_RADIO * sizeof(uint32_t))));
 
@@ -1550,18 +1533,14 @@ uint32_t radio_tmr_start_tick(uint8_t trx, uint32_t ticks_start)
 	}
 
 	/* Clear compare event, if any */
-	NRF_GRTC->EVENTS_COMPARE[HAL_CNTR_GRTC_CC_IDX_RADIO] = 0U;
 	nrf_grtc_event_clear(NRF_GRTC, HAL_CNTR_GRTC_EVENT_COMPARE_RADIO);
 
 	/* Set compare register values */
-	NRF_GRTC->CC[HAL_CNTR_GRTC_CC_IDX_RADIO].CCL = ticks_start;
-	NRF_GRTC->CC[HAL_CNTR_GRTC_CC_IDX_RADIO].CCH = cntr_h & GRTC_CC_CCH_CCH_Msk;
 	nrf_grtc_sys_counter_cc_set(NRF_GRTC, HAL_CNTR_GRTC_CC_IDX_RADIO,
 				    ((((uint64_t)cntr_h & GRTC_CC_CCH_CCH_Msk) << 32) |
 				     ticks_start));
 
 	/* Enable compare */
-	NRF_GRTC->CC[HAL_CNTR_GRTC_CC_IDX_RADIO].CCEN = 1U;
 	nrf_grtc_sys_counter_compare_event_enable(NRF_GRTC, HAL_CNTR_GRTC_CC_IDX_RADIO);
 
 #else /* !CONFIG_BT_CTLR_NRF_GRTC */
