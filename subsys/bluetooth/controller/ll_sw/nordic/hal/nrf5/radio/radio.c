@@ -20,6 +20,10 @@
 #include "hal/radio_df.h"
 #include "hal/ticker.h"
 
+#ifdef PPIB_PRESENT
+#include "hal/nrf_ppib.h"
+#endif
+
 #include "ll_sw/pdu_df.h"
 #include "lll/pdu_vendor.h"
 #include "ll_sw/pdu.h"
@@ -1360,11 +1364,10 @@ uint32_t radio_tmr_start(uint8_t trx, uint32_t ticks_start, uint32_t remainder)
 		 GRTC_PUBLISH_COMPARE_EN_Msk);
 
 	/* Enable same DPPI in Global domain */
-	NRF_DPPIC20->CHENSET = BIT(HAL_EVENT_TIMER_START_PPI);
+	nrf_dppi_channels_enable(NRF_DPPIC20, BIT(HAL_EVENT_TIMER_START_PPI));
 
 	/* Setup PPIB send subscribe */
-	NRF_PPIB21->SUBSCRIBE_SEND[HAL_EVENT_TIMER_START_PPI] =
-		BIT(HAL_EVENT_TIMER_START_PPI) | PPIB_SUBSCRIBE_SEND_EN_Msk;
+	nrf_ppib_subscribe_set(NRF_PPIB21, HAL_EVENT_TIMER_START_PPI, BIT(HAL_EVENT_TIMER_START_PPI));
 
 	/* Setup PPIB receive publish */
 	NRF_PPIB11->PUBLISH_RECEIVE[HAL_EVENT_TIMER_START_PPI] =
@@ -1486,11 +1489,10 @@ uint32_t radio_tmr_start_tick(uint8_t trx, uint32_t ticks_start)
 		 GRTC_PUBLISH_COMPARE_EN_Msk);
 
 	/* Enable same DPPI in Global domain */
-	NRF_DPPIC20->CHENSET = BIT(HAL_EVENT_TIMER_START_PPI);
+	nrf_dppi_channels_enable(NRF_DPPIC20, BIT(HAL_EVENT_TIMER_START_PPI));
 
 	/* Setup PPIB send subscribe */
-	NRF_PPIB21->SUBSCRIBE_SEND[HAL_EVENT_TIMER_START_PPI] =
-		BIT(HAL_EVENT_TIMER_START_PPI) | PPIB_SUBSCRIBE_SEND_EN_Msk;
+	nrf_ppib_subscribe_set(NRF_PPIB21, HAL_EVENT_TIMER_START_PPI, BIT(HAL_EVENT_TIMER_START_PPI));
 
 	/* Setup PPIB receive publish */
 	NRF_PPIB11->PUBLISH_RECEIVE[HAL_EVENT_TIMER_START_PPI] =
