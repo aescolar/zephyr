@@ -1367,11 +1367,11 @@ uint32_t radio_tmr_start(uint8_t trx, uint32_t ticks_start, uint32_t remainder)
 	nrf_dppi_channels_enable(NRF_DPPIC20, BIT(HAL_EVENT_TIMER_START_PPI));
 
 	/* Setup PPIB send subscribe */
-	nrf_ppib_subscribe_set(NRF_PPIB21, HAL_EVENT_TIMER_START_PPI, BIT(HAL_EVENT_TIMER_START_PPI));
+	nrf_ppib_subscribe_set(NRF_PPIB21, sizeof(uint32_t)*HAL_EVENT_TIMER_START_PPI, HAL_EVENT_TIMER_START_PPI);
 
 	/* Setup PPIB receive publish */
 	NRF_PPIB11->PUBLISH_RECEIVE[HAL_EVENT_TIMER_START_PPI] =
-		BIT(HAL_EVENT_TIMER_START_PPI) | PPIB_PUBLISH_RECEIVE_EN_Msk;
+		HAL_EVENT_TIMER_START_PPI | PPIB_PUBLISH_RECEIVE_EN_Msk;
 
 	/* NOTE: We are going to use TASKS_CAPTURE to read current
 	 *       SYSCOUNTER H and L, so that COMPARE registers can be set
@@ -1492,11 +1492,11 @@ uint32_t radio_tmr_start_tick(uint8_t trx, uint32_t ticks_start)
 	nrf_dppi_channels_enable(NRF_DPPIC20, BIT(HAL_EVENT_TIMER_START_PPI));
 
 	/* Setup PPIB send subscribe */
-	nrf_ppib_subscribe_set(NRF_PPIB21, HAL_EVENT_TIMER_START_PPI, BIT(HAL_EVENT_TIMER_START_PPI));
+	nrf_ppib_subscribe_set(NRF_PPIB21, sizeof(uint32_t)*HAL_EVENT_TIMER_START_PPI, HAL_EVENT_TIMER_START_PPI);
 
 	/* Setup PPIB receive publish */
 	NRF_PPIB11->PUBLISH_RECEIVE[HAL_EVENT_TIMER_START_PPI] =
-		BIT(HAL_EVENT_TIMER_START_PPI) | PPIB_PUBLISH_RECEIVE_EN_Msk;
+		HAL_EVENT_TIMER_START_PPI | PPIB_PUBLISH_RECEIVE_EN_Msk;
 
 	/* NOTE: We are going to use TASKS_CAPTURE to read current
 	 *       SYSCOUNTER H and L, so that COMPARE registers can be set
