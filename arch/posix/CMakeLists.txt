@@ -155,45 +155,5 @@ endif()
 # (supported by current gcc's as well)
 #
 
-if(CONFIG_ASAN)
-  list(APPEND LLVM_SANITIZERS "address")
-endif()
-
-if(CONFIG_MSAN)
-  list(APPEND LLVM_SANITIZERS "memory")
-endif()
-
-if(CONFIG_UBSAN)
-  list(APPEND LLVM_SANITIZERS "undefined")
-endif()
-
-if(CONFIG_ASAN_RECOVER)
-  zephyr_compile_options(-fsanitize-recover=all)
-  target_compile_options(native_simulator INTERFACE "-fsanitize-recover=all")
-endif()
-
-if(CONFIG_ARCH_POSIX_LIBFUZZER)
-  list(APPEND LLVM_SANITIZERS "fuzzer")
-  target_compile_options(native_simulator INTERFACE "-DNSI_NO_MAIN=1")
-  if(NOT CONFIG_64BIT)
-    # On i386, libfuzzer seems to dynamically relocate the binary, so
-    # we need to emit PIC code.  This limitation is undocumented and
-    # poorly understood...
-    zephyr_compile_options(-fPIC)
-  endif()
-endif()
-
-list(JOIN LLVM_SANITIZERS "," LLVM_SANITIZERS_ARG)
-if(NOT ${LLVM_SANITIZERS_ARG} STREQUAL "")
-  set(LLVM_SANITIZERS_ARG "-fsanitize=${LLVM_SANITIZERS_ARG}")
-  zephyr_compile_options("${LLVM_SANITIZERS_ARG}")
-  if (CONFIG_NATIVE_APPLICATION)
-    zephyr_link_libraries("${LLVM_SANITIZERS_ARG}")
-  endif()
-
-  target_link_options(native_simulator INTERFACE ${LLVM_SANITIZERS_ARG})
-  target_compile_options(native_simulator INTERFACE ${LLVM_SANITIZERS_ARG})
-endif()
-
 include(natsim_optional.cmake)
 add_subdirectory(core)
