@@ -6,9 +6,12 @@
 
 #include <stdio.h>
 
+char a[10];
+
 int main(void)
 {
 	printf("Hello World! %s\n", CONFIG_BOARD_TARGET);
+	printf("%i\n", *(int*)&a[1]);
 
 	return 0;
 }
