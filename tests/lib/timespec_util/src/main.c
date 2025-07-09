@@ -433,6 +433,8 @@ ZTEST(timeutil_api, test_timespec_to_timeout)
 	ARRAY_FOR_EACH(tospecs, i) {
 		const struct tospec *const tspec = &tospecs[i];
 		k_timeout_t actual;
+		struct timespec tick_ts;
+		struct timespec rem = {0};
 
 		if (tspec->saturation == 0) {
 			if (!tspec->negative &&
@@ -449,7 +451,7 @@ ZTEST(timeutil_api, test_timespec_to_timeout)
 			}
 
 			/* no saturation / exact match */
-			actual = timespec_to_timeout(&tspec->tspec);
+			actual = timespec_to_timeout_rem(&tspec->tspec, &rem);
 			zexpect_equal(actual.ticks, tspec->timeout.ticks,
 				      "%d: {%" PRId64 "} and {%" PRId64
 				      "} are unexpectedly different",
@@ -460,7 +462,7 @@ ZTEST(timeutil_api, test_timespec_to_timeout)
 				 (long long)tspec->tspec.tv_sec, (long long)tspec->tspec.tv_nsec);
 
 			/* K_TICK_MIN saturation */
-			actual = timespec_to_timeout(&tspec->tspec);
+			actual = timespec_to_timeout_rem(&tspec->tspec, &rem);
 			zexpect_equal(actual.ticks, K_TICK_MIN,
 				      "%d: {%" PRId64 "} and {%" PRId64
 				      "} are unexpectedly different",
@@ -499,27 +501,48 @@ ZTEST(timeutil_api, test_timespec_to_timeout)
 			}
 
 			/* K_TICK_MAX saturation */
-			actual = timespec_to_timeout(&workaround);
+			actual = timespec_to_timeout_rem(&workaround, &rem);
 			zexpect_equal(actual.ticks, K_TICK_MAX,
 				      "%d: {%" PRId64 "} and {%" PRId64
 				      "} are unexpectedly different",
 				      i, (int64_t)actual.ticks, (int64_t)K_TICK_MAX);
+
+			/* workaround */
+			timespec_from_timeout(tspec->timeout, &tick_ts);
+			timespec_add(&tick_ts, &rem);
+			zexpect_true(timespec_equal(&tick_ts, &workaround),
+				     "%d: {%ld, %ld} and {%ld, %ld} are unexpectedly different", i,
+				     tick_ts.tv_sec, tick_ts.tv_nsec, workaround.tv_sec,
+				     workaround.tv_nsec);
+			continue;
 		}
+
+		timespec_from_timeout(tspec->timeout, &tick_ts);
+		timespec_add(&tick_ts, &rem);
+		zexpect_true(timespec_equal(&tick_ts, &tspec->tspec),
+			     "%d: {%ld, %ld} and {%ld, %ld} are unexpectedly different", i,
+			     tick_ts.tv_sec, tick_ts.tv_nsec, tspec->tspec.tv_sec,
+			     tspec->tspec.tv_nsec);
 	}
 
 #if defined(CONFIG_TIMEOUT_64BIT) && (CONFIG_SYS_CLOCK_TICKS_PER_SEC == 100)
 	{
+		struct timespec rem = {};
 		/* K_TICK_MAX value corresponding to CONFIG_TIMEOUT_64BIT=y */
 		k_timeout_t to = K_TICKS(9223372036854775807LL);
 		/* K_TS_MAX corresponding K_TICK_MAX with a tick rate of 100 Hz */
 		struct timespec ts = K_TIMESPEC(92233720368547758LL, 70000000L);
 
-		zexpect_true(K_TIMEOUT_EQ(timespec_to_timeout(&ts), to),
+		zexpect_true(K_TIMEOUT_EQ(timespec_to_timeout_rem(&ts, &rem), to),
 			     "timespec_to_timeout(%lld, %lld) != %lld", (long long)ts.tv_sec,
 			     (long long)ts.tv_nsec, (long long)to.ticks);
+		zexpect_true(timespec_equal(&rem, &K_TS_NO_WAIT), "non-zero remainder {%lld, %lld}",
+			     (long long)rem.tv_sec, (long long)rem.tv_nsec);
 
-		TC_PRINT("timespec_to_timeout():\nts: {%lld, %lld} => to: {%" PRId64 "}\n",
-			 (long long)ts.tv_sec, (long long)ts.tv_nsec, (long long)to.ticks);
+		TC_PRINT("timespec_to_timeout_rem():\nts: {%lld, %lld} => to: {%lld}, rem: {%lld, "
+			 "%lld}\n",
+			 (long long)ts.tv_sec, (long long)ts.tv_nsec, (long long)to.ticks,
+			 (long long)rem.tv_sec, (long long)rem.tv_nsec);
 	}
 #endif
 }
