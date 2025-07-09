@@ -1,5 +1,6 @@
 /*
  * Copyright (c) 2019 Peter Bigot Consulting, LLC
+ * Copyright (c) 2025 Tenstorrent AI ULC
  *
  * SPDX-License-Identifier: Apache-2.0
  */
@@ -10,11 +11,17 @@
  * http://howardhinnant.github.io/date_algorithms.html#days_from_civil
  */
 
-#include <zephyr/types.h>
 #include <errno.h>
-#include <stddef.h>
 #include <stdbool.h>
+#include <stddef.h>
+#include <stdint.h>
+#include <time.h>
+
+#include <zephyr/kernel.h>
+#include <zephyr/sys/__assert.h>
 #include <zephyr/sys/timeutil.h>
+#include <zephyr/sys/time_units.h>
+#include <zephyr/sys/util.h>
 
 /** Convert a civil (proleptic Gregorian) date to days relative to
  * 1970-01-01.
@@ -187,4 +194,46 @@ int32_t timeutil_sync_skew_to_ppb(float skew)
 	int32_t ppb32 = (int32_t)ppb64;
 
 	return (ppb64 == ppb32) ? ppb32 : INT32_MIN;
+}
+
+void timespec_from_timeout(k_timeout_t timeout, struct timespec *ts)
+{
+	__ASSERT_NO_MSG(ts != NULL);
+	__ASSERT_NO_MSG(Z_IS_TIMEOUT_RELATIVE(timeout) ||
+			(IS_ENABLED(CONFIG_TIMEOUT_64BIT) && K_TIMEOUT_EQ(timeout, K_FOREVER)));
+
+	if (K_TIMEOUT_EQ(timeout, K_FOREVER)) {
+		/* duration == K_TICKS_FOREVER ticks */
+		*ts = K_TS_FOREVER;
+	} else if (K_TIMEOUT_EQ(timeout, K_NO_WAIT)) {
+		/* duration <= 0 ticks */
+		*ts = K_TS_NO_WAIT;
+	} else {
+		*ts = K_TICKS_TO_TIMESPEC(timeout.ticks);
+	}
+
+	__ASSERT_NO_MSG(timespec_is_valid(ts));
+}
+
+k_timeout_t timespec_to_timeout(const struct timespec *req)
+{
+	__ASSERT_NO_MSG((req != NULL) && timespec_is_valid(req));
+
+	if (timespec_compare(req, &K_TS_NO_WAIT) <= 0) {
+		return K_NO_WAIT;
+	}
+
+	if (timespec_compare(req, &K_TS_FOREVER) == 0) {
+		return K_FOREVER;
+	}
+
+	if (timespec_compare(req, &K_TS_MAX) >= 0) {
+		/* round down to align to max ticks */
+		return K_TICKS(K_TICK_MAX);
+	}
+
+	uint64_t ticks_s = k_sec_to_ticks_ceil64(req->tv_sec);
+	uint64_t ticks_ns = k_ns_to_ticks_ceil64(req->tv_nsec);
+
+	return K_TICKS(ticks_s + ticks_ns);
 }
