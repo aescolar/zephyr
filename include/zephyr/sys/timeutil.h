@@ -632,10 +632,36 @@ void timespec_from_timeout(k_timeout_t timeout, struct timespec *ts);
  *
  * Otherwise, this function will return the `k_timeout_t` that is rounded-up to a tick boundary.
  *
+ * If @p rem is not `NULL`, it will be set to the remainder of the conversion, i.e. the difference
+ * between the requested duration and the converted duration as a `timespec` object, approximately
+ * as shown below.
+ *
+ * ```python
+ * rem = requested_duration - converted_duration
+ * ```
+ *
  * @param req the requested `timespec` to convert
+ * @param[out] rem optional pointer to a `timespec` to store the remainder
  * @return the corresponding kernel timeout
  */
-k_timeout_t timespec_to_timeout(const struct timespec *req);
+k_timeout_t timespec_to_timeout_rem(const struct timespec *req, struct timespec *rem);
+
+/**
+ * @brief Convert a timespec to a kernel timeout
+ *
+ * This function converts a time duration, @p req, expressed as a `timespec` object, to a Zephyr
+ * @ref k_timeout_t object exactly as @ref timespec_to_timeout_rem, but does not provide a
+ * remainder.
+ *
+ * @param ts the timespec to convert
+ * @return the kernel timeout
+ *
+ * @see timespec_to_timeout_rem()
+ */
+static inline k_timeout_t timespec_to_timeout(const struct timespec *ts)
+{
+	return timespec_to_timeout_rem(ts, NULL);
+}
 
 /**
  * @}

@@ -215,25 +215,48 @@ void timespec_from_timeout(k_timeout_t timeout, struct timespec *ts)
 	__ASSERT_NO_MSG(timespec_is_valid(ts));
 }
 
-k_timeout_t timespec_to_timeout(const struct timespec *req)
+/*
+ * Helper function for timespec_to_timeout_rem() that calculates remainder, if necessary,
+ * from the requested timespec to k_timeout_t conversion, and returns the corresponding
+ * timeout.
+ */
+static k_timeout_t timespec_timeout_rem(const struct timespec *req, struct timespec *rem,
+					k_timeout_t timeout)
+{
+	if (rem != NULL) {
+		timespec_from_timeout(timeout, rem);
+		timespec_sub(rem, req);
+		timespec_negate(rem);
+	}
+
+	return timeout;
+}
+
+k_timeout_t timespec_to_timeout_rem(const struct timespec *req, struct timespec *rem)
 {
 	__ASSERT_NO_MSG((req != NULL) && timespec_is_valid(req));
 
 	if (timespec_compare(req, &K_TS_NO_WAIT) <= 0) {
+		if (rem != NULL) {
+			*rem = *req;
+		}
 		return K_NO_WAIT;
 	}
 
 	if (timespec_compare(req, &K_TS_FOREVER) == 0) {
+		if (rem != NULL) {
+			*rem = K_TS_NO_WAIT;
+		}
 		return K_FOREVER;
 	}
 
 	if (timespec_compare(req, &K_TS_MAX) >= 0) {
 		/* round down to align to max ticks */
-		return K_TICKS(K_TICK_MAX);
+		return timespec_timeout_rem(req, rem, K_TICKS(K_TICK_MAX));
 	}
 
 	uint64_t ticks_s = k_sec_to_ticks_ceil64(req->tv_sec);
 	uint64_t ticks_ns = k_ns_to_ticks_ceil64(req->tv_nsec);
 
-	return K_TICKS(ticks_s + ticks_ns);
+	return timespec_timeout_rem(req, rem, K_TICKS(ticks_s + ticks_ns));
 }
