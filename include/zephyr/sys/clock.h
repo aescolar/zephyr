@@ -184,7 +184,7 @@ typedef struct {
 /* Define a timespec */
 #define K_TIMESPEC(sec, nsec)                                                                      \
 	((struct timespec){                                                                        \
-		.tv_sec = (time_t)(sec),                                                           \
+		.tv_sec = (time_t)MAX(MIN((int64_t)(sec), SYS_TIME_T_MAX), SYS_TIME_T_MIN),        \
 		.tv_nsec = (long)(nsec),                                                           \
 	})
 
