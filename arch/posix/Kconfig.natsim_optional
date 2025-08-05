@@ -6,3 +6,10 @@ config NATIVE_USE_NSI_ERRNO
 	help
 	  Build the native simulator nsi_errno component with the Zephyr embedded code.
 	  This component allows translating errno values from/to the embedded libC to/from the host libC.
+
+config NATIVE_USE_NSI_FCNTL
+	bool
+	help
+	  Build the native simulator nsi_fcntl component with the Zephyr embedded code.
+	  This component allows translating fcntl values (e.g. open() flags) from/to the embedded
+	  libC to/from the host libC.
