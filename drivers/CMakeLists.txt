@@ -99,3 +99,5 @@ add_subdirectory_ifdef(CONFIG_WATCHDOG watchdog)
 add_subdirectory_ifdef(CONFIG_WIFI wifi)
 add_subdirectory_ifdef(CONFIG_XEN xen)
 # zephyr-keep-sorted-stop
+
+add_subdirectory(cpplib)

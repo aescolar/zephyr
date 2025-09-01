@@ -5,9 +5,11 @@
  */
 
 #include <iostream>
+#include <utility>
+#include <cpplib.hpp>
 
 int main(void)
 {
-	std::cout << "Hello, C++ world! " << CONFIG_BOARD << std::endl;
+	std::cout << "Hello, C++ world! " << CONFIG_BOARD << get_value() << std::endl;
 	return 0;
 }
