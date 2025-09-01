@@ -8,6 +8,8 @@
 #include <zephyr/drivers/mbox.h>
 #include <zephyr/sys/printk.h>
 
+#include "cpplib.hpp"
+
 #ifdef CONFIG_RX_ENABLED
 static void callback(const struct device *dev, mbox_channel_id_t channel_id,
 		     void *user_data, struct mbox_msg *data)
@@ -21,6 +23,9 @@ int main(void)
 	int ret;
 
 	printk("Hello from HOST - %s\n", CONFIG_BOARD_TARGET);
+
+	printk("Value: %d\n", get_value());
+	while (true) {k_sleep(K_SECONDS(1));}
 
 #ifdef CONFIG_RX_ENABLED
 	const struct mbox_dt_spec rx_channel = MBOX_DT_SPEC_GET(DT_PATH(mbox_consumer), rx);
