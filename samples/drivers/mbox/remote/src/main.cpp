@@ -8,6 +8,8 @@
 #include <zephyr/drivers/mbox.h>
 #include <zephyr/sys/printk.h>
 
+#include "cpplib.hpp"
+
 #if !defined(CONFIG_RX_ENABLED) && !defined(CONFIG_TX_ENABLED)
 #error "At least one of CONFIG_RX_ENABLED or CONFIG_TX_ENABLED must be set"
 #endif
@@ -25,6 +27,9 @@ int main(void)
 	int ret;
 
 	printk("Hello from REMOTE - %s\n", CONFIG_BOARD_TARGET);
+
+	printk("Value: %d\n", get_value());
+	while (true) {k_sleep(K_SECONDS(1));}
 
 #ifdef CONFIG_RX_ENABLED
 	const struct mbox_dt_spec rx_channel = MBOX_DT_SPEC_GET(DT_PATH(mbox_consumer), rx);
