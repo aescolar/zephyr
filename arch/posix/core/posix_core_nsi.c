@@ -62,3 +62,8 @@ int posix_arch_thread_name_set(int thread_idx, const char *str)
 {
 	return nct_thread_name_set(te_state, thread_idx, str);
 }
+
+int posix_arch_get_thread_stack(int thread_idx, void **stack_addr, unsigned long *stack_size)
+{
+	return nct_get_thread_stack(te_state, thread_idx, stack_addr, stack_size);
+}

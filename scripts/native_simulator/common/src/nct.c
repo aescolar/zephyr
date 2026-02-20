@@ -423,6 +423,28 @@ int nct_new_thread(void *this_arg, void *payload)
 }
 
 /**
+ * Get the stack address and size for a thread.
+ */
+int nct_get_thread_stack(void *this_arg, int thread_idx, void **stack_addr,
+			 unsigned long *stack_size)
+{
+	struct nct_status_t *this = (struct nct_status_t *)this_arg;
+	struct threads_table_el *tt_el = ttable_get_element(this, thread_idx);
+	pthread_attr_t attr;
+	int ret;
+
+	ret = pthread_getattr_np(tt_el->thread, &attr);
+	if (ret != 0) {
+		return ret;
+	}
+
+	ret = pthread_attr_getstack(&attr, stack_addr, (size_t *)stack_size);
+	pthread_attr_destroy(&attr);
+
+	return ret;
+}
+
+/**
  * Initialize an instance of the threading emulator.
  *
  * Returns a pointer to the initialize threading emulator instance.
