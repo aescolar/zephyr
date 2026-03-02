@@ -53,6 +53,28 @@ void arch_new_thread(struct k_thread *thread, k_thread_stack_t *stack,
 	thread->callee_saved.thread_status = thread_status;
 
 	thread_status->thread_idx = posix_new_thread((void *)thread_status);
+
+#ifdef CONFIG_THREAD_STACK_INFO
+	/*
+	 * Correct the stack_info to reflect the actual pthread stack.
+	 * The POSIX arch uses native pthread stacks instead of the
+	 * Zephyr-allocated stack, so stack_info needs to be updated.
+	 */
+	void *stack_addr;
+	unsigned long stack_size;
+
+	posix_arch_get_thread_stack(thread_status->thread_idx, &stack_addr, &stack_size);
+	_current->stack_info.start = (uintptr_t)stack_addr;
+	_current->stack_info.size = stack_size;
+	_current->stack_info.delta = 0;
+#if defined(CONFIG_STACK_SENTINEL)
+	/* Set the stack sentinel again, but now where the kernel will check after updating the
+	 * stack_info. This assumes the stack grows down, which is the case in most architectures
+	 * including x86 and arm/aarch64.
+	 */
+	*((uint32_t *)_current->stack_info.start) = STACK_SENTINEL;
+#endif /* CONFIG_STACK_SENTINEL */
+#endif /* CONFIG_THREAD_STACK_INFO */
 }
 
 int arch_thread_name_set(struct k_thread *thread, const char *str)
@@ -92,26 +114,6 @@ int arch_thread_name_set(struct k_thread *thread, const char *str)
 void posix_arch_thread_entry(void *pa_thread_status)
 {
 	posix_thread_status_t *ptr = pa_thread_status;
-
-#ifdef CONFIG_THREAD_STACK_INFO
-	/*
-	 * Correct the stack_info to reflect the actual pthread stack.
-	 * The POSIX arch uses native pthread stacks instead of the
-	 * Zephyr-allocated stack, so stack_info needs to be updated.
-	 */
-	void *stack_addr;
-	unsigned long stack_size;
-
-	if (posix_arch_get_thread_stack(ptr->thread_idx, &stack_addr, &stack_size) == 0) {
-		_current->stack_info.start = (uintptr_t)stack_addr;
-		_current->stack_info.size = stack_size;
-		_current->stack_info.delta = 0;
-		/* Set the stack sentinel if enabled so that the kernel is ok. */
-#if defined(CONFIG_STACK_SENTINEL)
-		*((uint32_t *)_current->stack_info.start) = STACK_SENTINEL;
-#endif /* CONFIG_STACK_SENTINEL */
-	}
-#endif
 
 	posix_irq_full_unlock();
 	z_thread_entry(ptr->entry_point, ptr->arg1, ptr->arg2, ptr->arg3);
