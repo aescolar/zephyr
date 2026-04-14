@@ -7,8 +7,8 @@
 /**
  * @file
  *
- * fcntl.h related code common to Zephyr (top: sockets.c) and Linux
- * (bottom: adapt.c).
+ * This module can be used to covert fcntl.h constants between the embedded and
+ * host C libraries.
  *
  * It is needed by both sides to share the same macro definitions/values
  * (prefixed with NSOS_MID_), which is not possible to achieve with two separate
@@ -16,19 +16,11 @@
  * symbols.
  */
 
-/*
- * When building for Zephyr, use Zephyr specific fcntl definitions.
- */
-#ifdef __ZEPHYR__
-#include <zephyr/posix/fcntl.h>
-#else
+#include <stdbool.h>
 #include <fcntl.h>
-#endif
 
 #include "nsi_errno.h"
 #include "nsi_fcntl.h"
-
-#include <stdbool.h>
 
 static int nsi_fcntl_to_mid_(int flags, bool strict)
 {
