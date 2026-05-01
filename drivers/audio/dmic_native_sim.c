@@ -11,10 +11,11 @@
 #include <string.h>
 #include <sys/types.h>
 
-#include <nsi_host_io.h>
 #include <nsi_host_trampolines.h>
 #include <nsi_hw_scheduler.h>
 #include <nsi_tracing.h>
+#include <nsi_errno.h>
+#include "dmic_native_sim_bottom.h"
 
 #include "cmdline.h"
 #include "soc.h"
@@ -175,10 +176,9 @@ static int ns_dmic_open_file(const struct ns_dmic_config *cfg, struct ns_dmic_da
 
 	ns_dmic_close_file(data);
 
-	fd = nsi_host_open_read(path);
+	fd = ns_dmic_open_file_bottom(path);
 	if (fd < 0) {
-		nsi_print_warning("%s could not be opened (%s)\n", path, strerror(errno));
-		return -errno;
+		return -nsi_host_get_errno();
 	}
 
 	data->fd = fd;

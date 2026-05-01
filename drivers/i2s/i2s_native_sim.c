@@ -12,10 +12,11 @@
 #include <string.h>
 #include <sys/types.h>
 
-#include <nsi_host_io.h>
 #include <nsi_host_trampolines.h>
 #include <nsi_hw_scheduler.h>
 #include <nsi_tracing.h>
+#include <nsi_errno.h>
+#include "i2s_native_sim_bottom.h"
 
 #include "cmdline.h"
 #include "soc.h"
@@ -287,15 +288,10 @@ static int ns_i2s_prepare_file(const struct ns_i2s_config *cfg, struct ns_i2s_st
 		return -EINVAL;
 	}
 
-	if (dir == I2S_DIR_RX) {
-		fd = nsi_host_open_read(path);
-	} else {
-		fd = nsi_host_open_write_truncate(path);
-	}
+	fd = ns_i2c_open_file_bottom(path, dir == I2S_DIR_RX);
 
 	if (fd < 0) {
-		nsi_print_warning("%s could not be opened (%s)\n", path, strerror(errno));
-		return -errno;
+		return -nsi_host_get_errno();
 	}
 
 	stream->fd = fd;
