@@ -2012,7 +2012,7 @@ endfunction()
 # 1.6. Heap ASAN helpers
 ########################################################
 #
-# Heap ASAN must be applied selectively — only application code is
+# Heap ASAN must be applied selectively - only application code is
 # instrumented; heap allocator internals must not be.
 # See CONFIG_HEAP_ASAN in lib/heap/Kconfig.
 
@@ -2051,17 +2051,12 @@ macro(_zephyr_heap_asan_flags VAR)
     -Dsnprintf=__asan_snprintf
     -Dvsprintf=__asan_vsprintf
     -Dvsnprintf=__asan_vsnprintf
+    -Dmemccpy=__asan_memccpy
+    -Dmempcpy=__asan_mempcpy
+    -Dstpcpy=__asan_stpcpy
+    -Dstpncpy=__asan_stpncpy
+    -Dfgets=__asan_fgets
   )
-  if(CONFIG_POSIX_API)
-    # POSIX/GNU extensions: not declared in all libc variants without POSIX_API.
-    list(APPEND ${VAR}
-      -Dmemccpy=__asan_memccpy
-      -Dmempcpy=__asan_mempcpy
-      -Dstpcpy=__asan_stpcpy
-      -Dstpncpy=__asan_stpncpy
-      -Dfgets=__asan_fgets
-    )
-  endif()
 endmacro()
 
 # Internal: apply heap ASAN COMPILE_OPTIONS to each source file in _srcs.

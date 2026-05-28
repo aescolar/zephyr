@@ -7,13 +7,18 @@
 /*
  * Lightweight heap ASAN for Zephyr sys_heap.
  *
- * 1 shadow bit per 4-byte granule (bit=1 → poisoned).  heap.c calls
+ * 1 shadow bit per 4-byte granule (bit=1 -> poisoned).  heap.c calls
  * heap_asan_on_alloc/free at each alloc/free site.
  *
  * Instrumented code reaches __asan_store* callbacks for per-store checks and
  * __asan_memset/memcpy/memmove for bulk writes (via -Dmemset=__asan_memset).
- * Non-instrumented code (heap.c, drivers) bypasses all checks — intentional.
+ * Non-instrumented code (heap.c, drivers) bypasses all checks - intentional.
  */
+
+#undef _POSIX_C_SOURCE
+#define _POSIX_C_SOURCE 200809L /* For strlcpy, stpcpy, strlcat, mempcpy,... */
+#undef _GNU_SOURCE
+#define _GNU_SOURCE /* For mempcpy */
 
 #include <zephyr/kernel.h>
 #include <zephyr/sys/sys_heap.h>
@@ -21,9 +26,6 @@
 #include <stdio.h>
 #include <stdarg.h>
 #include "heap.h"
-
-extern size_t strlcpy(char *dst, const char *src, size_t siz);
-extern size_t strlcat(char *dst, const char *src, size_t siz);
 
 #include <zephyr/sys/heap_asan.h>
 
@@ -34,7 +36,7 @@ extern size_t strlcat(char *dst, const char *src, size_t siz);
 static uintptr_t __noasan asan_heap_min = UINTPTR_MAX;
 static uintptr_t __noasan asan_heap_max;
 
-/* Last-hit cache — exploits access locality. */
+/* Last-hit cache - exploits access locality. */
 static struct sys_heap *__noasan asan_last_heap;
 
 static struct {
@@ -256,7 +258,7 @@ static __noasan void check_write_range(uintptr_t addr, size_t size)
 	}
 }
 
-static __always_inline __noasan void check_write(uintptr_t addr, size_t size)
+static ALWAYS_INLINE __noasan void check_write(uintptr_t addr, size_t size)
 {
 	struct sys_heap *heap = find_heap_for_addr(addr);
 
@@ -309,7 +311,7 @@ static __always_inline __noasan void check_write(uintptr_t addr, size_t size)
 	}
 }
 
-/* Per-store callbacks — writes only; loads not instrumented (-asan-instrument-reads=0). */
+/* Per-store callbacks - writes only; loads not instrumented (-asan-instrument-reads=0). */
 void __noasan __asan_store1(uintptr_t addr)  { check_write(addr, 1); }
 void __noasan __asan_store2(uintptr_t addr)  { check_write(addr, 2); }
 void __noasan __asan_store4(uintptr_t addr)  { check_write(addr, 4); }
@@ -326,7 +328,7 @@ void __noasan __asan_store16_noabort(uintptr_t addr) { check_write(addr, 16); }
 void __noasan __asan_storeN_noabort(uintptr_t addr, size_t size) { check_write_range(addr, size); }
 
 void __noasan __asan_init(void) { }
-/* Stubs for GCC ASAN ABI version checks — provide v6/v7/v8 to cover all GCC releases. */
+/* Stubs for GCC ASAN ABI version checks - provide v6/v7/v8 to cover all GCC releases. */
 void __noasan __asan_version_mismatch_check_v6(void) { }
 void __noasan __asan_version_mismatch_check_v7(void) { }
 void __noasan __asan_version_mismatch_check_v8(void) { }
@@ -357,7 +359,7 @@ void __noasan *__asan_memmove(void *dst, const void *src, size_t n)
 
 /* memccpy: copies up to n bytes stopping after first occurrence of c.
  * Conservatively checks n bytes (actual write may be less if c is found early). */
-#if defined(CONFIG_POSIX_API)
+#if defined(CONFIG_HEAP_ASAN_EXTENSIONS)
 void __noasan *__asan_memccpy(void *dst, const void *src, int c, size_t n)
 {
 	check_write_range((uintptr_t)dst, n);
@@ -370,9 +372,7 @@ void __noasan *__asan_mempcpy(void *dst, const void *src, size_t n)
 	__builtin_memcpy(dst, src, n);
 	return (uint8_t *)dst + n;
 }
-#endif /* CONFIG_POSIX_API */
 
-#if defined(CONFIG_POSIX_API)
 char __noasan *__asan_fgets(char *buf, int size, FILE *stream)
 {
 	if (size > 0) {
@@ -380,9 +380,9 @@ char __noasan *__asan_fgets(char *buf, int size, FILE *stream)
 	}
 	return fgets(buf, size, stream);
 }
-#endif /* CONFIG_POSIX_API */
+#endif /* CONFIG_HEAP_ASAN_EXTENSIONS */
 
-/* Stack-ASAN stubs — we only track heap memory. */
+/* Stack-ASAN stubs - we only track heap memory. */
 void __noasan __asan_alloca_poison(uintptr_t addr, size_t size)
 {
 	ARG_UNUSED(addr);
@@ -407,7 +407,7 @@ char __noasan *__asan_strcpy(char *dst, const char *src)
 	return strcpy(dst, src);
 }
 
-#if defined(CONFIG_POSIX_API)
+#if defined(CONFIG_HEAP_ASAN_EXTENSIONS)
 char __noasan *__asan_stpcpy(char *dst, const char *src)
 {
 	check_write_range((uintptr_t)dst, strlen(src) + 1);
@@ -419,7 +419,7 @@ char __noasan *__asan_stpncpy(char *dst, const char *src, size_t n)
 	check_write_range((uintptr_t)dst, n);
 	return stpncpy(dst, src, n);
 }
-#endif /* CONFIG_POSIX_API */
+#endif /* CONFIG_HEAP_ASAN_EXTENSIONS */
 
 char __noasan *__asan_strncpy(char *dst, const char *src, size_t n)
 {
@@ -440,6 +440,7 @@ char __noasan *__asan_strncat(char *dst, const char *src, size_t n)
 	return strncat(dst, src, n);
 }
 
+#if defined(CONFIG_HEAP_ASAN_EXTENSIONS)
 /* strlcpy/strlcat: bounded variants; check the full declared capacity. */
 size_t __noasan __asan_strlcpy(char *dst, const char *src, size_t siz)
 {
@@ -452,6 +453,7 @@ size_t __noasan __asan_strlcat(char *dst, const char *src, size_t siz)
 	check_write_range((uintptr_t)dst, siz);
 	return strlcat(dst, src, siz);
 }
+#endif /* defined(CONFIG_HEAP_ASAN_EXTENSIONS) */
 
 int __noasan __asan_vsnprintf(char *dst, size_t n, const char *fmt, va_list ap)
 {
@@ -471,7 +473,7 @@ int __noasan __asan_snprintf(char *dst, size_t n, const char *fmt, ...)
 }
 
 /*
- * sprintf/vsprintf: write size unknown at call time — compute it first with a
+ * sprintf/vsprintf: write size unknown at call time - compute it first with a
  * vsnprintf(NULL, 0, ...) dry run, which returns the would-be byte count.
  */
 int __noasan __asan_vsprintf(char *dst, const char *fmt, va_list ap)

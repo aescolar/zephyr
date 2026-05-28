@@ -200,6 +200,13 @@ config HEAP_ASAN_SYSTEM
 	help
 	  Attach ASAN shadow memory to the _system_heap.
 
+config HEAP_ASAN_EXTENSIONS
+	bool "Also track use thru C library extensions"
+	depends on HEAP_ASAN
+	default y if (POSIX_API || PICOLIBC || NATIVE_LIBC)
+	help
+	  blabla
+
 module = SYS_HEAP
 module-str = sys_heap
 source "subsys/logging/Kconfig.template.log_config"

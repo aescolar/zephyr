@@ -4,6 +4,11 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+#undef _POSIX_C_SOURCE
+#define _POSIX_C_SOURCE 200809L /* For strlcpy, stpcpy, strlcat, mempcpy,... */
+#undef _POSIX_C_SOURCE
+#define _GNU_SOURCE /* For mempcpy */
+
 #include <zephyr/ztest.h>
 #include <zephyr/kernel.h>
 #include <zephyr/sys/sys_heap.h>
@@ -12,11 +17,6 @@
 #include <string.h>
 #include <stdio.h>
 #include <setjmp.h>
-
-extern size_t strlcpy(char *dst, const char *src, size_t siz);
-extern size_t strlcat(char *dst, const char *src, size_t siz);
-extern void *mempcpy(void *dst, const void *src, size_t n);
-
 
 static jmp_buf   g_panic_jmp;
 static volatile bool g_expect_panic;
@@ -34,11 +34,9 @@ void __noasan heap_asan_report(uintptr_t addr, size_t size)
 		g_expect_panic = false;
 		longjmp(g_panic_jmp, 1);
 	}
-	TC_PRINT("UNEXPECTED ASAN fault addr=0x%lx size=%zu — halting\n",
+	TC_PRINT("UNEXPECTED ASAN fault addr=0x%lx size=%zu - halting\n",
 		 (unsigned long)addr, size);
-	for (;;) {
-		k_sleep(K_FOREVER);
-	}
+	ztest_test_fail();
 }
 
 #define EXPECT_PANIC(body)                        \
@@ -62,7 +60,7 @@ void do_write(volatile uint8_t *p, size_t off, uint8_t val)
 	p[off] = val;
 }
 
-/* Eight-byte store → __asan_store8 (spans two shadow bytes when misaligned).
+/* Eight-byte store -> __asan_store8 (spans two shadow bytes when misaligned).
  * Use aligned(1) so ARM32 strict-alignment targets don't fault on unaligned
  * accesses; the compiler still emits __asan_store8 because the type width is 8.
  */
@@ -104,11 +102,13 @@ static void do_strcat(char *dst, const char *src)  { strcat(dst, src); }
 __attribute__((noinline))
 static void do_strncat(char *dst, const char *src, size_t n) { strncat(dst, src, n); }
 
+#if defined(CONFIG_HEAP_ASAN_EXTENSIONS)
 __attribute__((noinline))
 static void do_strlcpy(char *dst, const char *src, size_t siz) { strlcpy(dst, src, siz); }
 
 __attribute__((noinline))
 static void do_strlcat(char *dst, const char *src, size_t siz) { strlcat(dst, src, siz); }
+#endif
 
 __attribute__((noinline))
 static void do_sprintf(char *dst, const char *src) { sprintf(dst, "%s", src); }
@@ -116,6 +116,7 @@ static void do_sprintf(char *dst, const char *src) { sprintf(dst, "%s", src); }
 __attribute__((noinline))
 static void do_snprintf(char *dst, size_t n, const char *src) { snprintf(dst, n, "%s", src); }
 
+#if defined(CONFIG_HEAP_ASAN_EXTENSIONS)
 __attribute__((noinline))
 static char *do_stpcpy(char *dst, const char *src)  { return stpcpy(dst, src); }
 
@@ -133,7 +134,7 @@ static void *do_mempcpy(void *dst, const void *src, size_t n) { return mempcpy(d
 
 __attribute__((noinline))
 static char *do_fgets(char *buf, int size, FILE *stream) { return fgets(buf, size, stream); }
-
+#endif
 
 struct heap_ops {
 	void *(*alloc)(size_t bytes);
@@ -145,13 +146,11 @@ struct heap_ops {
 struct asan_malloc_fixture   { struct heap_ops ops; };
 struct asan_sys_heap_fixture { struct heap_ops ops; };
 
+#if !defined(CONFIG_NATIVE_LIBC)
+
 static void *w_malloc(size_t b)           { return malloc(b); }
 static void  w_free(void *p)              { free(p); }
 static void *w_realloc(void *p, size_t b) { return realloc(p, b); }
-
-static void *w_k_malloc(size_t b)           { return k_malloc(b); }
-static void  w_k_free(void *p)              { k_free(p); }
-static void *w_k_realloc(void *p, size_t b) { return k_realloc(p, b); }
 
 static void *malloc_setup(void)
 {
@@ -161,6 +160,11 @@ static void *malloc_setup(void)
 	};
 	return &f;
 }
+#endif
+
+static void *w_k_malloc(size_t b)           { return k_malloc(b); }
+static void  w_k_free(void *p)              { k_free(p); }
+static void *w_k_realloc(void *p, size_t b) { return k_realloc(p, b); }
 
 static void *sys_heap_setup(void)
 {
@@ -865,7 +869,7 @@ static void run_strncat_overflow(struct heap_ops *ops)
 
 	zassert_not_null(p, "alloc failed");
 	do_memcpy(p, g_str_half, 9);
-	/* n=8: check_write_range(p+8, 9) → p[8..16] overflows */
+	/* n=8: check_write_range(p+8, 9) -> p[8..16] overflows */
 	bool fired = EXPECT_PANIC(do_strncat(p, g_str_overflow, 8));
 
 	ops->free(p);
@@ -878,7 +882,7 @@ static void run_strncat_exact(struct heap_ops *ops)
 
 	zassert_not_null(p, "alloc failed");
 	do_memcpy(p, g_str_half, 9);
-	/* n=7: check_write_range(p+8, 8) → p[8..15] exact */
+	/* n=7: check_write_range(p+8, 8) -> p[8..15] exact */
 	bool fired = EXPECT_PANIC(do_strncat(p, g_str_overflow, 7));
 
 	ops->free(p);
@@ -887,6 +891,9 @@ static void run_strncat_exact(struct heap_ops *ops)
 
 static void run_strlcpy_overflow(struct heap_ops *ops)
 {
+#if !defined(CONFIG_HEAP_ASAN_EXTENSIONS)
+	ztest_test_skip();
+#else
 	char *p = ops->alloc(16);
 
 	zassert_not_null(p, "alloc failed");
@@ -894,10 +901,14 @@ static void run_strlcpy_overflow(struct heap_ops *ops)
 
 	ops->free(p);
 	zassert_true(fired, "strlcpy overflow not detected (siz=17 into 16-byte buffer)");
+#endif
 }
 
 static void run_strlcpy_exact(struct heap_ops *ops)
 {
+#if !defined(CONFIG_HEAP_ASAN_EXTENSIONS)
+	ztest_test_skip();
+#else
 	char *p = ops->alloc(16);
 
 	zassert_not_null(p, "alloc failed");
@@ -905,10 +916,14 @@ static void run_strlcpy_exact(struct heap_ops *ops)
 
 	ops->free(p);
 	zassert_false(fired, "false positive on exact strlcpy (siz=16)");
+#endif
 }
 
 static void run_strlcat_overflow(struct heap_ops *ops)
 {
+#if !defined(CONFIG_HEAP_ASAN_EXTENSIONS)
+	ztest_test_skip();
+#else
 	char *p = ops->alloc(16);
 
 	zassert_not_null(p, "alloc failed");
@@ -917,10 +932,14 @@ static void run_strlcat_overflow(struct heap_ops *ops)
 
 	ops->free(p);
 	zassert_true(fired, "strlcat overflow not detected (siz=17 into 16-byte buffer)");
+#endif
 }
 
 static void run_strlcat_exact(struct heap_ops *ops)
 {
+#if !defined(CONFIG_HEAP_ASAN_EXTENSIONS)
+	ztest_test_skip();
+#else
 	char *p = ops->alloc(16);
 
 	zassert_not_null(p, "alloc failed");
@@ -929,6 +948,7 @@ static void run_strlcat_exact(struct heap_ops *ops)
 
 	ops->free(p);
 	zassert_false(fired, "false positive on exact strlcat (siz=16)");
+#endif
 }
 
 static void run_snprintf_overflow(struct heap_ops *ops)
@@ -995,16 +1015,23 @@ static void run_str_non_heap_no_false_positive(struct heap_ops *ops)
 {
 	ARG_UNUSED(ops);
 	char stack_buf[64];
-	static char fgets_src[] = "hi\n";
 	bool fired = EXPECT_PANIC({
 		do_strcpy(stack_buf, g_str_exact);
-		do_stpcpy(stack_buf, g_str_exact);
-		do_stpncpy(stack_buf, g_str_exact, sizeof(stack_buf));
 		do_strcat(stack_buf, " ok");
-		do_memccpy(stack_buf, g_src_bytes, 0, sizeof(stack_buf));
-		do_mempcpy(stack_buf, g_src_bytes, 16);
 		do_sprintf(stack_buf, g_str_exact);
 		do_snprintf(stack_buf, sizeof(stack_buf), g_str_exact);
+	});
+
+	zassert_false(fired,
+		      "false positive: str/printf to stack buffer must not trigger ASAN");
+
+#if defined(CONFIG_HEAP_ASAN_EXTENSIONS)
+	static char fgets_src[] = "hi\n";
+	bool fired = EXPECT_PANIC({
+		do_stpcpy(stack_buf, g_str_exact);
+		do_stpncpy(stack_buf, g_str_exact, sizeof(stack_buf));
+		do_memccpy(stack_buf, g_src_bytes, 0, sizeof(stack_buf));
+		do_mempcpy(stack_buf, g_src_bytes, 16);
 		FILE *f = fmemopen(fgets_src, sizeof(fgets_src), "r");
 		if (f != NULL) {
 			do_fgets(stack_buf, sizeof(stack_buf), f);
@@ -1014,6 +1041,8 @@ static void run_str_non_heap_no_false_positive(struct heap_ops *ops)
 
 	zassert_false(fired,
 		      "false positive: str/printf to stack buffer must not trigger ASAN");
+#endif
+
 }
 
 /*
@@ -1046,9 +1075,11 @@ static void run_zero_size_str_ops_no_false_positive(struct heap_ops *ops)
 
 	zassert_not_null(p, "alloc failed");
 	bool fired = EXPECT_PANIC({
-		do_strncpy(p, g_str_overflow, 0); /* n=0: check(p,0) → skip */
-		do_strlcpy(p, g_str_overflow, 0); /* siz=0: check(p,0) → skip */
-		do_snprintf(p, 0, g_str_overflow); /* n=0: check(p,0) → skip */
+		do_strncpy(p, g_str_overflow, 0); /* n=0: check(p,0) -> skip */
+#if defined(CONFIG_HEAP_ASAN_EXTENSIONS)
+		do_strlcpy(p, g_str_overflow, 0); /* siz=0: check(p,0) -> skip */
+#endif
+		do_snprintf(p, 0, g_str_overflow); /* n=0: check(p,0) -> skip */
 	});
 
 	ops->free(p);
@@ -1069,7 +1100,7 @@ static void run_strncat_conservative_check(struct heap_ops *ops)
 
 	zassert_not_null(p, "alloc failed");
 	do_memcpy(p, g_str_half, 9);  /* p = "abcdefgh\0" */
-	/* n=8: check(p+8, 9) → p[8..16] → p[16] poisoned, even though
+	/* n=8: check(p+8, 9) -> p[8..16] -> p[16] poisoned, even though
 	 * strncat("X", 8) would only write 2 bytes.                      */
 	bool fired = EXPECT_PANIC(do_strncat(p, "X", 8));
 
@@ -1079,9 +1110,11 @@ static void run_strncat_conservative_check(struct heap_ops *ops)
 		     "(conservative check: n+1 bytes checked, not min(strlen,n)+1)");
 }
 
-
 static void run_stpcpy_overflow(struct heap_ops *ops)
 {
+#if !defined(CONFIG_HEAP_ASAN_EXTENSIONS)
+	ztest_test_skip();
+#else
 	char *p = ops->alloc(16);
 
 	zassert_not_null(p, "alloc failed");
@@ -1089,10 +1122,14 @@ static void run_stpcpy_overflow(struct heap_ops *ops)
 
 	ops->free(p);
 	zassert_true(fired, "stpcpy overflow not detected (18 bytes into 16-byte buffer)");
+#endif
 }
 
 static void run_stpcpy_exact(struct heap_ops *ops)
 {
+#if !defined(CONFIG_HEAP_ASAN_EXTENSIONS)
+	ztest_test_skip();
+#else
 	char *p = ops->alloc(16);
 
 	zassert_not_null(p, "alloc failed");
@@ -1100,11 +1137,14 @@ static void run_stpcpy_exact(struct heap_ops *ops)
 
 	ops->free(p);
 	zassert_false(fired, "false positive on exact stpcpy (15 chars + null = 16 bytes)");
+#endif
 }
-
 
 static void run_stpncpy_overflow(struct heap_ops *ops)
 {
+#if !defined(CONFIG_HEAP_ASAN_EXTENSIONS)
+	ztest_test_skip();
+#else
 	char *p = ops->alloc(16);
 
 	zassert_not_null(p, "alloc failed");
@@ -1112,10 +1152,14 @@ static void run_stpncpy_overflow(struct heap_ops *ops)
 
 	ops->free(p);
 	zassert_true(fired, "stpncpy overflow not detected (n=17 into 16-byte buffer)");
+#endif
 }
 
 static void run_stpncpy_exact(struct heap_ops *ops)
 {
+#if !defined(CONFIG_HEAP_ASAN_EXTENSIONS)
+	ztest_test_skip();
+#else
 	char *p = ops->alloc(16);
 
 	zassert_not_null(p, "alloc failed");
@@ -1123,11 +1167,14 @@ static void run_stpncpy_exact(struct heap_ops *ops)
 
 	ops->free(p);
 	zassert_false(fired, "false positive on exact stpncpy (n=16)");
+#endif
 }
-
 
 static void run_memccpy_overflow(struct heap_ops *ops)
 {
+#if !defined(CONFIG_HEAP_ASAN_EXTENSIONS)
+	ztest_test_skip();
+#else
 	char *p = ops->alloc(16);
 
 	zassert_not_null(p, "alloc failed");
@@ -1136,10 +1183,14 @@ static void run_memccpy_overflow(struct heap_ops *ops)
 
 	ops->free(p);
 	zassert_true(fired, "memccpy overflow not detected (n=17 into 16-byte buffer)");
+#endif
 }
 
 static void run_memccpy_exact(struct heap_ops *ops)
 {
+#if !defined(CONFIG_HEAP_ASAN_EXTENSIONS)
+	ztest_test_skip();
+#else
 	char *p = ops->alloc(16);
 
 	zassert_not_null(p, "alloc failed");
@@ -1147,11 +1198,15 @@ static void run_memccpy_exact(struct heap_ops *ops)
 
 	ops->free(p);
 	zassert_false(fired, "false positive on exact memccpy (n=16)");
+#endif
 }
 
 
 static void run_mempcpy_overflow(struct heap_ops *ops)
 {
+#if !defined(CONFIG_HEAP_ASAN_EXTENSIONS)
+	ztest_test_skip();
+#else
 	char *p = ops->alloc(16);
 
 	zassert_not_null(p, "alloc failed");
@@ -1159,10 +1214,14 @@ static void run_mempcpy_overflow(struct heap_ops *ops)
 
 	ops->free(p);
 	zassert_true(fired, "mempcpy overflow not detected (n=17 into 16-byte buffer)");
+#endif
 }
 
 static void run_mempcpy_exact(struct heap_ops *ops)
 {
+#if !defined(CONFIG_HEAP_ASAN_EXTENSIONS)
+	ztest_test_skip();
+#else
 	char *p = ops->alloc(16);
 
 	zassert_not_null(p, "alloc failed");
@@ -1170,8 +1229,8 @@ static void run_mempcpy_exact(struct heap_ops *ops)
 
 	ops->free(p);
 	zassert_false(fired, "false positive on exact mempcpy (n=16)");
+#endif
 }
-
 
 /*
  * fgets overflow: __asan_fgets checks size bytes at buf before calling fgets.
@@ -1179,18 +1238,25 @@ static void run_mempcpy_exact(struct heap_ops *ops)
  */
 static void run_fgets_overflow(struct heap_ops *ops)
 {
+#if !defined(CONFIG_HEAP_ASAN_EXTENSIONS)
+	ztest_test_skip();
+#else
 	char *p = ops->alloc(16);
 
 	zassert_not_null(p, "alloc failed");
-	/* size=17 → check(p, 17) fires on 16-byte buffer before fgets is called. */
+	/* size=17 -> check(p, 17) fires on 16-byte buffer before fgets is called. */
 	bool fired = EXPECT_PANIC(do_fgets(p, 17, stdin));
 
 	ops->free(p);
 	zassert_true(fired, "fgets overflow not detected (size=17 into 16-byte buffer)");
+#endif
 }
 
 static void run_fgets_exact(struct heap_ops *ops)
 {
+#if !defined(CONFIG_HEAP_ASAN_EXTENSIONS)
+	ztest_test_skip();
+#else
 	char *p = ops->alloc(16);
 
 	zassert_not_null(p, "alloc failed");
@@ -1210,8 +1276,8 @@ static void run_fgets_exact(struct heap_ops *ops)
 	fclose(f);
 	ops->free(p);
 	zassert_false(fired, "false positive on exact fgets (size=16 into 16-byte buffer)");
+#endif
 }
-
 
 /* clang-format off */
 #define ASAN_COMMON_TESTS(suite)                                                       \
@@ -1359,11 +1425,14 @@ static void run_fgets_exact(struct heap_ops *ops)
 		{ run_str_non_heap_no_false_positive(&fixture->ops); }
 /* clang-format on */
 
-
+#if !defined(CONFIG_NATIVE_LIBC)
+/* This test cannot be run with the host/NATIVE_LIBC as it tests the embedded malloc(),
+ * but when building with the host libC malloc() is the host malloc()
+ */
 ZTEST_SUITE(asan_malloc, NULL, malloc_setup, NULL, NULL, NULL);
 ASAN_COMMON_TESTS(asan_malloc)
 ASAN_STR_TESTS(asan_malloc)
-
+#endif
 
 ZTEST_SUITE(asan_sys_heap, NULL, sys_heap_setup, NULL, NULL, NULL);
 ASAN_COMMON_TESTS(asan_sys_heap)
