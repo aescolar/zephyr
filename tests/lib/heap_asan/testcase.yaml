@@ -1,0 +1,15 @@
+common:
+  tags: heap asan
+  filter: >
+    CONFIG_QEMU_TARGET and
+    (CONFIG_RISCV or CONFIG_ARM or CONFIG_ARM64 or CONFIG_X86 or
+     CONFIG_MIPS or CONFIG_XTENSA or CONFIG_SPARC)
+  platform_exclude:
+    - qemu_cortex_m0/nrf51822
+  integration_platforms:
+    - qemu_riscv32
+    - qemu_cortex_m3
+    - qemu_cortex_a53
+    - qemu_x86_64
+tests:
+  libraries.heap_asan: {}
