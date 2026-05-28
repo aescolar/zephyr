@@ -164,6 +164,42 @@ config SYS_HEAP_CANARIES_RANDOM
 	  Without this, canaries are still effective at detecting
 	  accidental corruption but are predictable.
 
+config HEAP_ASAN
+	bool "Heap Address Sanitizer (shadow-memory write detection)"
+	depends on !USERSPACE
+	help
+	  Enables a lightweight shadow-memory heap write sanitizer.
+	  One bit of shadow memory tracks each 4-byte slot; writes to chunk
+	  headers, trailers, or freed memory are detected when the application
+	  is compiled with -fsanitize=kernel-address (Clang or GCC, outline
+	  mode).
+
+	  Requires toolchain support for -fsanitize=kernel-address; the build
+	  will fail with a compiler error if the selected toolchain does not
+	  support this flag.
+
+config HEAP_ASAN_MAX_HEAPS
+	int "Maximum number of ASAN-tracked heaps"
+	depends on HEAP_ASAN
+	default 4
+	help
+	  Upper bound on the number of heaps that can have ASAN shadow memory
+	  attached via SYS_HEAP_ASAN_ENABLE or K_HEAP_ASAN_ENABLE.
+
+config HEAP_ASAN_MALLOC
+	bool "Automatically track z_malloc_heap with ASAN"
+	depends on HEAP_ASAN && COMMON_LIBC_MALLOC && COMMON_LIBC_MALLOC_ARENA_SIZE > 0
+	help
+	  Attach ASAN shadow memory to the common libc malloc heap.
+	  Only effective when CONFIG_COMMON_LIBC_MALLOC_ARENA_SIZE > 0 (heap
+	  is statically sized at compile time).
+
+config HEAP_ASAN_SYSTEM
+	bool "Automatically track _system_heap with ASAN"
+	depends on HEAP_ASAN && KERNEL_MEM_POOL
+	help
+	  Attach ASAN shadow memory to the _system_heap.
+
 module = SYS_HEAP
 module-str = sys_heap
 source "subsys/logging/Kconfig.template.log_config"

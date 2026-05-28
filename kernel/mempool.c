@@ -89,6 +89,11 @@ void k_free(void *ptr)
 K_HEAP_DEFINE(_system_heap, Z_HEAP_MIN_SIZE_FOR(K_HEAP_MEM_POOL_SIZE));
 #define _SYSTEM_HEAP (&_system_heap)
 
+#if defined(CONFIG_HEAP_ASAN_SYSTEM)
+#include <zephyr/sys/heap_asan.h>
+K_HEAP_ASAN_ENABLE(_system_heap, Z_HEAP_MIN_SIZE_FOR(K_HEAP_MEM_POOL_SIZE));
+#endif
+
 void *k_aligned_alloc(size_t align, size_t size)
 {
 	SYS_PORT_TRACING_OBJ_FUNC_ENTER(k_heap_sys, k_aligned_alloc, _SYSTEM_HEAP);

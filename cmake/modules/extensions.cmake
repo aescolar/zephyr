@@ -19,6 +19,7 @@ include(CheckCXXCompilerFlag)
 # 1.3. generate_inc_*
 # 1.4. board_*
 # 1.5. Misc.
+# 1.6. Heap ASAN helpers
 # 2. Kconfig-aware extensions
 # 2.1 Misc
 # 3. CMake-generic extensions
@@ -2006,6 +2007,124 @@ function(zephyr_constants_library)
     add_dependencies(${lib_name} ${dep}_h)
   endforeach()
 endfunction()
+
+########################################################
+# 1.6. Heap ASAN helpers
+########################################################
+#
+# Heap ASAN must be applied selectively — only application code is
+# instrumented; heap allocator internals must not be.
+# See CONFIG_HEAP_ASAN in lib/heap/Kconfig.
+
+# Internal: full set of -fsanitize + -D macro-redirect flags for heap ASAN.
+macro(_zephyr_heap_asan_flags VAR)
+  set(${VAR})
+  if(CMAKE_C_COMPILER_ID STREQUAL "Clang")
+    list(APPEND ${VAR}
+      -fsanitize=kernel-address
+      -mllvm;-asan-instrumentation-with-call-threshold=0
+      -mllvm;-asan-globals=0
+      -mllvm;-asan-stack=0
+      -mllvm;-asan-instrument-reads=0
+    )
+  elseif(CMAKE_C_COMPILER_ID STREQUAL "GNU")
+    list(APPEND ${VAR}
+      -fsanitize=kernel-address
+      --param=asan-instrumentation-with-call-threshold=0
+      --param=asan-globals=0
+      --param=asan-stack=0
+      --param=asan-instrument-reads=0
+      -fno-tree-loop-distribute-patterns
+    )
+  endif()
+  list(APPEND ${VAR}
+    -Dmemset=__asan_memset
+    -Dmemcpy=__asan_memcpy
+    -Dmemmove=__asan_memmove
+    -Dstrcpy=__asan_strcpy
+    -Dstrncpy=__asan_strncpy
+    -Dstrcat=__asan_strcat
+    -Dstrncat=__asan_strncat
+    -Dstrlcpy=__asan_strlcpy
+    -Dstrlcat=__asan_strlcat
+    -Dsprintf=__asan_sprintf
+    -Dsnprintf=__asan_snprintf
+    -Dvsprintf=__asan_vsprintf
+    -Dvsnprintf=__asan_vsnprintf
+  )
+  if(CONFIG_POSIX_API)
+    # POSIX/GNU extensions: not declared in all libc variants without POSIX_API.
+    list(APPEND ${VAR}
+      -Dmemccpy=__asan_memccpy
+      -Dmempcpy=__asan_mempcpy
+      -Dstpcpy=__asan_stpcpy
+      -Dstpncpy=__asan_stpncpy
+      -Dfgets=__asan_fgets
+    )
+  endif()
+endmacro()
+
+# Internal: apply heap ASAN COMPILE_OPTIONS to each source file in _srcs.
+function(_zephyr_heap_asan_apply_to_sources _target _srcs)
+  _zephyr_heap_asan_flags(_flags)
+  foreach(_src IN LISTS _srcs)
+    set_source_files_properties("${_src}"
+      TARGET_DIRECTORY ${_target}
+      PROPERTIES COMPILE_OPTIONS "${_flags}"
+    )
+  endforeach()
+endfunction()
+
+# Instrument all sources of <target> with heap ASAN.
+# Usage: zephyr_target_enable_heap_asan(app)
+function(zephyr_target_enable_heap_asan target)
+  if(NOT CONFIG_HEAP_ASAN)
+    return()
+  endif()
+  get_property(_srcs TARGET ${target} PROPERTY SOURCES)
+  _zephyr_heap_asan_apply_to_sources(${target} "${_srcs}")
+endfunction()
+
+# Instrument sources under <dir> with heap ASAN.
+# TARGET <t>: defaults to ZEPHYR_CURRENT_LIBRARY; required from app CMakeLists.
+# Usage: zephyr_heap_asan_enable_directory(src TARGET app)
+#        zephyr_heap_asan_enable_directory(src/mymodule)  # inside a library
+function(zephyr_heap_asan_enable_directory dir)
+  if(NOT CONFIG_HEAP_ASAN)
+    return()
+  endif()
+
+  cmake_parse_arguments(PARSE_ARGV 1 ARG "" "TARGET" "")
+
+  if(DEFINED ARG_TARGET)
+    set(_target ${ARG_TARGET})
+  elseif(DEFINED ZEPHYR_CURRENT_LIBRARY AND NOT ZEPHYR_CURRENT_LIBRARY STREQUAL "")
+    set(_target ${ZEPHYR_CURRENT_LIBRARY})
+  else()
+    message(FATAL_ERROR
+      "zephyr_heap_asan_enable_directory: no TARGET specified and "
+      "ZEPHYR_CURRENT_LIBRARY is not set.")
+  endif()
+
+  cmake_path(ABSOLUTE_PATH dir
+    BASE_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"
+    NORMALIZE OUTPUT_VARIABLE _abs_dir)
+
+  set(_matching)
+  get_property(_srcs TARGET ${_target} PROPERTY SOURCES)
+  foreach(_src IN LISTS _srcs)
+    cmake_path(ABSOLUTE_PATH _src
+      BASE_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"
+      NORMALIZE OUTPUT_VARIABLE _abs_src)
+    cmake_path(IS_PREFIX _abs_dir "${_abs_src}" NORMALIZE _under_dir)
+    if(_under_dir)
+      list(APPEND _matching "${_src}")
+    endif()
+  endforeach()
+
+  _zephyr_heap_asan_apply_to_sources(${_target} "${_matching}")
+endfunction()
+
 
 ########################################################
 # 2. Kconfig-aware extensions

@@ -21,6 +21,19 @@ LOG_MODULE_REGISTER(os_heap, CONFIG_SYS_HEAP_LOG_LEVEL);
 #include <zephyr/random/random.h>
 #endif
 
+#ifdef CONFIG_HEAP_ASAN
+/* Forward declarations for ASAN hooks defined in heap_asan.c. */
+extern void heap_asan_on_alloc(struct sys_heap *heap, chunkid_t c, void *mem,
+				size_t bytes);
+extern void heap_asan_on_free(struct sys_heap *heap, chunkid_t c);
+extern void heap_asan_on_sys_heap_init(struct sys_heap *heap);
+#define HEAP_ASAN_ALLOC(heap, c, mem, bytes) heap_asan_on_alloc(heap, c, mem, bytes)
+#define HEAP_ASAN_FREE(heap, c)              heap_asan_on_free(heap, c)
+#else
+#define HEAP_ASAN_ALLOC(heap, c, mem, bytes) do { } while (false)
+#define HEAP_ASAN_FREE(heap, c)              do { } while (false)
+#endif
+
 #ifdef CONFIG_SYS_HEAP_RUNTIME_STATS
 static inline void increase_allocated_bytes(struct z_heap *h, size_t num_bytes)
 {
@@ -345,6 +358,7 @@ void sys_heap_free(struct sys_heap *heap, void *mem)
 				  chunk_usable_bytes(h, c) - mem_align_gap(h, mem));
 #endif
 
+	HEAP_ASAN_FREE(heap, c);
 	free_chunk(h, c);
 }
 
@@ -457,6 +471,7 @@ void *sys_heap_alloc(struct sys_heap *heap, size_t bytes)
 				   chunk_usable_bytes(h, c));
 #endif
 
+	HEAP_ASAN_ALLOC(heap, c, mem, bytes);
 	IF_ENABLED(CONFIG_MSAN, (__msan_allocated_memory(mem, bytes)));
 	return mem;
 }
@@ -546,6 +561,7 @@ void *sys_heap_aligned_alloc(struct sys_heap *heap, size_t align, size_t bytes)
 #endif
 
 	IF_ENABLED(CONFIG_MSAN, (__msan_allocated_memory(mem, bytes)));
+	HEAP_ASAN_ALLOC(heap, c, mem, bytes);
 	return mem;
 }
 
@@ -608,12 +624,17 @@ static bool inplace_realloc(struct sys_heap *heap, void *ptr, size_t bytes)
 		chunkid_t suffix = c + chunks_need;
 		chunkid_t suffix_rc = right_chunk(h, suffix);
 
+		HEAP_ASAN_FREE(heap, suffix);
+
 		if (!chunk_used(h, suffix_rc)) {
 			free_chunk_check(h, suffix_rc, true);
 			free_list_remove(h, suffix_rc);
 			merge_chunks(h, suffix, suffix_rc);
 		}
+
 		free_list_add(h, suffix);
+
+		HEAP_ASAN_ALLOC(heap, c, ptr, bytes);
 
 #ifdef CONFIG_SYS_HEAP_LISTENER
 		heap_listener_notify_alloc(HEAP_ID_FROM_POINTER(heap), ptr,
@@ -653,6 +674,8 @@ static bool inplace_realloc(struct sys_heap *heap, void *ptr, size_t bytes)
 		if (SYS_HEAP_HARDENING_FULL) {
 			set_chunk_canary(h, c);
 		}
+
+		HEAP_ASAN_ALLOC(heap, c, ptr, bytes);
 
 #ifdef CONFIG_SYS_HEAP_LISTENER
 		heap_listener_notify_alloc(HEAP_ID_FROM_POINTER(heap), ptr,
@@ -800,4 +823,11 @@ void sys_heap_init(struct sys_heap *heap, void *mem, size_t bytes)
 	set_chunk_used(h, heap_sz, true);
 
 	free_list_add(h, chunk0_size);
+
+#ifdef CONFIG_HEAP_ASAN
+	heap->asan_shadow = NULL;
+	heap->asan_base   = 0;
+	heap->asan_slots  = 0;
+	heap_asan_on_sys_heap_init(heap);
+#endif
 }

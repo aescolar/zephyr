@@ -58,6 +58,11 @@ struct sys_heap {
 	struct z_heap *heap;
 	void *init_mem;
 	size_t init_bytes;
+#ifdef CONFIG_HEAP_ASAN
+	uint8_t             *asan_shadow;
+	size_t               asan_slots;  /* total 4-byte shadow slots */
+	uintptr_t            asan_base;   /* heap buffer start address */
+#endif
 };
 
 struct z_heap_stress_result {
