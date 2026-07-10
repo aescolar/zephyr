@@ -14,6 +14,9 @@ set -uex
 twister -T tests/bsim/bluetooth/host/ -vv --fixture bsim_multi_test --no-clean \
   --force-color --inline-logs -vv --fixture bsim_multi_test
 
+twister -T tests/bsim/bluetooth/audio/ -vv --fixture bsim_multi_test --no-clean \
+  --force-color --inline-logs -vv --fixture bsim_multi_test
+
 # nrf52_bsim set:
 nice tests/bsim/bluetooth/compile.sh
 
