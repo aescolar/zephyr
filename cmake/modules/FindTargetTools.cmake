@@ -66,7 +66,35 @@ set(CMAKE_SYSTEM_NAME Generic)
 #   CMAKE_SYSTEM_NAME-compiler-CMAKE_SYSTEM_PROCESSOR.cmake file,
 #   which can be used to modify settings like compiler flags etc. for
 #   the target
-set(CMAKE_SYSTEM_PROCESSOR ${ARCH})
+if(NOT "${ARCH}" STREQUAL "posix")
+  set(CMAKE_SYSTEM_PROCESSOR ${ARCH})
+else()
+  # For the POSIX architecture, let's set it to the actual target host architecture
+  if(NATIVE_TARGET_HOST) # Allow users to manually select the target for cross-compiling use cases
+    set(TARGET_HOST ${NATIVE_TARGET_HOST})
+  else()
+    # NOTE: As this is included before project(), CMAKE_HOST_SYSTEM_PROCESSOR is not yet set
+    # but this will produce the same result for Linux
+    cmake_host_system_information(RESULT host_processor QUERY OS_PLATFORM)
+    if(host_processor MATCHES "arm.*")
+      # All 32bit arm variants
+      set(TARGET_HOST "arm")
+    elseif(host_processor MATCHES ".*86.*")
+      # x86_64/i*86
+      set(TARGET_HOST "x86_64")
+    else()
+      set(TARGET_HOST ${host_processor})
+    endif()
+  endif()
+
+  if((TARGET_HOST STREQUAL "x86_64") AND (NOT CONFIG_64BIT))
+    set(NATIVE_TARGET_ARCH "i686")
+  else()
+    set(NATIVE_TARGET_ARCH ${TARGET_HOST})
+  endif()
+
+  set(CMAKE_SYSTEM_PROCESSOR ${NATIVE_TARGET_ARCH})
+endif()
 
 # https://cmake.org/cmake/help/latest/variable/CMAKE_SYSTEM_VERSION.html:
 #   When the CMAKE_SYSTEM_NAME variable is set explicitly to enable cross
