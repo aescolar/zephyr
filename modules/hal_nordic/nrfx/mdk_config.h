@@ -216,6 +216,12 @@
 #endif
 #endif
 
+#ifdef CONFIG_SOC_COMPATIBLE_NRF54L15_CPUFLPR
+#ifndef NRF_FLPR
+#define NRF_FLPR 1
+#endif
+#endif
+
 #ifdef CONFIG_SOC_NRF54LM20A_CPUAPP
 #ifndef NRF54LM20A_XXAA
 #define NRF54LM20A_XXAA 1
