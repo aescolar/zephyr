@@ -1,0 +1,110 @@
+/*
+ * Copyright (c) 2026 Nordic Semiconductor ASA
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+/dts-v1/;
+
+#include <mem.h>
+#include <vendor/nordic/nrf54l15_cpuflpr.dtsi>
+/* #include <vendor/nordic/nrf54l15_ipc_shared_ram.dtsi> */
+#include <../boards/nordic/nrf54l15dk/nrf54l15dk_nrf54l_05_10_15-pinctrl.dtsi>
+
+/ {
+	model = "Nordic nRF54L15 BSIM nRF54L15 FLPR MCU";
+	compatible = "bsim,nrf54l15bsim_nrf54l15-cpuflpr", "bsim,nrf54";
+
+	chosen {
+		zephyr,console = &uart30;
+		zephyr,shell-uart = &uart30;
+		/* zephyr,code-partition = &cpuflpr_code_partition; */
+		/* zephyr,flash = &cpuflpr_rram; */
+		/* zephyr,sram = &cpuflpr_sram; */
+	};
+	
+	/delete-node/ cpus;
+	/delete-node/ ipc;
+
+	soc {
+
+		peripheral@50000000 {
+			/delete-node/ spi@4a000;
+			/delete-node/ i2c@c6000;
+			/delete-node/ spi@c6000;
+			/delete-node/ i2c@c7000;
+			/delete-node/ spi@c7000;
+			/delete-node/ i2c@c8000;
+			/delete-node/ spi@c8000;
+			/delete-node/ pdm@d0000;
+			/delete-node/ pdm@d1000;
+			/delete-node/ pwm@d2000;
+			/delete-node/ pwm@d3000;
+			/delete-node/ pwm@d4000;
+			/delete-node/ adc@d5000;
+			/delete-node/ nfct@d6000;
+			/delete-node/ i2s@dd000;
+			/delete-node/ qdec@e0000;
+			/delete-node/ qdec@e1000;
+			/delete-node/ i2c@104000;
+			/delete-node/ spi@104000;
+			/delete-node/ comparator@106000;
+			/delete-node/ watchdog@108000;
+			/delete-node/ watchdog@109000;
+		};
+	};
+};
+
+&cpuflpr_clic {
+	status = "disabled";
+};
+
+/*
+&cpuflpr_rram {
+	partitions {
+		#address-cells = <1>;
+		#size-cells = <1>;
+		ranges;
+	};
+};
+*/
+
+&grtc {
+	owned-channels = <3 4>;
+	status = "okay";
+};
+
+&uart20 {
+	current-speed = <115200>;
+	pinctrl-0 = <&uart20_default>;
+	pinctrl-1 = <&uart20_sleep>;
+	pinctrl-names = "default", "sleep";
+};
+
+&uart30 {
+	status = "okay";
+	current-speed = <115200>;
+	pinctrl-0 = <&uart30_default>;
+	pinctrl-1 = <&uart30_sleep>;
+	pinctrl-names = "default", "sleep";
+};
+
+&gpio0 {
+	status = "okay";
+};
+
+&gpio1 {
+	status = "okay";
+};
+
+&gpio2 {
+	status = "okay";
+};
+
+&gpiote20 {
+	status = "okay";
+};
+
+&gpiote30 {
+	status = "okay";
+};
