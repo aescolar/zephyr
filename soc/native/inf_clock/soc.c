@@ -122,6 +122,7 @@ void posix_atomic_halt_cpu(unsigned int imask)
 void posix_boot_cpu(void)
 {
 	nce_st = nce_init();
+	nce_set_cpu_nbr(nce_st, CONFIG_NATIVE_SIMULATOR_MCU_N);
 	posix_arch_init();
 	nce_boot_cpu(nce_st, &z_cstart);
 }
