@@ -9,9 +9,9 @@
  * @file
  * @brief API to the native simulator - native command line parsing utilities
  *
- * Note: The arguments structure definitions is kept fully compatible with Zephyr's native_posix
- * and BabbleSim's command line options to enable to reuse components between them.
- * And for APIs to be accessible thru a trivial shim.
+ * Note: The arguments structure definitions are kept fully compatible with Zephyr's native_posix
+ * and BabbleSim's command line options to enable reusing components between them.
+ * And for APIs to be accessible through a trivial shim.
  */
 
 #ifndef NATIVE_SIMULATOR_NATIVE_SRC_NSI_CMDLINE_H
@@ -41,7 +41,7 @@ typedef void (*option_found_callback_f)(char *argv, int offset);
 struct args_struct_t {
 	/*
 	 * if manual is set nsi_cmd_args_parse*() will ignore it except for
-	 * displaying it the help messages and initializing <dest> to its
+	 * displaying it in the help messages and initializing <dest> to its
 	 * default
 	 */
 	bool manual;

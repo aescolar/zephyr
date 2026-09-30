@@ -103,7 +103,7 @@ int nsi_cmd_is_help_option(const char *arg)
 	"automatically read boolean switches\n"
 
 /**
- * Read out a the value following an option from str, and store it into
+ * Read out the value following an option from str, and store it into
  * <dest>
  * <type> indicates the type of parameter (and type of dest pointer)
  *   'b' : boolean

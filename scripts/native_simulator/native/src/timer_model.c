@@ -141,7 +141,7 @@ static inline void host_clock_gettime(struct timespec *tv)
 }
 
 /*
- * This function is globally available only for tests purposes
+ * This function is globally available only for test purposes
  * It should not be used for any functional purposes,
  * and as such is not present in this component header.
  */
@@ -362,8 +362,8 @@ int64_t hwtimer_get_pending_silent_ticks(void)
 
 
 /**
- * During boot set the real time clock simulated time not start
- * from the real host time
+ * During boot set the real time clock simulated time be 0,
+ * instead of being initialized to the real host time
  */
 void hwtimer_reset_rtc(void)
 {
@@ -459,14 +459,14 @@ void hwtimer_get_pseudohost_rtc_time(uint32_t *nsec, uint64_t *sec)
 	 * time split in us and ns. So we keep the full precision for 500 odd
 	 * years after the last clock ratio adjustment (or boot,
 	 * whichever is latest).
-	 * Meaning, we will still start to loose precision after 500 odd
+	 * Meaning, we will still start to lose precision after 500 odd
 	 * years of runtime without a clock ratio adjustment, but that really
 	 * should not be much of a problem, given that the ns lower digits are
 	 * pretty much noise anyhow.
 	 * (So, all this is a huge overkill)
 	 *
 	 * The operation below in plain is just:
-	 *   st = (rt - last_rt_adj_time)*ratio + last_dt_adj_time
+	 *   st = (rt - last_rt_adj_time)*ratio + last_st_adj_time
 	 * where st = simulated time
 	 *       rt = real time
 	 *       last_rt_adj_time = time (real) when the last ratio

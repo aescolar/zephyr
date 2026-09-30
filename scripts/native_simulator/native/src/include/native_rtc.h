@@ -47,7 +47,7 @@ uint64_t native_rtc_gettime_us(int clock_type);
  *
  * @param clock_type Which clock to measure from
  * @param nsec Pointer to store the nanoseconds
- * @param nsec Pointer to store the seconds
+ * @param sec Pointer to store the seconds
  */
 void native_rtc_gettime(int clock_type, uint32_t *nsec, uint64_t *sec);
 

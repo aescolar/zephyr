@@ -26,7 +26,7 @@ static uint64_t irq_premask; /* interrupts before the mask */
  * irq handler
  * If an interrupt is masked in this way, it will be pending in the premask in
  * case it is enabled later before clearing it.
- * If the irq_mask enables and interrupt pending in irq_premask, it will cause
+ * If the irq_mask enables an interrupt pending in irq_premask, it will cause
  * the controller to raise the interrupt immediately
  */
 static uint64_t irq_mask;
@@ -46,7 +46,7 @@ static int currently_running_prio = 256; /* 255 is the lowest prio interrupt */
 
 static void hw_irq_ctrl_init(void)
 {
-	irq_mask = 0U; /* Let's assume all interrupts are disable at boot */
+	irq_mask = 0U; /* Let's assume all interrupts are disabled at boot */
 	irq_premask = 0U;
 	irqs_locked = false;
 	lock_ignore = false;
