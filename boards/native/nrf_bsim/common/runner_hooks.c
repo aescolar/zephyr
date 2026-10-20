@@ -30,14 +30,16 @@ void bsim_set_terminate_on_exit(bool terminate)
 	bsim_disconnect_on_exit = !terminate;
 }
 
-static uint8_t main_clean_up_trace_wrap(void)
+static uint8_t main_clean_up_trace_wrap(uint8_t code)
 {
-	return nsi_exit_inner(0);
+	int ret = nsi_exit_inner(code);
+
+	return (ret > UINT8_MAX || ret < 0) ? UINT8_MAX : ret;
 }
 
 static void trace_registration(void)
 {
-	bs_trace_register_cleanup_function(main_clean_up_trace_wrap);
+	bs_trace_register_cleanup_functionv2(main_clean_up_trace_wrap);
 	bs_trace_register_time_function(nsi_hws_get_time);
 }
 
